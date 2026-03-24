@@ -33,6 +33,11 @@ resave: false,
 // serve frontend
 app.use(express.static(path.join(__dirname, "../public")));
 
+// EXPLICIT ROUTE
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/index.html"));
+});
+
 // Read database
 function readDB() {
   
