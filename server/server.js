@@ -21,8 +21,8 @@ app.use((req, res, next) => {
 });
 
 app.use(session({
-  secret: "attendance-secret",
-  resave: false,
+secret: process.env.SESSION_SECRET || "attendance-secret",  
+resave: false,
   saveUninitialized: false,
   cookie: { 
     maxAge: 1000 * 60 * 30,
