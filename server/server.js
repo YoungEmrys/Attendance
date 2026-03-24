@@ -8,7 +8,7 @@ const dbPath = path.join(__dirname, "database.json");
 
 const app = express();
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 app.use(express.json());
 
 app.set('trust proxy', 1);
@@ -46,7 +46,7 @@ app.get("/", (req, res) => {
 // Useful if you directly access /attendance.html etc.
 app.get("/:page", (req, res) => {
   const page = req.params.page;
-  const filePath = path.join(publicPath, `${page}.html`);
+  const filePath = path.join(publicPath, `${req.params.page}.html`);
   res.sendFile(filePath, err => {
     if (err) {
       res.status(404).send("Page not found");
