@@ -8,7 +8,7 @@ const dbPath = path.join(__dirname, "database.json");
 
 const app = express();
 
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 app.set('trust proxy', 1);
