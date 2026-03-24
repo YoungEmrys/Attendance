@@ -39,7 +39,11 @@ app.use(express.static(publicPath));
 
 // EXPLICIT ROUTE
 app.get("/", (req, res) => {
-  res.sendFile(path.join(publicPath, "index.html"));
+if (!req.session.user) {
+  return res.sendFile(path.join(publicPath, "login.html"));
+}
+
+res.sendFile(path.join(publicPath, "index.html"));
 });
 
 // Optional: fallback for any other routes to index.html
