@@ -7,6 +7,7 @@ const path = require("path");
 const dbPath = path.join(__dirname, "database.json");
 
 const app = express();
+
 const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
