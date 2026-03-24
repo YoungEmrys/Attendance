@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>User Manager</title>
+	
+	<meta http-equiv="Cache-Control" content="no-store">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+	
+<script src="js/auth.js"></script>
+
+	<style>
+	table {
+  width:100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding:12px;
+  border-bottom:1px solid #ddd;
+}
+
+tr:hover {
+  background:#f5f5f5;
+}
+
+button {
+  padding:6px 10px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+	
+.badge {
+  padding:4px 8px;
+  border-radius:6px;
+  color:white;
+  font-size:12px;
+  font-weight:bold;
+}
+
+.admin-badge {
+  background:#e53935;
+}
+
+.user-badge {
+  background:#1e88e5;
+}
+
+    input, button {
+      padding: 6px;
+      margin: 0.7% 0.5%;
+    }
+
+	  
+/* NAV BUTTONS */
+
+.navbar button{
+
+  padding:10px 20px;
+  border:none;
+  border-radius:25px;
+
+  background:rgba(255,255,255,0.6);
+  backdrop-filter:blur(5px);
+
+  color:#333;
+  font-weight:bold;
+  font-size:14px;
+
+  cursor:pointer;
+
+  transition:all 0.3s ease;
+
+  box-shadow:0 5px 12px rgba(0,0,0,0.15);
+}
+
+.navbar button:hover{
+  background:#667eea;
+  color:white;
+
+  transform:translateY(-3px);
+  box-shadow:0 10px 20px rgba(0,0,0,0.25);
+}
+
+/* ACTIVE PAGE */
+
+.navbar button.active{
+  background:#667eea;
+  color:white;
+}
+
+</style>
+  
+  <script>checkSession();</script>
+  <script src="js/auth.js"></script>
+  
+	</head>
+<body onload="checkAuth(); checkAdmin(); loadUsers();">
+
+<h2>User Management</h2>
+	
+			<div class="navbar">
+
+  <button onclick="window.location.href='index.html'">
+  📊 Dashboard
+  </button>
+
+  <button class="active" onclick="window.location.href='users.html'">
+  📊 User Management
+  </button>
+
+</div>
+
+
+<h3>Create User</h3>
+
+<input id="newUsername" placeholder="Username">
+
+<input id="newPassword" placeholder="Password">
+
+<select id="newRole">
+<option value="user">User</option>
+<option value="admin">Admin</option>
+</select>
+
+<button onclick="addUser()">Create User</button>
+
+<br><br>
+
+<h3>All Users</h3>
+	
+<input type="text" id="userSearch" placeholder="Search users..." onkeyup="searchUsers()"><br><br>
+	
+<table border="1">
+
+<thead>
+<tr>
+<th>Username</th>
+<th>Role</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="usersTable"></tbody>
+
+</table>
+
+<br>
+
+	<div class="navbar"><button onclick="logout()">Logout</button></div>
+
+</body>
+</html>

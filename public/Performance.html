@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Student Performance</title>
+	
+	<meta http-equiv="Cache-Control" content="no-store">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+	<script src="js/auth.js"></script>	
+	<script> checkAuth(); </script>
+	
+	<script src="js/storage.js"></script>	
+	<script src="js/dashboard.js"></script>	
+	
+<style>
+
+body{
+font-family: Arial;
+background: linear-gradient(135deg,#667eea,#764ba2);
+padding:20px;
+margin:0;
+}
+
+.container{
+background:white;
+max-width:1000px;
+margin:auto;
+padding:25px;
+border-radius:12px;
+box-shadow:0 10px 20px rgba(0,0,0,0.2);
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+th,td{
+border:1px solid #ccc;
+padding:8px;
+text-align:center;
+}
+
+th{
+background:#f0f0f0;
+}
+
+button{
+padding:6px 10px;
+margin-top:10px;
+background:#4CAF50;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+	
+    input, button {
+      padding: 6px;
+      margin: 0.7% 0.5%;
+    }
+
+	  
+.navbar{
+  width:94%;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:14px;
+
+  padding:1.5% 3%;
+
+  background:rgba(255,255,255,0.25);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,0.4);
+
+  box-shadow:0 8px 20px rgba(0,0,0,0.15);
+}
+/* NAV BUTTONS */
+
+.navbar button{
+
+  padding:10px 20px;
+  border:none;
+  border-radius:25px;
+
+  background:rgba(255,255,255,0.6);
+  backdrop-filter:blur(5px);
+
+  color:#333;
+  font-weight:bold;
+  font-size:14px;
+
+  cursor:pointer;
+
+  transition:all 0.3s ease;
+
+  box-shadow:0 5px 12px rgba(0,0,0,0.15);
+}
+
+.navbar button:hover{
+  background:#667eea;
+  color:white;
+
+  transform:translateY(-3px);
+  box-shadow:0 10px 20px rgba(0,0,0,0.25);
+}
+
+/* ACTIVE PAGE */
+
+.navbar button.active{
+  background:#667eea;
+  color:white;
+}
+
+/* MOBILE MENU */
+
+.menu-toggle{
+  display:block;
+  font-size:20px;
+  padding:8px 14px;
+  border-radius:10px;
+  background:rgba(255, 255, 255, 0.6);
+  border:none;
+  cursor:pointer;
+  margin-bottom:10px;
+  color: #667eea;
+}
+
+/* MOBILE */
+
+@media(max-width:700px){
+
+  .navbar{
+    flex-direction:column;
+    align-items:flex-start;   /* aligns menu to left */
+    display:none;
+    width:94%;  }
+
+  .navbar.show{
+    display:flex;
+  }
+
+  .navbar button{
+    width:100%;
+    text-align:left;         /* text aligns left */
+  }
+
+}
+
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+
+  		<div class="navbar" id="navbar">
+
+  <button onclick="window.location.href='index.html'">
+  📊 Dashboard
+  </button>
+
+  <button onclick="window.location.href='students.html'">
+👨‍🎓 Students
+</button>
+
+  <button class="active" onclick="window.location.href='performance.html'">
+  ⭐ Student Performance
+  </button>
+			
+  <button onclick="window.location.href='attendance.html'">
+  📋 Attendance
+  </button>
+
+  <button onclick="logout()">Logout</button>
+
+</div>
+
+<h1>Student Performance</h1>
+
+<div id="performanceTable"></div>
+
+</div>
+
+<script>
+
+function goBack(){
+window.location.href="attendance.html";
+}
+
+async function renderPerformance(){
+
+const students = await getStudents();
+const attendance = await getAttendance();
+	
+	if(!Array.isArray(students) || !Array.isArray(attendance)){
+console.error("Invalid data", students, attendance);
+return;
+}
+
+let stats = {};
+
+students.forEach(s=>{
+stats[s.name]={ontime:0,late:0,absent:0};
+});
+
+attendance.forEach(day=>{
+
+(day.records || []).forEach(r=>{
+
+if(stats[r.student]){
+stats[r.student][r.status]++;
+}
+
+});
+
+});
+
+let html=`
+<table>
+<tr>
+<th>Student</th>
+<th>On Time</th>
+<th>Late</th>
+<th>Absent</th>
+<th>Attendance %</th>
+</tr>
+`;
+
+Object.entries(stats).forEach(([name,data])=>{
+
+let total=data.ontime+data.late+data.absent;
+
+let percent=total?Math.round((data.ontime+data.late)/total*100):0;
+
+html+=`
+<tr>
+<td>${name}</td>
+<td>${data.ontime}</td>
+<td>${data.late}</td>
+<td>${data.absent}</td>
+<td>${percent}%</td>
+</tr>
+`;
+
+});
+
+html+="</table>";
+
+document.getElementById("performanceTable").innerHTML=html;
+
+}
+
+document.addEventListener("DOMContentLoaded", renderPerformance);
+
+	async function checkAlerts(){
+
+const attendance=await getAttendance();
+		
+		if(!Array.isArray(attendance)){
+console.error("Invalid attendance data:", attendance);
+return;
+}
+
+let lateCount={};
+let absenceStreak={};
+
+attendance.forEach(day=>{
+
+day.records.forEach(r=>{
+
+if(!lateCount[r.student]){
+lateCount[r.student]=0;
+}
+
+if(!absenceStreak[r.student]){
+absenceStreak[r.student]=0;
+}
+
+if(r.status==="late"){
+lateCount[r.student]++;
+}
+
+if(r.status==="absent"){
+absenceStreak[r.student]++;
+}else{
+absenceStreak[r.student]=0;
+}
+
+});
+
+});
+
+let alerts="";
+
+Object.keys(lateCount).forEach(name=>{
+
+if(lateCount[name]>=5){
+alerts+=`⚠️ ${name} has been late ${lateCount[name]} times<br>`;
+}
+
+});
+
+Object.keys(absenceStreak).forEach(name=>{
+
+if(absenceStreak[name]>=3){
+alerts+=`⚠️ ${name} absent for ${absenceStreak[name]} consecutive days<br>`;
+}
+
+});
+
+if(alerts){
+document.getElementById("performanceTable").innerHTML=
+`<div style="color:red;font-weight:bold">${alerts}</div>`+
+document.getElementById("performanceTable").innerHTML;
+}
+
+}
+
+document.addEventListener("DOMContentLoaded", checkAlerts);</script>
+
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+		<meta charset="UTF-8">
+  <title>Attendance & Punctuality Tracker</title>
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+	<meta http-equiv="Cache-Control" content="no-store">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+	<script src="js/auth.js"></script>	
+
+		
+  <style>
+   body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      margin: 0;
+      padding: 20px;
+    }
+
+.container {
+  max-width: 1100px;
+  margin: auto;
+  background: rgba(255,255,255,0.9);
+  padding: 25px;
+  border-radius: 18px;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+}
+
+    h2 { margin-top: 30px; }
+
+    input, select, button {
+      padding: 6px;
+      margin: 5px 0;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      color: white;
+    }
+
+    .add-btn { background: #4CAF50; }
+    .save-btn { background: #2196F3; }
+    .delete-btn { background: #f44336; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th { background: #f0f0f0; }
+
+    .record-box {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f7f7f7;
+      border-radius: 8px;
+    }
+
+    .locked {
+      color: red;
+      font-weight: bold;
+    } 
+	  
+	  .export-btn { background: #ff9800; }
+	  
+    input, button {
+      padding: 6px;
+      margin: 0.7% 0.5%;
+    }
+
+	  
+.navbar{
+  width:94%;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:14px;
+
+  padding:1.5% 3%;
+
+  background:rgba(255,255,255,0.25);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,0.4);
+
+  box-shadow:0 8px 20px rgba(0,0,0,0.15);
+}
+/* NAV BUTTONS */
+
+.navbar button{
+
+  padding:10px 20px;
+  border:none;
+  border-radius:25px;
+
+  background:rgba(255,255,255,0.6);
+  backdrop-filter:blur(5px);
+
+  color:#333;
+  font-weight:bold;
+  font-size:14px;
+
+  cursor:pointer;
+
+  transition:all 0.3s ease;
+
+  box-shadow:0 5px 12px rgba(0,0,0,0.15);
+}
+
+.navbar button:hover{
+  background:#667eea;
+  color:white;
+
+  transform:translateY(-3px);
+  box-shadow:0 10px 20px rgba(0,0,0,0.25);
+}
+
+/* ACTIVE PAGE */
+
+.navbar button.active{
+  background:#667eea;
+  color:white;
+}
+
+/* MOBILE MENU */
+
+.menu-toggle{
+  display:block;
+  font-size:20px;
+  padding:8px 14px;
+  border-radius:10px;
+  background:rgba(255, 255, 255, 0.6);
+  border:none;
+  cursor:pointer;
+  margin-bottom:10px;
+  color: #667eea;
+}
+
+/* MOBILE */
+
+@media(max-width:700px){
+
+  .navbar{
+    flex-direction:column;
+    align-items:flex-start;   /* aligns menu to left */
+    display:none;
+    width:94%;  }
+
+  .navbar.show{
+    display:flex;
+  }
+
+  .navbar button{
+    width:100%;
+    text-align:left;         /* text aligns left */
+  }
+
+}
+
+  </style>
+</head>
+
+<body onload= "checkAuth();">
+	
+<div class="container">
+
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    
+		<div class="navbar" id="navbar">
+
+  <button onclick="window.location.href='index.html'">
+  📊 Dashboard
+  </button>
+
+  <button onclick="window.location.href='students.html'">
+👨‍🎓 Students
+</button>
+
+  <button onclick="window.location.href='performance.html'">
+  ⭐ Student Performance
+  </button>
+			
+  <button class="active" onclick="window.location.href='attendance.html'">
+  📋 Attendance
+  </button>
+  <button onclick="logout()">Logout</button>
+
+
+</div>
+
+  <h1>Attendance & Punctuality Tracker</h1>
+	
+
+  <!-- DATE PICKER -->
+  <h2>Attendance Entry</h2>
+  <input type="date" id="datePicker" onchange="loadSelectedDate()">
+  <span id="lockStatus"></span>
+
+  <div id="attendanceTable"></div>
+  <button class="save-btn" onclick="submitAttendance()">Save / Update</button>
+	
+	<button class="export-btn" onclick="exportMonthlyReport()">Export Monthly Report</button>
+	
+  <!-- VIEW STUDENT RECORD -->
+  <h2>View Student Record</h2>
+  <select id="recordStudent" onchange="viewStudentRecord()"></select>
+	
+  <div id="studentRecord" class="record-box"></div>
+
+</div>
+
+<script src="js/storage.js"></script>	
+<script src="js/attendance.js"></script>
+  
+</body>
+</html>
