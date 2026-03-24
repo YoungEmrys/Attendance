@@ -30,19 +30,23 @@ resave: false,
   } // 30 minutes
 }));
 
+
 // serve frontend
-app.use(express.static(path.join(__dirname, 'public')));
+const publicPath = path.join(__dirname, "../public");
+
+
+app.use(express.static(publicPath));
 
 // EXPLICIT ROUTE
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(publicPath, "index.html"));
 });
 
 // Optional: fallback for any other routes to index.html
 // Useful if you directly access /attendance.html etc.
 app.get("/:page", (req, res) => {
   const page = req.params.page;
-  const filePath = path.join(__dirname, "../../public", `${page}.html`);
+  const filePath = path.join(publicPath, `${page}.html`);
   res.sendFile(filePath, err => {
     if (err) {
       res.status(404).send("Page not found");
