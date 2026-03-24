@@ -31,11 +31,11 @@ resave: false,
 }));
 
 // serve frontend
-app.use(express.static(path.join(__dirname, "../../public")));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // EXPLICIT ROUTE
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../../public/index.html"));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Optional: fallback for any other routes to index.html
