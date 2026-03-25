@@ -70,6 +70,218 @@
     {
       "date": "2026-03-17",
       "records": []
+    },
+    {
+      "date": "2026-01-05",
+      "records": [
+        {
+          "student": "Esther Nyarko",
+          "status": "absent"
+        },
+        {
+          "student": "Esther Asare Appiah",
+          "status": "absent"
+        },
+        {
+          "student": "Sarah Adjei",
+          "status": "late"
+        },
+        {
+          "student": "Josephine Cann",
+          "status": "absent"
+        },
+        {
+          "student": "Josephine Acquah",
+          "status": "absent"
+        },
+        {
+          "student": "Janet Akagbor",
+          "status": "absent"
+        },
+        {
+          "student": "Rosina Oyivor",
+          "status": "late"
+        },
+        {
+          "student": "Georgette Amonoo",
+          "status": "absent"
+        },
+        {
+          "student": "Harriet Boakye",
+          "status": "absent"
+        },
+        {
+          "student": "Rachael Kassengne",
+          "status": "ontime"
+        },
+        {
+          "student": "Charlotte Tebie",
+          "status": "absent"
+        },
+        {
+          "student": "Patience Brooks",
+          "status": "absent"
+        }
+      ]
+    },
+    {
+      "date": "2026-01-06",
+      "records": [
+        {
+          "student": "Esther Nyarko",
+          "status": "ontime"
+        },
+        {
+          "student": "Esther Asare Appiah",
+          "status": "absent"
+        },
+        {
+          "student": "Sarah Adjei",
+          "status": "late"
+        },
+        {
+          "student": "Josephine Cann",
+          "status": "absent"
+        },
+        {
+          "student": "Josephine Acquah",
+          "status": "absent"
+        },
+        {
+          "student": "Janet Akagbor",
+          "status": "absent"
+        },
+        {
+          "student": "Rosina Oyivor",
+          "status": "absent"
+        },
+        {
+          "student": "Georgette Amonoo",
+          "status": "absent"
+        },
+        {
+          "student": "Harriet Boakye",
+          "status": "absent"
+        },
+        {
+          "student": "Rachael Kassengne",
+          "status": "ontime"
+        },
+        {
+          "student": "Charlotte Tebie",
+          "status": "absent"
+        },
+        {
+          "student": "Patience Brooks",
+          "status": "late"
+        }
+      ]
+    },
+    {
+      "date": "2026-01-07",
+      "records": [
+        {
+          "student": "Esther Nyarko",
+          "status": "ontime"
+        },
+        {
+          "student": "Esther Asare Appiah",
+          "status": "absent"
+        },
+        {
+          "student": "Sarah Adjei",
+          "status": "late"
+        },
+        {
+          "student": "Josephine Cann",
+          "status": "absent"
+        },
+        {
+          "student": "Josephine Acquah",
+          "status": "absent"
+        },
+        {
+          "student": "Janet Akagbor",
+          "status": "late"
+        },
+        {
+          "student": "Rosina Oyivor",
+          "status": "absent"
+        },
+        {
+          "student": "Georgette Amonoo",
+          "status": "absent"
+        },
+        {
+          "student": "Harriet Boakye",
+          "status": "absent"
+        },
+        {
+          "student": "Rachael Kassengne",
+          "status": "ontime"
+        },
+        {
+          "student": "Charlotte Tebie",
+          "status": "absent"
+        },
+        {
+          "student": "Patience Brooks",
+          "status": "absent"
+        }
+      ]
+    },
+    {
+      "date": "2026-01-08",
+      "records": [
+        {
+          "student": "Esther Nyarko",
+          "status": "ontime"
+        },
+        {
+          "student": "Esther Asare Appiah",
+          "status": "absent"
+        },
+        {
+          "student": "Sarah Adjei",
+          "status": "absent"
+        },
+        {
+          "student": "Josephine Cann",
+          "status": "absent"
+        },
+        {
+          "student": "Josephine Acquah",
+          "status": "absent"
+        },
+        {
+          "student": "Janet Akagbor",
+          "status": "late"
+        },
+        {
+          "student": "Rosina Oyivor",
+          "status": "absent"
+        },
+        {
+          "student": "Georgette Amonoo",
+          "status": "absent"
+        },
+        {
+          "student": "Harriet Boakye",
+          "status": "absent"
+        },
+        {
+          "student": "Rachael Kassengne",
+          "status": "ontime"
+        },
+        {
+          "student": "Charlotte Tebie",
+          "status": "absent"
+        },
+        {
+          "student": "Patience Brooks",
+          "status": "absent"
+        }
+      ]
     }
   ]
 }
