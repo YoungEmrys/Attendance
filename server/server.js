@@ -32,17 +32,15 @@ resave: false,
 
 
 // serve frontend
-const publicPath = path.join(__dirname, "../public");
 
-
-app.use(express.static(publicPath));
+app.use(express.static(path.join(__dirname, "../public")));
 
 // EXPLICIT ROUTE
 app.get("/", (req, res) => {
 if (!req.session.user) {
-  return res.sendFile(path.join(publicPath, "login.html"));
+  return res.sendFile(path.join(__dirname, "../public/index.html"));
 }
-res.sendFile(path.join(publicPath, "index.html"));
+res.sendFile(path.join(__dirname, "../public/index.html"));
 
 });
 
