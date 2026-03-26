@@ -44,6 +44,15 @@ res.sendFile(path.join(__dirname, "../public/index.html"));
 
 });
 
+app.get("/debug", (req, res) => {
+  const fs = require("fs");
+  res.json({
+    files: fs.readdirSync(__dirname),
+    parent: fs.readdirSync(require("path").join(__dirname, ".."))
+  });
+});
+
+
 // Optional: fallback for any other routes to index.html
 // Useful if you directly access /attendance.html etc.
 app.get("/:page", (req, res) => {
