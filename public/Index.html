@@ -6,16 +6,14 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="Cache-Control" content="no-store">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   
 	<script src="js/auth.js"></script>	
 	<script src="js/storage.js"></script>	
-   
- 
-	<style>
 
-    body {
+   <style>
+        body {
       font-family: Arial, sans-serif;
       background: linear-gradient(135deg, #667eea, #764ba2);
       margin: 0;
@@ -161,22 +159,47 @@
 
 }
 
+.logo{
+	height: 50px;
+	width: 60px;
+  float: left;
+	/*background: black;*/
+	z-index: 1;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+}
 
-</style>
+.tm{
+  display: flex;
+  float: right;
+
+}
+   </style> 
 	
 </head>
 
 <body onload="checkAuth(); displayUser();">
 
 <div class="container">
+
+  <div class="logo">
+    <a href="index.html"><img src="Upload/p2f logo.png" height="50" alt="Company Logo"/></a>
+  </div>
   
-  <div class="user-profile">
-  Welcome, <span id="currentUser"></span>
+<div class="logo">
+    <div class="user-profile"><span id="currentUser"></span></div>
 </div>
 
-
+<div class="tm">
   <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+</div>
+<br><br><br><br>
 
+<!-- Navigation-->
   		<div class="navbar" id="navbar">
 
   <button class="active" window.location.href='index.html'">
@@ -201,6 +224,8 @@
   <button onclick="logout()">Logout</button>
 
 </div>
+
+<!-- Attendance Report-->
 	
   <h1>Monthly Attendance Dashboard</h1> 
 

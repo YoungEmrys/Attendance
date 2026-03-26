@@ -1,11 +1,6 @@
 {
   "users": [
     {
-      "username": "admin",
-      "password": "admin123",
-      "role": "admin"
-    },
-    {
       "username": "Rashida Anvia",
       "password": "1234",
       "role": "user"
@@ -13,6 +8,11 @@
     {
       "username": "Principal",
       "password": "1234",
+      "role": "admin"
+    },
+    {
+      "username": "Admin",
+      "password": "Admin123",
       "role": "admin"
     }
   ],
@@ -63,6 +63,10 @@
     },
     {
       "name": "Patience Brooks",
+      "status": "active"
+    },
+    {
+      "name": "Atsu Ekpelekpedzi",
       "status": "active"
     }
   ],
@@ -280,6 +284,59 @@
         {
           "student": "Patience Brooks",
           "status": "absent"
+        }
+      ]
+    },
+    {
+      "date": "2026-02-25",
+      "records": [
+        {
+          "student": "Esther Nyarko",
+          "status": "ontime"
+        },
+        {
+          "student": "Esther Asare Appiah",
+          "status": "ontime"
+        },
+        {
+          "student": "Sarah Adjei",
+          "status": "ontime"
+        },
+        {
+          "student": "Josephine Cann",
+          "status": "ontime"
+        },
+        {
+          "student": "Josephine Acquah",
+          "status": "ontime"
+        },
+        {
+          "student": "Janet Akagbor",
+          "status": "ontime"
+        },
+        {
+          "student": "Rosina Oyivor",
+          "status": "ontime"
+        },
+        {
+          "student": "Georgette Amonoo",
+          "status": "ontime"
+        },
+        {
+          "student": "Harriet Boakye",
+          "status": "ontime"
+        },
+        {
+          "student": "Rachael Kassengne",
+          "status": "ontime"
+        },
+        {
+          "student": "Charlotte Tebie",
+          "status": "ontime"
+        },
+        {
+          "student": "Patience Brooks",
+          "status": "ontime"
         }
       ]
     }
