@@ -45,8 +45,12 @@
     }
 
     .add-btn { background: #4CAF50; }
+
     .save-btn { background: #2196F3; }
+    .save-btn:hover {background-color: #0056b3;}
+
     .delete-btn { background: #f44336; }
+    .delete-btn:hover {background-color: #0056b3;}
 
     table {
       width: 100%;
@@ -170,6 +174,23 @@
     text-align:left;         /* text aligns left */
   }
 
+  /* Styled buttons for attendance actions */
+.clearAllBtn {
+  background-color: #ed521f;  
+  color: white;               
+  border: none; 
+  font-size: 20px;              
+  border-radius: 20px;         
+  padding: 5px 16px;                     
+  cursor: pointer;         
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.clearAllBtn:hover {
+  background-color: #a23d1b;  /* Darker blue on hover */
+  /*transform: translateY(-1px);  Slight lift effect */
+}
+
 }
 
   </style>
@@ -211,11 +232,18 @@
   <input type="date" id="datePicker" onchange="loadSelectedDate()">
   <span id="lockStatus"></span>
 
-  <div id="attendanceTable"></div>
+  <div id="attendanceTable"></div><br>
+
+  <button class="save-btn" id="markAbsentBtn">Mark Remaining Students Absent</button>
+
   <button class="save-btn" onclick="submitAttendance()">Save / Update</button>
 	
-	<button class="export-btn" onclick="exportMonthlyReport()">Export Monthly Report</button>
+	<button class="export-btn" onclick="exportMonthlyReport()">Export Monthly Report</button><br>
 	
+<button class="clearAllBtn" id="clearMonthBtn">Clear Monthly Attendance</button>
+
+<button class="clearAllBtn" id="fullResetBtn">Reset Attendance </button>
+
   <!-- VIEW STUDENT RECORD -->
   <h2>View Student Record</h2>
   <select id="recordStudent" onchange="viewStudentRecord()"></select>

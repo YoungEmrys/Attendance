@@ -339,6 +339,63 @@
           "status": "ontime"
         }
       ]
+    },
+    {
+      "date": "2026-04-03",
+      "records": [
+        {
+          "student": "Esther Nyarko",
+          "status": "absent"
+        },
+        {
+          "student": "Esther Asare Appiah",
+          "status": "absent"
+        },
+        {
+          "student": "Sarah Adjei",
+          "status": "absent"
+        },
+        {
+          "student": "Josephine Cann",
+          "status": "absent"
+        },
+        {
+          "student": "Josephine Acquah",
+          "status": "absent"
+        },
+        {
+          "student": "Janet Akagbor",
+          "status": "absent"
+        },
+        {
+          "student": "Rosina Oyivor",
+          "status": "absent"
+        },
+        {
+          "student": "Georgette Amonoo",
+          "status": "absent"
+        },
+        {
+          "student": "Harriet Boakye",
+          "status": "absent"
+        },
+        {
+          "student": "Rachael Kassengne",
+          "status": "absent"
+        },
+        {
+          "student": "Charlotte Tebie",
+          "status": "absent"
+        },
+        {
+          "student": "Patience Brooks",
+          "status": "absent"
+        },
+        {
+          "student": "Atsu Ekpelekpedzi",
+          "status": "absent"
+        }
+      ]
     }
   ]
 }

@@ -317,6 +317,94 @@ async function populateRecordDropdown(){
 
 }
 
+function markUnmarkedAsAbsent() {
+  const students = document.querySelectorAll("#attendanceTable tr td:first-child");
+
+  students.forEach(td => {
+    const name = td.textContent.trim();
+    const radios = document.querySelectorAll(`input[name="${name}"]`);
+    const selected = document.querySelector(`input[name="${name}"]:checked`);
+    
+    if (!selected) {
+      // mark the "Absent" radio
+      const absentRadio = Array.from(radios).find(r => r.value === "absent");
+      if (absentRadio) absentRadio.checked = true;
+    }
+  });
+
+  alert("All unmarked students have been marked as Absent");
+}
+
+const markBtn = document.getElementById("markAbsentBtn");
+if (markBtn) {
+  markBtn.addEventListener("click", markUnmarkedAsAbsent);
+}
+
+
+async function clearMonthAttendance() {
+  const datePicker = document.getElementById("datePicker");
+  if (!datePicker || !datePicker.value) {
+    alert("Select a date first");
+    return;
+  }
+
+  // Get the selected month in YYYY-MM format
+  const selectedMonth = datePicker.value.slice(0, 7); // "2026-04" for example
+
+  // Confirm action
+  if (!confirm(`Are you sure you want to delete ALL attendance for ${selectedMonth}? This cannot be undone.`)) {
+    return;
+  }
+
+  // Fetch existing attendance
+  let attendance = await getAttendance();
+
+  // Filter out records NOT in the selected month
+  attendance = attendance.filter(a => !a.date.startsWith(selectedMonth));
+
+  // Save updated attendance
+  await saveAttendance(attendance);
+
+  alert(`All attendance for ${selectedMonth} has been cleared`);
+
+  // Re-render table
+  await renderAttendanceTable(datePicker.value);
+}
+
+const clearBtn = document.getElementById("clearMonthBtn");
+if (clearBtn) {
+  clearBtn.addEventListener("click", clearMonthAttendance);
+}
+
+
+async function fullResetAttendance() {
+  if (!confirm("Are you sure you want to delete ALL attendance records? This cannot be undone.")) {
+    return;
+  }
+
+  // Fetch current attendance
+  let attendance = await getAttendance();
+
+  // Clear all records
+  attendance = [];
+
+  // Save empty attendance
+  await saveAttendance(attendance);
+
+  alert("All attendance records have been cleared.");
+
+  // Re-render table
+  const datePicker = document.getElementById("datePicker");
+  if (datePicker) {
+    await renderAttendanceTable(datePicker.value || todayString());
+  }
+}
+
+const fullResetBtn = document.getElementById("fullResetBtn");
+if (fullResetBtn) {
+  fullResetBtn.addEventListener("click", fullResetAttendance);
+}
+
 /* =========================
    INITIAL LOAD
 ========================= */

@@ -4,7 +4,7 @@ const session = require("express-session");
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
-const dbPath = path.join(__dirname, "../database.json");
+const dbPath = path.join(__dirname, "../server/database.json");
 
 const app = express();
 
@@ -57,7 +57,7 @@ app.get("/debug", (req, res) => {
 // Useful if you directly access /attendance.html etc.
 app.get("/:page", (req, res) => {
   const page = req.params.page;
-  const filePath = path.join(publicPath, `${req.params.page}.html`);
+  const filePath = path.join(__dirname, "../public", `${req.params.page}.html`);
   res.sendFile(filePath, err => {
     if (err) {
       res.status(404).send("Page not found");
