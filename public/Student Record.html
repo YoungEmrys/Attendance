@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Student Registry</title>
+  <meta charset="UTF-8">
+  <title>Student Records</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script src="js/auth.js"></script>
+  <script src="js/auth.js"></script>
 
-<style>
-
+  <style>
     body {
       font-family: Arial, sans-serif;
       background: linear-gradient(135deg, #667eea, #764ba2);
@@ -17,53 +16,33 @@
       padding: 3% 5%;
     }
 
-.container {
-  max-width: 1100px;
-  margin: auto;
-  background: rgba(255,255,255,0.9);
-  padding: 25px;
-  border-radius: 18px;
-  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-}
-
-/* STUDENT LIST */
-
-.student-card{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-
-  background:#f7f7f7;
-  padding:10px 15px;
-  margin-top:8px;
-
-  border-radius:8px;
-}
-
-.delete-btn{
-  background:#de0909;
-  color:white;
-  border:none;
-  padding:6px 12px;
-  border-radius:6px;
-  cursor:pointer;
-}
-
-.add-btn{
-  background:#02be2e;
-  color:white;
-  border:none;
-  padding:6px 12px;
-  border-radius:6px;
-  cursor:pointer;
-}
-
-input, button {
-      padding: 6px;
-      margin: 0.7% 0.5%;
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: rgba(255,255,255,0.9);
+      padding: 25px;
+      border-radius: 18px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
     }
 
-.navbar{
+    h2 {
+      margin-top: 20px;
+    }
+
+    select {
+      padding: 8px;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .record-box {
+      margin-top: 10px;
+      padding: 15px;
+      background: #f7f7f7;
+      border-radius: 8px;
+    }
+
+    .navbar{
   width:94%;
   justify-content:center;
   align-items:center;
@@ -81,7 +60,6 @@ input, button {
 
   box-shadow:0 8px 20px rgba(0,0,0,0.15);
 }
-/* NAV BUTTONS */
 
 .navbar button{
 
@@ -103,6 +81,7 @@ input, button {
   box-shadow:0 5px 12px rgba(0,0,0,0.15);
 }
 
+
 .navbar button:hover{
   background:#667eea;
   color:white;
@@ -110,8 +89,6 @@ input, button {
   transform:translateY(-3px);
   box-shadow:0 10px 20px rgba(0,0,0,0.25);
 }
-
-/* ACTIVE PAGE */
 
 .navbar button.active{
   background:#667eea;
@@ -158,30 +135,41 @@ input, button {
 
 }
 
-#imagePreview { 
-  margin-top:10px; 
-  max-width:150px; 
-  border-radius:8px; 
+.student-card {
+  background: white;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
-.student-Crs {display:flex; 
-  gap:5px; 
-  align-items:center;
+.student-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
-.courseTags {margin-top:5px;}
+.student-header img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
 
-.img-P {
-  max-width:100px; 
-  display:block; 
-  margin-top:5px;
+.course-tag {
+  display: inline-block;
+  background: #667eea;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  margin: 2px;
+  font-size: 12px;
 }
 
 </style>
-
 </head>
 
-<body onload="checkAuth()">
+<body onload="checkAuth();">
 
 <div class="container">
 <button class="menu-toggle" onclick="toggleMenu()">☰</button>
@@ -192,14 +180,13 @@ input, button {
 📊 Dashboard
 </button>
 
-<button class="active">
+<button onclick="window.location.href='students.html'">
 👨‍🎓 Student Registration
 </button>
 
-  <button onclick="window.location.href='student record'">
+<button class="active">
 📚 Student Information
 </button>
-
 
 <button onclick="window.location.href='performance.html'">
 ⭐ Student Performance
@@ -213,41 +200,21 @@ input, button {
 
 </div>
 
-<h1>Student Registry</h1>
+  <h2>View Student Records</h2>
 
-<h3>Add Student</h3>
+  <h2>Student Records</h2>
+<div id="studentCards"></div>
 
-<div id="studentForm">
+  <select id="recordStudent" onchange="viewStudentRecord()"></select>
 
-<label for="studentName"> Student Name</label><br>
-<input type="text" id="studentName" placeholder="Enter Student Name"><br><br>
+  <div id="studentRecord" class="record-box"></div>
 
-<label for="studentId">Student ID </label><br>
-<input type="text" id="studentId" placeholder="Enter Student ID"><br><br>
-
-<label for="studentCourseInput">Student Course</label><br>
-
-<div class="student-Crs" style="display:flex; gap:5px; align-items:center;">
-  <input type="text" id="studentCourseInput" placeholder="Enter course">
-  <button type="button" id="addCourseBtn">+</button>
-</div>  
-<div class="course-tag" id="courseTags"></div><br>
-
-<label for="studentImage">Student Image</label><br>
-<input type="file" id="studentImage" accept="image/*"><br>
-<img class="img-P" id="imagePreview" style="max-width:100px; display:block; margin-top:5px;"/><br>
-
-<button class="add-btn" type="button" id="addStudentBtn"> Add Student</button>
+<button> Hi </button>
 </div>
-
-<h3>Registered Students</h3>
-
-<div id="studentList"></div><br>
-</div>  
-
 
 <script src="js/storage.js"></script>
 <script src="js/attendance.js"></script>
+
 
 </body>
 </html>

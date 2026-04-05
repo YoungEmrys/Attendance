@@ -44,14 +44,6 @@
       color: white;
     }
 
-    .add-btn { background: #4CAF50; }
-
-    .save-btn { background: #2196F3; }
-    .save-btn:hover {background-color: #0056b3;}
-
-    .delete-btn { background: #f44336; }
-    .delete-btn:hover {background-color: #0056b3;}
-
     table {
       width: 100%;
       border-collapse: collapse;
@@ -173,23 +165,100 @@
     width:100%;
     text-align:left;         /* text aligns left */
   }
+}
 
-  /* Styled buttons for attendance actions */
+
+    .add-btn { background: #4CAF50; }
+
+    .save-btn {
+      display: grid;
+      gap: 10px;
+      justify-content: flex-start;
+      margin-bottom: 15px; 
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* 2 per row if space*/
+
+   
+      
+    }
+
+    .save-btn button{
+      background: #667eea;
+      width: 100%;
+  padding: 10px 15px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .save-btn button:hover {
+      background-color: #2d46b5;
+      transform: translateY(-1px);
+    
+    }
+
+
 .clearAllBtn {
-  background-color: #ed521f;  
-  color: white;               
-  border: none; 
-  font-size: 20px;              
-  border-radius: 20px;         
-  padding: 5px 16px;                     
-  cursor: pointer;         
+  display: grid;
+      gap: 10px;
+      justify-content: flex-start;
+      margin-bottom: 15px; 
+      grid-template-columns: repeat(2, minmax(180px, 1fr)); /* 2 per row if space*/
+  
+}
+
+.clearAllBtn button {
+  background: #ed521f;
+  width: 100%;
+  padding: 10px 15px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
   transition: background-color 0.2s, transform 0.1s;
 }
 
-.clearAllBtn:hover {
+.clearAllBtn button:hover {
   background-color: #a23d1b;  /* Darker blue on hover */
-  /*transform: translateY(-1px);  Slight lift effect */
+  transform: translateY(-1px);  /*Slight lift effect */
 }
+
+    .delete-btn { background: #f44336; }
+
+    .delete-btn:hover {
+      background-color: #c8372d;  
+      transform: translateY(-1px);  /*Slight lift effect */
+}
+
+.xpt-btn {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+      justify-content: flex-start;
+      margin-bottom: 15px; 
+      grid-template-columns: repeat( minmax(180px, 1fr)); /* 2 per row if space*/
+
+  
+}
+
+.xpt-btn button{  
+  background: #3cbc40;
+  width: 100%;
+  padding: 10px 15px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.xpt-btn button:hover {  
+    background: #2f9b33;
+    transform: translateY(-1px);  /*Slight lift effect */
 
 }
 
@@ -209,8 +278,13 @@
   </button>
 
   <button onclick="window.location.href='students.html'">
-👨‍🎓 Students
+👨‍🎓 Student Registration
 </button>
+
+  <button onclick="window.location.href='student record'">
+📚 Student Information
+</button>
+
 
   <button onclick="window.location.href='performance.html'">
   ⭐ Student Performance
@@ -230,25 +304,32 @@
   <!-- DATE PICKER -->
   <h2>Attendance Entry</h2>
   <input type="date" id="datePicker" onchange="loadSelectedDate()">
-  <span id="lockStatus"></span>
+  <span id="lockStatus"></span><br><br>
+
+  <label>
+  <input type="checkbox" id="holidayToggle">
+  Mark this day as Holiday / No School
+</label>
 
   <div id="attendanceTable"></div><br>
 
-  <button class="save-btn" id="markAbsentBtn">Mark Remaining Students Absent</button>
+  <div class="save-btn">  
+    <button id="markAbsentBtn">Mark Remaining Students Absent</button>  
+    
+    <button  onclick="submitAttendance()">Save / Update</button>
+	</div>
 
-  <button class="save-btn" onclick="submitAttendance()">Save / Update</button>
-	
-	<button class="export-btn" onclick="exportMonthlyReport()">Export Monthly Report</button><br>
-	
-<button class="clearAllBtn" id="clearMonthBtn">Clear Monthly Attendance</button>
+  <div class="clearAllBtn">
+    <button  id="clearMonthBtn">Clear Monthly Attendance</button>
 
-<button class="clearAllBtn" id="fullResetBtn">Reset Attendance </button>
+    <button id="fullResetBtn">Reset Attendance </button>
+    
+  </div>    
+  
+  <div class="xpt-btn">
+      <button  onclick="exportMonthlyReport()">Export Monthly Report</button><br>
 
-  <!-- VIEW STUDENT RECORD -->
-  <h2>View Student Record</h2>
-  <select id="recordStudent" onchange="viewStudentRecord()"></select>
-	
-  <div id="studentRecord" class="record-box"></div>
+  </div>
 
 </div>
 

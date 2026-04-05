@@ -47,10 +47,16 @@ async function renderDashboard() {
 
     let totalDays = 0;
 
+    const excludeDates = [];
+
     attendance
       .filter(a => a.date.startsWith(month))
       .forEach(day => {
+
+        if (day.type === "holiday") return;
+
         totalDays++;
+
         day.records.forEach(r => {
           if (summary[r.student]) {
             summary[r.student][r.status]++;
@@ -91,11 +97,21 @@ if (missingDays.length > 0) {
 }
 document.getElementById("monthlyTotal").innerHTML = totalText;
   const ranking = Object.entries(summary)
-  .map(([name, stats]) => ({
+.map(([name, stats]) => {
+  const present = stats.ontime + stats.late;
+
+  const percentage = totalDays > 0
+    ? Math.round((present / totalDays) * 100)
+    : 0;
+
+  return {
     name,
-    ...stats
-  }))
-  .sort((a, b) => b.ontime - a.ontime);
+    ...stats,
+    percentage
+  };
+})
+
+.sort((a, b) => b.ontime - a.ontime);
 	  
 	  if (ranking.length === 0) return;
 
@@ -131,6 +147,7 @@ let highlightHTML = `
           <th>On Time</th>
           <th>Late</th>
           <th>Absent</th>
+          <th>Attendance%</th>
         </tr>
     `;
 
@@ -142,6 +159,7 @@ let highlightHTML = `
           <td>${r.ontime}</td>
           <td>${r.late}</td>
           <td>${r.absent}</td>
+          <td>${r.percentage}%</td>
         </tr>
       `;
     });

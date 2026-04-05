@@ -9,7 +9,8 @@ const dbPath = path.join(__dirname, "../server/database.json");
 const app = express();
 
 const PORT = process.env.PORT || 3000;
-app.use(express.json());
+app.use(express.json({limit: '10mb'}));
+app.use(express.urlencoded({limit: '10mb', extended: true}));
 
 app.set('trust proxy', 1);
 

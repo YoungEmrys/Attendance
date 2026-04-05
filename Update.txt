@@ -1,0 +1,4 @@
+Things Updated
+
+1. Student ID, image course, practical progress to student registry
+2. Display this on the student-record page
