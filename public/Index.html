@@ -10,7 +10,10 @@
   <meta http-equiv="Expires" content="0">
   
 	<script src="js/auth.js"></script>	
-	<script src="js/storage.js"></script>	
+	<script src="js/storage.js"></script>
+	<script src="js/attendance.js"></script>
+
+	
 
    <style>
         body {
@@ -76,19 +79,14 @@
   align-items:center;
   flex-wrap:wrap;
   gap:14px;
-
   padding:1.5% 3%;
-
   background:rgba(255,255,255,0.25);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-
+  backdrop-filter:blur (12px);
+  webkit-backdrop-filter:blur(12px);
   border-radius:20px;
   border:1px solid rgba(255,255,255,0.4);
-
   box-shadow:0 8px 20px rgba(0,0,0,0.15);
 }
-/* NAV BUTTONS */
 
 .navbar button{
 
@@ -117,8 +115,6 @@
   transform:translateY(-3px);
   box-shadow:0 10px 20px rgba(0,0,0,0.25);
 }
-
-/* ACTIVE PAGE */
 
 .navbar button.active{
   background:#667eea;
@@ -178,6 +174,29 @@
   float: right;
 
 }
+
+.tm button{
+  padding:7px 12px;
+  margin: 0 5px;
+  border:none;
+  border-radius:12px;
+  backdrop-filter:blur(5px);
+  font-weight:bold;
+  font-size:14px;
+  cursor:pointer;
+
+}
+
+.logt{
+ 
+  color: #f0f0f0;
+    background:#667eea;
+
+}
+
+.logt:hover{
+  background:#2f50e4;
+}
    </style> 
 	
 </head>
@@ -196,22 +215,27 @@
 
 <div class="tm">
   <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-</div>
+<button onclick="logout()"  class="logt">Logout</button>
+
+</div>  
+
 <br><br><br><br>
 
 <!-- Navigation-->
   		<div class="navbar" id="navbar">
-
-  <button class="active" window.location.href='index.html'">
-  📊 Dashboard
-  </button>
+			
+			
+  <button onclick="window.location.href='index.html'">
+📊 Dashboard 
+</button>
+														   
 
   <button onclick="window.location.href='students.html'">
 👨‍🎓 Student Registration
 </button>
 
-  <button onclick="window.location.href='student record'">
-📚 Students
+  <button onclick="window.location.href='student-record'">
+📚 Student Information
 </button>
 
 
@@ -225,8 +249,6 @@
 
     <button onclick="window.location.href='users.html'"> User Management
   </button>
-
-  <button onclick="logout()">Logout</button>
 
 </div>
 

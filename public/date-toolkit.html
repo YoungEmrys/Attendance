@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Date Toolkit</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    background: linear-gradient(135deg, #4e73df, #1cc88a);
+    color: #333;
+}
+
+.container {
+    max-width: 500px;
+    margin: 30px auto;
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.section {
+    margin-bottom: 30px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 6px 0;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 15px;
+}
+
+.duration-row {
+    display: flex;
+    gap: 8px;
+}
+
+.duration-row input {
+    flex: 1;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    background: #4e73df;
+    color: white;
+}
+
+button.secondary {
+    background: #858796;
+}
+
+button.print {
+    background: #1cc88a;
+}
+
+.result {
+    margin-top: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Date Toolkit</h2>
+
+<!-- Remaining Time Section -->
+<div class="section">
+<h3>Remaining Time From Today</h3>
+<input type="date" id="remainingDate">
+<button onclick="calculateRemaining()">Calculate Remaining</button>
+<div class="result" id="remainingResult"></div>
+</div>
+
+<!-- Duration Section -->
+<div class="section">
+<h3>Calculate End / Past Date</h3>
+<input type="date" id="startDate">
+
+<div class="duration-row">
+<input type="number" id="years" placeholder="Years" min="0">
+<input type="number" id="months" placeholder="Months" min="0">
+<input type="number" id="days" placeholder="Days" min="0">
+</div>
+
+<button onclick="calculateEndDate(true)">Add Duration</button>
+<button class="secondary" onclick="calculateEndDate(false)">Subtract Duration</button>
+
+<div class="result" id="endResult"></div>
+</div>
+
+<button class="print" onclick="window.print()">Print / Export PDF</button>
+
+</div>
+
+<script>
+
+// Save inputs
+function saveInputs() {
+    localStorage.setItem("remainingDate", document.getElementById("remainingDate").value);
+    localStorage.setItem("startDate", document.getElementById("startDate").value);
+    localStorage.setItem("years", document.getElementById("years").value);
+    localStorage.setItem("months", document.getElementById("months").value);
+    localStorage.setItem("days", document.getElementById("days").value);
+}
+
+// Load saved inputs
+window.onload = function() {
+    document.getElementById("remainingDate").value = localStorage.getItem("remainingDate") || "";
+    document.getElementById("startDate").value = localStorage.getItem("startDate") || "";
+    document.getElementById("years").value = localStorage.getItem("years") || "";
+    document.getElementById("months").value = localStorage.getItem("months") || "";
+    document.getElementById("days").value = localStorage.getItem("days") || "";
+}
+
+// Remaining Time
+function calculateRemaining() {
+
+    const endInput = document.getElementById("remainingDate").value;
+    const resultDiv = document.getElementById("remainingResult");
+
+    if (!endInput) {
+        resultDiv.innerHTML = "Select a future date.";
+        return;
+    }
+
+    const today = new Date();
+    const end = new Date(endInput);
+
+    today.setHours(0,0,0,0);
+    end.setHours(0,0,0,0);
+
+    if (end <= today) {
+        resultDiv.innerHTML = "Date already passed.";
+        return;
+    }
+
+    let years = end.getFullYear() - today.getFullYear();
+    let months = end.getMonth() - today.getMonth();
+    let days = end.getDate() - today.getDate();
+
+    if (days > 0) months++;
+
+    if (months >= 12) {
+        years++;
+        months -= 12;
+    }
+
+    if (months < 0) {
+        years--;
+        months += 12;
+    }
+
+    resultDiv.innerHTML =
+        years + " Years, " + months + " Months remaining";
+
+    saveInputs();
+}
+
+// Add or Subtract Duration
+function calculateEndDate(add = true) {
+
+    const startInput = document.getElementById("startDate").value;
+    const yearsInput = parseInt(document.getElementById("years").value) || 0;
+    const monthsInput = parseInt(document.getElementById("months").value) || 0;
+    const daysInput = parseInt(document.getElementById("days").value) || 0;
+    const resultDiv = document.getElementById("endResult");
+
+    if (!startInput) {
+        resultDiv.innerHTML = "Select a start date.";
+        return;
+    }
+
+    let date = new Date(startInput);
+
+    if (add) {
+        date.setFullYear(date.getFullYear() + yearsInput);
+        date.setMonth(date.getMonth() + monthsInput);
+        date.setDate(date.getDate() + daysInput);
+    } else {
+        date.setFullYear(date.getFullYear() - yearsInput);
+        date.setMonth(date.getMonth() - monthsInput);
+        date.setDate(date.getDate() - daysInput);
+    }
+
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+
+    resultDiv.innerHTML =
+        "Result Date: " + day + "/" + month + "/" + year;
+
+    saveInputs();
+}
+
+</script>
+
+</body>
+</html>

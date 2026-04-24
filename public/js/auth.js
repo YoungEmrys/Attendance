@@ -79,6 +79,29 @@ async function loadUsers() {
 
 }
 
+// user profile
+
+async function loadUserProfile() {
+  try {
+    const res = await fetch("/api/session", {
+      credentials: "include"
+    });
+
+    if (!res.ok) return;
+
+    const user = await res.json();
+
+    const box = document.getElementById("userProfile");
+    if (box) {
+      box.textContent = `👤 ${user.username}`;
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+window.addEventListener("DOMContentLoaded", loadUserProfile);
+
 // Add User
 async function addUser() {
 
@@ -232,34 +255,36 @@ loadUsers();
 
 }
 
-async function signup(){
+async function signup() {
+  const username = document.getElementById("signupUsername").value.trim();
+  const password = document.getElementById("signupPassword").value.trim();
 
-const username = document.getElementById("signupUsername").value.trim();
-const password = document.getElementById("signupPassword").value;
-  
-if(!username || !password){
-alert("Please fill all fields");
-return;
-}
+  if (!username || !password) {
+    return alert("Enter username and password");
+  }
 
-const users = await getUsers();
+  try {
+    let users = await getUsers();
 
-if(users.some(u => u.username === username)){
-alert("Username already exists");
-return;
-}
-  users.push({
-    username: username,
-    password: password,
-    role: "user"
-  });
+    if (users.some(u => u.username === username)) {
+      return alert("Username already exists");
+    }
 
-saveUsers(users);
+    users.push({
+      username,
+      password,
+      role: "user"
+    });
 
-alert("Account created successfully!");
+    await saveUsers(users);
 
-window.location.href = "login.html";
+    alert("Account created successfully!");
+    window.location.href = "login.html";
 
+  } catch (err) {
+    console.error(err);
+    alert("Signup failed (check console)");
+  }
 }
 
 async function forgotPassword(){

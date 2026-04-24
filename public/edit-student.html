@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+  <title>Edit Student</title>
+  <script src="js/auth.js"></script>
+	
+	<style>
+		.edit-container {
+  max-width: 400px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  font-family: Arial, sans-serif;
+}
+
+.edit-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.edit-container input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+.image-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.edit-image {
+  width: 120px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 2px solid #eee;
+  margin-bottom: 10px;
+}
+
+/* Course input */
+.course-box {
+  display: flex;
+  gap: 8px;
+}
+
+.course-box input {
+  flex: 1;
+}
+
+.course-box button {
+  padding: 10px;
+  border: none;
+  background: #667eea;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.course-box button:hover {
+  background: #5563d6;
+}
+
+/* Course tags */
+#editCourses {
+  margin-top: 10px;
+}
+
+#editCourses span {
+  display: inline-block;
+  margin: 5px;
+  padding: 6px 10px;
+  background: #667eea;
+  color: white;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* Save button */
+.save-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background: #218838;
+}
+	
+	
+	
+	
+	</style>
+		
+</head>
+
+<body onload="checkAuth(); loadEditStudent();">
+
+	
+<div class="edit-container">
+
+  <h2>Edit Student</h2>
+
+  <div class="image-section">
+    <img id="editImagePreview" class="edit-image" src="" />
+    <input type="file" id="editImage" accept="image/*" />
+  </div>
+
+  <input id="editName" placeholder="Student Name" />
+  <input id="editId" placeholder="Student ID" />
+
+  <div class="course-box">
+    <input id="editCourseInput" placeholder="Add course" />
+    <button id="addCourseBtnEdit">Add</button>
+  </div>
+
+  <div id="editCourses"></div>
+
+  <button class="save-btn" onclick="saveEdit()">Save Changes</button>
+
+</div>
+
+<script src="js/storage.js"></script>
+<script src="js/attendance.js"></script>
+
+</body>
+</html>

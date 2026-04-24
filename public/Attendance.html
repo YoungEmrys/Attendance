@@ -261,6 +261,32 @@
     transform: translateY(-1px);  /*Slight lift effect */
 
 }
+	  
+	  .header{
+		  height: auto;
+		  display: flex;
+		  align-items: center;
+	  }
+
+    .logt{
+  padding:7px 12px;
+  margin: 0 5px;
+  border:none;
+  border-radius:12px;
+  background:#667eea;
+  backdrop-filter:blur(5px);
+  font-weight:bold;
+  font-size:14px;
+  cursor:pointer;
+    color:white;
+
+}
+
+.logt:hover{
+  background:#2f50e4;
+}
+
+
 
   </style>
 </head>
@@ -269,7 +295,13 @@
 	
 <div class="container">
 
-    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+	<div class = "header">
+<button class="menu-toggle" onclick="toggleMenu()">☰</button>
+	<div id="userProfile" style="margin-left:auto; font-weight:bold; float: right">
+</div>
+	<button onclick="logout()" style="float: right;"  class="logt">Logout</button>
+
+	</div>
     
 		<div class="navbar" id="navbar">
 
@@ -281,7 +313,7 @@
 👨‍🎓 Student Registration
 </button>
 
-  <button onclick="window.location.href='student record'">
+  <button onclick="window.location.href='student-record'">
 📚 Student Information
 </button>
 
@@ -293,7 +325,6 @@
   <button class="active" onclick="window.location.href='attendance.html'">
   📋 Attendance
   </button>
-  <button onclick="logout()">Logout</button>
 
 
 </div>

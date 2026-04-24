@@ -64,6 +64,23 @@ cursor:pointer;
       margin: 0.7% 0.5%;
     }
 
+    .logt{
+  padding:7px 12px;
+  margin: 0 5px;
+  border:none;
+  border-radius:12px;
+  background:#667eea;
+  backdrop-filter:blur(5px);
+  font-weight:bold;
+  font-size:14px;
+  cursor:pointer;
+    color:white;
+
+}
+
+.logt:hover{
+  background:#2f50e4;
+}
 	  
 .navbar{
   width:94%;
@@ -155,6 +172,11 @@ cursor:pointer;
 
 }
 
+	  .header{
+		  height: auto;
+		  display: flex;
+		  align-items: center;
+	  }
 
 </style>
 
@@ -164,7 +186,12 @@ cursor:pointer;
 
 <div class="container">
 
-  <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+	<div class = "header">
+<button class="menu-toggle" onclick="toggleMenu()">☰</button>
+	<div id="userProfile" style="margin-left:auto; font-weight:bold; float: right">
+  </div>
+  <button onclick="logout()" style="float: right;"  class="logt">Logout</button>
+ 		</div>
 
   		<div class="navbar" id="navbar">
 
@@ -176,7 +203,7 @@ cursor:pointer;
 👨‍🎓 Student Registration
 </button>
 
-  <button onclick="window.location.href='student record'">
+  <button onclick="window.location.href='student-record'">
 📚 Student Information
 </button>
 
@@ -188,8 +215,6 @@ cursor:pointer;
   <button onclick="window.location.href='attendance.html'">
   📋 Attendance
   </button>
-
-  <button onclick="logout()">Logout</button>
 
 </div>
 

@@ -68,12 +68,23 @@ app.get("/:page", (req, res) => {
 
 // Read database
 function readDB() {
-  
   if (!fs.existsSync(dbPath)) {
     return { users: [], students: [], attendance: [] };
   }
-return JSON.parse(fs.readFileSync(dbPath, "utf8"));
+
+  const db = JSON.parse(fs.readFileSync(dbPath, "utf8"));
+
+  // ? CLEAN IDS ON LOAD
+  if (Array.isArray(db.students)) {
+    db.students = db.students.map(s => ({
+      ...s,
+      id: String(s.id || "").trim()
+    }));
+  }
+
+  return db;
 }
+
 
 // Write database
 function writeDB(data) {
@@ -136,65 +147,153 @@ app.get("/api/students", checkAuth, (req, res) => {
 });
 
 app.post("/api/students", checkAuth, (req, res) => {
+	
+  const db = readDB(); // ✅ FIRST
 
-  const db = readDB();
+  const { name, id, courses, image, status, mode, students } = req.body;
 
-  if (!db.students) {
-    db.students = [];
+  if (mode === "bulk") {
+    db.students = students;
+    writeDB(db);
+    return res.json({ message: "Bulk update success" });
   }
 
-  const { name, status } = req.body;
-
-  if (!name) {
-    return res.status(400).json({ message: "Student name required" });
+  if (!name || !id) {
+    return res.status(400).json({ message: "Name and ID required" });
   }
-
-  // prevent duplicates
-  const exists = db.students.find(s => s.name === name);
-  if (exists) {
-    return res.status(400).json({ message: "Student already exists" });
-  }
-
-  db.students.push({
-    name: name,
-    status: status || "active"
+	
+		if (!/^[a-zA-Z0-9]+$/.test(id)) {
+  return res.status(400).json({
+    message: "Invalid ID: only letters and numbers allowed"
   });
+}
 
-  writeDB(db);
+if (/\s/.test(id)) {
+  return res.status(400).json({
+    message: "Invalid ID: no spaces allowed"
+  });
+}
 
-  res.json({ message: "Student saved successfully" });
+
+  if (!db.students) db.students = [];
+
+  const existingIndex = db.students.findIndex(s => s.id === id);
+
+  if (mode !== "edit") {
+    if (existingIndex !== -1) {
+      return res.status(400).json({ message: "ID already exists" });
+    }
+
+    db.students.push({
+      name,
+      id,
+      courses: courses || [],
+      image: image || "",
+      status: status || "active"
+    });
+
+    writeDB(db);
+    return res.json({ message: "Student created" });
+  }
+	
+  if (mode === "edit") {
+    if (existingIndex === -1) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    db.students[existingIndex] = {
+      ...db.students[existingIndex],
+      name,
+      id,
+      courses: courses || [],
+      image: image || "",
+      status: status || "active"
+    };
+
+    writeDB(db);
+    return res.json({ message: "Student updated" });
+  }
+	
+	if (image && image.length > 3_000_000) {
+  return res.status(400).json({
+    message: "Image too large"
+  });
+}
 
 });
 
-  // DELETE STUDENT
-
-app.delete("/api/students/:name", checkAuth, (req, res) => {
-
-  const name = decodeURIComponent(req.params.name);
-
+app.put("/api/students/:id", checkAuth, (req, res) => {
+	
   const db = readDB();
 
-  if (!db.students) {
-    db.students = [];
+  const id = req.params.id;
+  const { name, newId, courses, image } = req.body;
+	
+		if (newId && !/^[a-zA-Z0-9]+$/.test(newId)) {
+  return res.status(400).json({
+    message: "Invalid ID format"
+  });
+}
+
+if (/\s/.test(newId)) {
+  return res.status(400).json({
+    message: "ID cannot contain spaces"
+  });
+}
+
+  const student = db.students.find(s => s.id === id);
+
+  if (!student) {
+    return res.status(404).json({ message: "Student not found" });
   }
 
-  // remove student
-  db.students = db.students.filter(s => s.name !== name);
-
-  // also remove student from attendance
-  if (db.attendance) {
-    db.attendance.forEach(day => {
-      day.records = day.records.filter(r => r.student !== name);
-    });
+  // 🔒 Prevent duplicate ID if changed
+  if (newId && newId !== id) {
+    const idExists = db.students.find(s => s.id === newId);
+    if (idExists) {
+      return res.status(400).json({ message: "ID already exists" });
+    }
+    student.id = newId;
   }
+
+  // ✏️ Update fields
+  if (name) student.name = name;
+  if (courses) student.courses = courses;
+  if (image !== undefined) student.image = image;
 
   writeDB(db);
 
-  console.log("Deleted:", name);
+  res.json({ message: "Student updated successfully" });
+});
 
-  res.json({ message: "Student deleted successfully" });
 
-});	
+  // DELETE STUDENT
+
+app.delete("/api/students/:id", checkAuth, (req, res) => {
+  try {
+    const db = readDB(); // ✅ use same DB
+
+    const id = req.params.id;
+
+    const index = db.students.findIndex(s => s.id === id);
+
+    if (index === -1) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    db.students.splice(index, 1);
+
+    writeDB(db);
+
+    res.json({ message: "Student deleted successfully" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error deleting student" });
+  }
+});
+
+
 
 // BACKUP JSON
 app.get("/api/backup", checkAuth, (req, res) => {
@@ -215,8 +314,26 @@ app.get("/api/attendance", checkAuth, (req, res) => {
 });
 
 app.post("/api/attendance", checkAuth, (req, res) => {
+  console.log("NEW ATTENDANCE ROUTE HIT")
   const db = readDB();
-  db.attendance = req.body;
+  
+  if (!db.attendance) db.attendance = [];
+
+const { date, records } = req.body;	
+	
+	records.forEach(r => {
+		console.log("Record:", r);
+    db.attendance.push({
+      id: "", // will improve later
+	name: r.student,
+      date,
+      time: null,
+      checkout: null,
+      status: r.status || "present",
+      source: "manual"
+    });
+  });
+  
   writeDB(db);
   res.json({ message: "Attendance saved" });
 });
@@ -256,6 +373,29 @@ function checkAuth(req, res, next) {
   next();
 
 }
+
+// CLEAN AND SAVE IDS ON SERVER START
+(function cleanStudentIds() {
+  const db = readDB();
+
+  if (!Array.isArray(db.students)) return;
+
+  let changed = false;
+
+  db.students = db.students.map(s => {
+    const cleanId = String(s.id || "").trim();
+
+    if (s.id !== cleanId) changed = true;
+
+    return { ...s, id: cleanId };
+  });
+
+  if (changed) {
+    console.log("Fixing student IDs...");
+    writeDB(db);
+    console.log("Student IDs cleaned and saved");
+  }
+})();
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

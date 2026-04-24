@@ -14,7 +14,7 @@ async function saveStudents(students) {
       "Content-Type": "application/json"
     },
     credentials: "include",
-    body: JSON.stringify(student)
+    body: JSON.stringify(students)
   });
 }
 
@@ -178,4 +178,6 @@ function backupData(){
 function toggleMenu(){
   const nav = document.getElementById("navbar");
   nav.classList.toggle("show");
+	
+	window.addEventListener("DOMContentLoaded", loadUserProfile);
 }

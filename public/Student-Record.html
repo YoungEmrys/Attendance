@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Student Records</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script src="js/auth.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      margin: 0;
+      padding: 3% 5%;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: rgba(255,255,255,0.9);
+      padding: 25px;
+      border-radius: 18px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+
+    h2 {
+      margin-top: 20px;
+    }
+
+    select {
+      padding: 8px;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .record-box {
+      margin-top: 10px;
+      padding: 15px;
+      background: #f7f7f7;
+      border-radius: 8px;
+    }
+
+    .navbar{
+  width:94%;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:14px;
+
+  padding:1.5% 3%;
+
+  background:rgba(255,255,255,0.25);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,0.4);
+
+  box-shadow:0 8px 20px rgba(0,0,0,0.15);
+}
+
+.navbar button{
+
+  padding:10px 20px;
+  border:none;
+  border-radius:25px;
+
+  background:rgba(255,255,255,0.6);
+  backdrop-filter:blur(5px);
+
+  color:#333;
+  font-weight:bold;
+  font-size:14px;
+
+  cursor:pointer;
+
+  transition:all 0.3s ease;
+
+  box-shadow:0 5px 12px rgba(0,0,0,0.15);
+}
+
+
+.navbar button:hover{
+  background:#667eea;
+  color:white;
+
+  transform:translateY(-3px);
+  box-shadow:0 10px 20px rgba(0,0,0,0.25);
+}
+
+.navbar button.active{
+  background:#667eea;
+  color:white;
+}
+
+/* MOBILE MENU */
+
+.menu-toggle{
+  display:block;
+  font-size:20px;
+  padding:8px 14px;
+  border-radius:10px;
+  background:rgba(255, 255, 255, 0.6);
+  border:none;
+  cursor:pointer;
+  margin-bottom:10px;
+  color: #667eea;
+}
+
+/* MOBILE */
+
+@media(max-width:700px){
+
+  .navbar{
+    flex-direction:column;
+    align-items:flex-start;   /* aligns menu to left */
+    display:none;
+    width:94%;  }
+
+  .navbar.show{
+    display:flex;
+  }
+
+  .navbar button{
+    width:100%;
+    text-align:left;         /* text aligns left */
+  }
+
+  .menu-toggle{
+    display:block;
+    margin-bottom:10px;
+  }
+
+}
+
+.student-card {
+  background: white;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.student-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.student-header img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.course-tag {
+  display: inline-block;
+  background: #667eea;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  margin: 2px;
+  font-size: 12px;
+}
+	  
+	  .header{
+		  height: auto;
+		  display: flex;
+		  align-items: center;
+	  }
+  
+  .option{
+    width:100%; 
+    border:1px solid #ccc; 
+    border-radius:8px; 
+    padding:10px; 
+    margin-bottom:10px; 
+    height:60px;
+    font-size:20px;
+    background-color:#ffffff;
+    
+    
+  }
+
+  .logt{
+  padding:7px 12px;
+  margin: 0 5px;
+  border:none;
+  border-radius:12px;
+  background:#667eea;
+  backdrop-filter:blur(5px);
+  font-weight:bold;
+  font-size:14px;
+  cursor:pointer;
+    color:white;
+
+}
+
+.logt:hover{
+  background:#2f50e4;
+}
+
+
+</style>
+</head>
+
+<body onload="checkAuth();">
+
+<div class="container">
+	
+	<div class = "header">
+<button class="menu-toggle" onclick="toggleMenu()">☰</button>
+	<div id="userProfile" style="margin-left:auto; font-weight:bold; float: right">
+	</div>
+  <button onclick="logout()" class="logt">Logout</button>
+
+	</div>
+
+
+<div class="navbar" id="navbar">
+
+<button onclick="window.location.href='index.html'">
+📊 Dashboard
+</button>
+
+<button onclick="window.location.href='students.html'">
+👨‍🎓 Student Registration
+</button>
+
+<button class="active" onclick="window.location.href='student-record.html'">
+📚 Student Information
+</button>
+
+<button onclick="window.location.href='performance.html'">
+⭐ Student Performance
+</button>
+
+<button onclick="window.location.href='attendance.html'">
+📋 Attendance
+</button>
+
+
+</div>
+
+
+
+  <h2>Student Records</h2>
+	
+<input type="text" style="width:96%; font-size:16px; border:1px solid #ccc; border-radius:8px; padding:10px; margin-bottom:10px; height:30px" id="searchStudent" placeholder="🔍 Search student by name..." style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;">
+  <br><br><br>
+<select class="option" id="courseFilter">
+  <option value="">All Courses</option>
+</select>
+
+<select class="option" id="sortOption">
+  <option value="">Sort</option>
+  <option value="az">A → Z</option>
+  <option value="za">Z → A</option>
+  <option value="top">Top Performers</option>
+</select>
+
+	
+<div id="studentCards"></div>
+
+ 
+
+</div>
+
+<script src="js/storage.js"></script>
+<script src="js/attendance.js"></script>
+
+
+</body>
+</html>

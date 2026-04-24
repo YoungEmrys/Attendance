@@ -1,29 +1,142 @@
 console.log("Attendance script loaded");
 
+let editCourses = [];
+
 /* =========================
    DATE UTILITIES
 ========================= */
 
-function todayString(){
+function todayString() {
   return new Date().toISOString().split("T")[0];
 }
 
-function isWeekend(dateStr){
+function isWeekend(dateStr) {
   const d = new Date(dateStr);
   return d.getDay() === 0 || d.getDay() === 6;
 }
 
-
 /* =========================
-   STUDENT MANAGEMENT
+   GLOBAL STATE
 ========================= */
 
-//async function addStudent(){
-
-  // Array to hold courses temporarily
 let studentCourses = [];
-window.addEventListener("DOMContentLoaded", () => {
-  // ===== DOM Elements =====
+
+/* =========================
+   INIT (SAFE FOR ALL PAGES)
+========================= */
+
+
+ 
+window.addEventListener("DOMContentLoaded", async () => {
+  try {
+    console.log("INIT RUNNING"); 
+	  await migrateStudents();
+	  console.log("Migrated students:", await getStudents());
+	  
+	  await loadStudents();
+
+    const students = await getStudents();
+    console.log("Students:", students);
+	  
+	  initStudentForm();
+    loadStudents();  
+    loadStudentDetails();
+	  
+	   const datePicker = document.getElementById("datePicker");
+  if (datePicker) {
+    datePicker.value = todayString();
+    loadSelectedDate();
+  }
+	  
+	console.log("INIT DONE");
+
+  } catch (err) {
+    console.error("INIT ERROR:", err);
+  }
+  
+ 
+let currentSearch = "";
+
+const searchInput = document.getElementById("searchStudent");
+
+if (searchInput) {
+  searchInput.addEventListener("input", (e) => {
+    currentSearch = e.target.value;
+    loadStudents(currentSearch);
+  });
+}
+
+document.getElementById("courseFilter")?.addEventListener("change", () => {
+  loadStudents(currentSearch);
+});
+
+document.getElementById("sortOption")?.addEventListener("change", () => {
+  loadStudents(currentSearch);
+});
+  
+  
+});
+
+// migrate student (upgrade)
+
+async function migrateStudents() {
+  const students = await getStudents();
+
+  let changed = false;
+
+  const updated = students.map((s, index) => {
+    if (!s.id) {
+      s.id = "STD" + Date.now() + index;
+      changed = true;
+    }
+
+    if (!Array.isArray(s.courses)) {
+      s.courses = [];
+      changed = true;
+    }
+
+    if (!s.image) {
+      s.image = "";
+      changed = true;
+    }
+
+    return s;
+  });
+
+  if (!changed) {
+    console.log("No migration needed");
+    return;
+  }
+
+  console.log("Saving FULL migrated dataset...");
+
+  const res = await fetch("/api/students", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({
+      students: updated,
+      mode: "bulk"  
+    })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    console.error(data);
+    alert("Migration failed");
+    return;
+  }
+
+  console.log("Migration SUCCESS");
+}
+
+
+/* =========================
+   STUDENT FORM LOGIC
+========================= */
+
+function initStudentForm() {
   const studentNameInput = document.getElementById("studentName");
   const studentIdInput = document.getElementById("studentId");
   const courseInput = document.getElementById("studentCourseInput");
@@ -33,74 +146,82 @@ window.addEventListener("DOMContentLoaded", () => {
   const imagePreview = document.getElementById("imagePreview");
   const addStudentBtn = document.getElementById("addStudentBtn");
 
-  // ===== Temp storage =====
-  let studentCourses = [];
+  if (!addStudentBtn) return; // Not on this page
 
-  // ===== Image preview =====
-  imageInput.addEventListener("change", () => {
-    if (imageInput.files.length > 0) {
-      const reader = new FileReader();
-      reader.onload = () => { imagePreview.src = reader.result; };
-      reader.readAsDataURL(imageInput.files[0]);
-    } else {
-      imagePreview.src = "";
-    }
-  });
-
-  // ===== Add course tag =====
-  addCourseBtn.addEventListener("click", () => {
-    const course = courseInput.value.trim();
-    if (!course || studentCourses.includes(course)) return;
-
-    studentCourses.push(course);
-
-    const tag = document.createElement("span");
-    tag.className = "course-tag";
-    tag.textContent = course;
-
-    tag.addEventListener("click", () => {
-      studentCourses = studentCourses.filter(c => c !== course);
-      courseTags.removeChild(tag);
-    });
-
-    courseTags.appendChild(tag);
-  });
-
-  // ===== Convert file to Base64 =====
-  function toBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
+  /* Image Preview */
+  if (imageInput) {
+    imageInput.addEventListener("change", () => {
+      if (imageInput.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = () => (imagePreview.src = reader.result);
+        reader.readAsDataURL(imageInput.files[0]);
+      }
     });
   }
 
-  // ===== Add student =====
+  /* Add Course */
+  if (addCourseBtn) {
+    addCourseBtn.addEventListener("click", () => {
+      const course = courseInput.value.trim();
+      if (!course || studentCourses.includes(course)) return;
+
+      studentCourses.push(course);
+
+      const tag = document.createElement("span");
+      tag.className = "course-tag";
+      tag.textContent = course;
+
+      tag.onclick = () => {
+        studentCourses = studentCourses.filter(c => c !== course);
+        tag.remove();
+      };
+
+      courseTags.appendChild(tag);
+      courseInput.value = "";
+    });
+  }
+
+  /* Add Student */
   addStudentBtn.addEventListener("click", async () => {
-    const name = studentNameInput.value.trim();
-    const id = studentIdInput.value.trim();
+   
+	  const name = studentNameInput.value.trim();
+	  
+const rawId = studentIdInput.value;
+const id = rawId.trim();
 
-    if (!name || !id) {
-      alert("Enter name and ID");
-      return;
-    }
+// block spaces inside ID
+if (/\s/.test(id)) {
+  return alert("Student ID cannot contain spaces");
+}
 
-    if (studentCourses.length === 0) {
-      alert("Add at least one course");
-      return;
-    }
+// allow only letters + numbers
+if (!/^[a-zA-Z0-9]+$/.test(id)) {
+  return alert("Student ID must contain only letters and numbers (no symbols)");
+}
+
+// optional: enforce length
+if (id.length < 2) {
+  return alert("Student ID is too short");
+}
+
+    if (!name || !id) return alert("Enter name and ID");
+    if (studentCourses.length === 0) return alert("Add at least one course");
 
     let imageBase64 = "";
 
-    if (imageInput.files[0].size > 2 * 1024 * 1024) {
-  alert("Image too large. Please select an image under 2MB.");
-  return;
-}
-    if (imageInput.files.length > 0) {
-      imageBase64 = await toBase64(imageInput.files[0]);
-    }
+if (imageInput && imageInput.files && imageInput.files.length > 0) {
+  const file = imageInput.files[0];
+	
+const MAX_SIZE = 1.5 * 1024 * 1024; // 1.5MB
 
+if (file.size > MAX_SIZE) {
+  return alert("Image must be under 1.5MB");
+}
+  imageBase64 = await compressImage(file);
+	
+}
+	  
+	  
     const studentData = {
       name,
       id,
@@ -117,15 +238,15 @@ window.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify(studentData)
       });
 
-      if (!res.ok) {
-        const errText = await res.text();
-        alert("Student already exists or failed to save: " + errText);
-        return;
-      }
+const data = await res.json();
+
+if (!res.ok) {
+  return alert(data.message || "Failed to save student");
+}
+
 
       alert("Student added!");
 
-      // Reset form
       studentNameInput.value = "";
       studentIdInput.value = "";
       courseInput.value = "";
@@ -134,111 +255,178 @@ window.addEventListener("DOMContentLoaded", () => {
       imageInput.value = "";
       imagePreview.src = "";
 
-      // Reload students and dropdowns
-      await loadStudents();
-      await populateRecordDropdown();
+      renderStudentCards();
+      loadStudents();
 
     } catch (err) {
       console.error(err);
       alert("Error adding student");
     }
   });
-});
+}
 
-  // Initialize dropdown on page load
-  document.addEventListener("DOMContentLoaded", () => {
-    populateRecordDropdown();
-  });
+async function deleteStudent(id) {
+  if (!confirm("Delete this student?")) return;
 
-
-/* =========================
-   DELETE / INACTIVE STUDENT
-========================= */
-
-async function deleteStudent(name){
-
-  if(!confirm("Delete this student permanently?")) return;
-
-  try{
-
-    const res = await fetch(`/api/students/${encodeURIComponent(name)}`,{
-      method:"DELETE",
-      credentials:"include"
+  try {
+    const res = await fetch(`/api/students/${id}`, {
+      method: "DELETE",
+      credentials: "include"
     });
 
-    const text = await res.text();
+const text = await res.text();
 
-    console.log("Server response:", res.status, text);
+let data;
+try {
+  data = JSON.parse(text);
+} catch {
+  console.error("Server returned HTML:", text);
+  alert("Server error (check backend)");
+  return;
+}
 
-    if(!res.ok){
-      alert("Delete failed. Check console.");
-      return;
+    if (!res.ok) {
+      return alert(data.message || "Delete failed");
     }
 
     alert("Student deleted");
+    loadStudents();
 
-    location.reload();
-
-  }catch(err){
+  } catch (err) {
     console.error(err);
-    alert("Delete request failed");
+    alert("Error deleting student");
   }
-
 }
 
+/* =========================
+   UTIL
+========================= */
+
+function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = e => {
+      img.src = e.target.result;
+    };
+
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+
+      const MAX_WIDTH = 300;
+      const scale = MAX_WIDTH / img.width;
+
+      canvas.width = MAX_WIDTH;
+      canvas.height = img.height * scale;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      // compress quality (0.7 = good balance)
+      const compressed = canvas.toDataURL("image/jpeg", 0.7);
+
+      resolve(compressed);
+    };
+
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+
+searchInput.addEventListener("input", (e) => {
+  currentSearch = e.target.value;
+  loadStudents(currentSearch);
+});
+
+document.getElementById("courseFilter")?.addEventListener("change", () => {
+  loadStudents(currentSearch);
+});
+
+document.getElementById("sortOption")?.addEventListener("change", () => {
+  loadStudents(currentSearch);
+});
+
+studentIdInput.addEventListener("input", () => {
+  // remove spaces automatically
+  studentIdInput.value = studentIdInput.value.replace(/\s/g, "");
+});
+
+
+/* =========================
+   STUDENT CARDS
+========================= */
+
 async function renderStudentCards() {
+  const container = 
+		document.getElementById("studentCards");
+	
+  if (!container) return;
+
+  const students = await getStudents();
+
+  container.innerHTML = students.map((s, i) => `
+    <div class="student-card" 
+data-id="${s.id}"
+onclick="handleStudentClick(this)" style="flex-direction:column; align-items:flex-start; cursor:pointer;">
+      <strong>${s.name}</strong><br>
+      ID: ${s.id || "N/A"}
+  ${!s.courses.length ? "<small style='color:red'>No courses</small>" : ""}
+    </div>
+
+  `).join("");
+}
+
+function handleStudentClick(el) {
+  const id = el.getAttribute("data-id");
+  openStudentDetails(id);
+}
+
+
+/* =========================
+   STUDENT RECORD VIEW
+========================= */
+
+async function viewAllStudentRecords() {
+  const container = document.getElementById("studentRecord");
+  if (!container) return;
 
   const students = await getStudents();
   const attendance = await getAttendance();
 
-  const container = document.getElementById("studentCards");
-  if (!container) return;
-
   let html = "";
 
   students.forEach(student => {
+    let recordsHTML = "";
 
-    // Calculate attendance summary
-    let ontime = 0, late = 0, absent = 0;
-
-    attendance.forEach(day => {
-      const record = day.records?.find(r => r.student === student.name);
-      if (record) {
-        if (record.status === "ontime") ontime++;
-        if (record.status === "late") late++;
-        if (record.status === "absent") absent++;
+    attendance.forEach(a => {
+      if (a.name === student.name) {
+        recordsHTML += `${a.date} - ${a.status}<br>`;
       }
     });
 
-    // Courses display
-    let coursesHTML = "";
-    if (student.courses && student.courses.length > 0) {
-      student.courses.forEach(c => {
-        coursesHTML += `<span class="course-tag">${c}</span>`;
-      });
-    }
+    const imageBlock = student.image
+      ? `<img src="${student.image}" 
+              style="width:80px; height:100px; object-fit:cover; border-radius:12px;margin-right:10px;">`
+
+      : `<div style="width:80px; height:100px; object-fit:cover; border radius:12px;background:#ccc; display:flex;align-items:center;justify-content:center;margin-right:10px;">
+		  
+          ${getInitials(student.name)}
+        </div>`;
 
     html += `
-      <div class="student-card">
-
-        <div class="student-header">
-          <img src="${student.image || ''}" alt="student">
-          <div>
-            <strong>${student.name}</strong><br>
-            ID: ${student.id || 'N/A'}
-          </div>
+    <div class="student-card" 
+     onclick="openStudentDetails('${s.id}')" 
+     style="flex-direction:column; align-items:flex-start; cursor:pointer;">
+        
+        <div style="display:flex; align-items:center; margin-bottom:8px;">
+          ${imageBlock}
+          <strong>${s.name}</strong>
         </div>
 
-        <div style="margin-top:10px;">
-          <strong>Courses:</strong><br>
-          ${coursesHTML || "No courses"}
-        </div>
-
-        <div style="margin-top:10px;">
-          <strong>Attendance:</strong><br>
-          ✅ On Time: ${ontime} |
-          ⏰ Late: ${late} |
-          ❌ Absent: ${absent}
+        <div style="font-size:14px;">
+          ${recordsHTML || "No records found"}
         </div>
 
       </div>
@@ -248,278 +436,7 @@ async function renderStudentCards() {
   container.innerHTML = html;
 }
 
-window.addEventListener("DOMContentLoaded", () => {
-  renderStudentCards();
-});
 
-/*=========================
-   ATTENDANCE TABLE
-========================= */
-
-async function renderAttendanceTable(date) {
-  const students = await getStudents();
-  const attendance = await getAttendance();
-
-  // If no students are present
-if (!students || students.filter(s => s.status === "active").length === 0) {    document.getElementById("attendanceTable").innerHTML =
-      "<p>No students yet. Add students to start attendance.</p>";
-    return;
-  }
-
-  const record = attendance.find(a => a.date === date);
-
-  if (record && record.type === "holiday") {
-  document.getElementById("attendanceTable").innerHTML =
-    "<p style='color:red;'>This day is marked as Holiday / No School</p>";
-  return;
-}
-
-  let html = `
-  <table>
-  <tr>
-  <th>Student</th>
-  <th>On Time</th>
-  <th>Late</th>
-  <th>Absent</th>
-  <th>Delete</th>
-  </tr>
-  `;
-
-  students
-    .filter(s => s.status === "active")
-    .forEach(student => {
-      let status = "";
-
-      if (record) {
-        const found = record.records.find(r => r.student === student.name);
-        if (found) status = found.status;
-      }
-
-      html += `
-    <tr>
-      <td>${student.name}</td>
-      <td><input type="radio" name="${student.name}" value="ontime" ${status === "ontime" ? "checked" : ""}></td>
-      <td><input type="radio" name="${student.name}" value="late" ${status === "late" ? "checked" : ""}></td>
-      <td><input type="radio" name="${student.name}" value="absent" ${status === "absent" ? "checked" : ""}></td>
-      <td><button class="delete-btn" onclick="deleteStudent('${student.name}')">X</button></td>
-    </tr>
-  `;
-    });
-
-  html += "</table>";
-
-  document.getElementById("attendanceTable").innerHTML = html;
-}
-
-/* =========================
-   LOAD DATE
-========================= */
-
-async function loadSelectedDate(){
-
-  const date =
-  document.getElementById("datePicker").value;
-
-  const lockStatus =
-  document.getElementById("lockStatus");
-  
-  const attendance = await getAttendance();
-  const record = attendance.find(a => a.date === date);
-  const holidayToggle = document.getElementById("holidayToggle");
-
-  if(!date) return;
-
-  if(date > todayString()){
-    alert("Future dates not allowed");
-    return;
-  }
-
-if (holidayToggle) {
-  holidayToggle.checked = record?.type === "holiday";
-}
-
-  if(isWeekend(date)){
-    alert("Weekend selected");
-    return;
-  }
-
-  lockStatus.innerHTML="(Editable)";
-  lockStatus.className="";
-
-  await renderAttendanceTable(date);
-
-}
-
-/* =========================
-   SAVE ATTENDANCE
-========================= */
-
-async function submitAttendance(){
-
-    const date = document.getElementById("datePicker").value;
-
-  const isHoliday = document.getElementById("holidayToggle")?.checked;
-  console.log("Holiday checked:", isHoliday);
-
-  if (isHoliday) {
-
-  let attendance = await getAttendance();
-
-  let record = attendance.find(a => a.date === date);
-
-  if (record) {
-    record.type = "holiday";
-    record.records = [];
-  } else {
-    attendance.push({
-      date: date,
-      type: "holiday",
-      records: []
-    });
-  }
-
-  await saveAttendance(attendance);
-
-  alert("Marked as Holiday / No School");
-
-  await loadSelectedDate();
-  return; // 🚨 stop normal attendance flow
-}
-
-  if(!date){
-    alert("Select a date first");
-    return;
-  }
-
-  const students =
-  (await getStudents())
-  .filter(s=>s.status==="active");
-
-  let records = [];
-
-  for(let student of students){
-
-    const selected =
-    document.querySelector(
-      `input[name="${student.name}"]:checked`
-    );
-
-    if(!selected){
-      alert("Please mark all students");
-      return;
-    }
-
-    records.push({
-      student:student.name,
-      status:selected.value
-    });
-
-  }
-
-  let attendance = await getAttendance();
-
-  let record =
-  attendance.find(a=>a.date===date);
-
-  if(record){
-
-    record.records = records;
-
-  }else{
-
-    attendance.push({
-      date:date,
-      records:records
-    });
-
-  }
-
-  await saveAttendance(attendance);
-
-  alert("Attendance saved");
-
-  await loadSelectedDate();
-
-}
-
-/* =========================
-   STUDENT RECORD VIEW
-========================= */
-
-async function viewStudentRecord(){
-
-  const selected =
-  document.getElementById("recordStudent").value;
-
-  const attendance =
-  await getAttendance();
-
-  const box =
-  document.getElementById("studentRecord");
-
-  if(!selected){
-    box.innerHTML="";
-    return;
-  }
-
-  let output="";
-
-  attendance.forEach(day=>{
-
-    const found =
-    day.records.find(
-      r=>r.student===selected
-    );
-
-    if(found){
-
-      output +=
-      `${day.date} - ${found.status}<br>`;
-
-    }
-
-  });
-
-  if(!output){
-    output="No records found";
-  }
-
-  box.innerHTML=output;
-
-}
-
-/* =========================
-   DROPDOWN POPULATION
-========================= */
-
-async function populateRecordDropdown(){
-
-  const students = await getStudents();
-
-  const select =
-  document.getElementById("recordStudent");
-
-  if(!select) return;
-
-  select.innerHTML =
-  "<option value=''>Select Student</option>";
-
-  select.innerHTML +=
-  "<option value='all'>All Students</option>";
-
-  students.forEach(s=>{
-
-    const label =
-    s.status==="inactive"
-    ? `${s.name} (Inactive)`
-    : s.name;
-
-    select.innerHTML +=
-    `<option value="${s.name}">${label}</option>`;
-
-  });
-
-}
 
 function markUnmarkedAsAbsent() {
   const students = document.querySelectorAll("#attendanceTable tr td:first-child");
@@ -609,52 +526,437 @@ if (fullResetBtn) {
   fullResetBtn.addEventListener("click", fullResetAttendance);
 }
 
-/* =========================
-   INITIAL LOAD
-========================= */
+async function loadStudents(search = "") {
+  const container =
+    document.getElementById("studentCards") ||
+    document.getElementById("studentList");
 
-window.addEventListener("DOMContentLoaded", async () => {
+  if (!container) return;
 
-// Run only if datePicker exists (attendance page)
+  let students = await getStudents();
+  const attendance = await getAttendance();
 
-const datePicker = document.getElementById("datePicker");
+  const courseFilter = document.getElementById("courseFilter")?.value;
+  const sortOption = document.getElementById("sortOption")?.value;
 
-if(datePicker){
+  // 🔍 SEARCH
+  students = students.filter(s =>
+    s.name.toLowerCase().includes(search.toLowerCase())
+  );
 
-  datePicker.value = todayString();
+  // 🎓 FILTER BY COURSE
+  if (courseFilter) {
+    students = students.filter(s =>
+      s.courses?.includes(courseFilter)
+    );
+  }
 
- 
-  loadSelectedDate();
-
-}
-})
-
-async function loadStudents(){
-
-  const students = await getStudents();
-
-  let html = "";
-
-  students.forEach(s => {
-
-    html += ` 
-
-    <div class="student-card">
-
-      <span>${s.name}</span>
-
-      <button class="delete-btn"
-      onclick="deleteStudent('${s.name}')">
-      Delete
-      </button>
-
-    </div>
-    `;
-
+  // 🏆 PERFORMANCE SCORE
+  const scores = {};
+  attendance.forEach(a => {
+    if (!scores[a.name]) scores[a.name] = 0;
+    if (a.status === "ontime") scores[a.name] += 2;
+    if (a.status === "late") scores[a.name] += 1;
   });
 
-  document.getElementById("studentList").innerHTML = html;
+  // 🔃 SORT
 
+  const sort = sortOption || "az";
+
+  if (sortOption === "az") {
+    students.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  if (sortOption === "za") {
+    students.sort((a, b) => b.name.localeCompare(a.name));
+  }
+
+  if (sortOption === "top") {
+    students.sort((a, b) =>
+      (scores[b.name] || 0) - (scores[a.name] || 0)
+    );
+  }
+
+  container.innerHTML = students.map((s) => `
+<div class="student-card" 
+     onclick="openStudentDetails('${s.id}')"
+     style="cursor:pointer;">
+
+  <div style="display:flex; align-items:center; gap:10px;">
+    
+    ${
+      s.image
+        ? `<img src="${s.image}" style="width:60px; height:80px; object-fit:cover; border-radius:10px;">`
+        : `<div style="width:60px; height:80px; object-fit:cover; border-radius:10px;background:#ccc;
+            display:flex;align-items:center;justify-content:center;">
+            ${getInitials(s.name)}
+          </div>`
+    }
+
+    <div>
+      <strong>${s.name}</strong><br>
+     <strong>ID: ${s.id || "N/A"}</strong><br>
+    <strong><small>${(s.courses || []).join(", ")}</small></strong>
+    </div>
+
+  </div>
+
+  
+  <div style="display:flex;">
+    <button onclick="event.stopPropagation(); goToEdit('${s.id}')">✏️ Edit </button> 
+
+    <button onclick="event.stopPropagation(); deleteStudent('${s.id}')">
+      🗑️ Delete
+    </button>
+  </div>
+
+</div>
+  `).join("") || "<p>No students found</p>";
 }
 
-loadStudents();
+
+const studentContainer = document.getElementById("studentCards");
+if (studentContainer) {
+  loadStudents();
+}
+
+async function goToEdit(id) {
+  const students = await getStudents();
+  const student = students.find(s => s.id === id);
+
+  if (!student){
+    alert("Student not found");
+    return;
+  
+  }
+
+  localStorage.setItem("editStudent", JSON.stringify(student));
+  window.location.href = "edit-student.html";
+}
+
+
+async function loadEditStudent() {
+  const stored = JSON.parse(localStorage.getItem("editStudent"));
+  if (!stored) return;
+
+  const students = await getStudents();
+  const student = students.find(s => s.id === stored.id);
+
+  if (!student) {
+    alert("Student not found");
+    return;
+  }
+
+  document.getElementById("editName").value = student.name || "";
+  document.getElementById("editId").value = student.id || "";
+
+  editCourses = [...(student.courses || [])];
+
+  renderEditCourses();
+
+  // ✅ Bind button AFTER page loads
+  const btn = document.getElementById("addCourseBtnEdit");
+  if (btn) {
+    btn.addEventListener("click", addEditCourse);
+  }
+
+  // Optional: press ENTER to add
+  const input = document.getElementById("editCourseInput");
+  if (input) {
+    input.addEventListener("keypress", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        addEditCourse();
+      }
+    });
+  }
+
+const imageInput = document.getElementById("editImage");
+const preview = document.getElementById("editImagePreview");
+
+// show existing image
+if (preview) {
+  preview.src = student.image || "";
+}
+
+// live preview when user selects new image
+if (imageInput) {
+  imageInput.addEventListener("change", () => {
+    const file = imageInput.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      preview.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+}
+
+function addEditCourse() {
+  const input = document.getElementById("editCourseInput");
+  if (!input) return;
+
+  const value = input.value.trim();
+
+  if (!value) return;
+
+  if (editCourses.includes(value)) {
+    alert("Course already added");
+    return;
+  }
+
+  editCourses.push(value);
+  input.value = "";
+
+  renderEditCourses();
+}
+
+function renderEditCourses() {
+  const container = document.getElementById("editCourses");
+  if (!container) return;
+
+  container.innerHTML = editCourses.map(c => `
+    <span style="
+      display:inline-block;
+      margin:5px;
+      padding:5px 10px;
+      background:#667eea;
+      color:white;
+      border-radius:6px;
+      cursor:pointer;
+    " onclick="removeEditCourse('${c}')">
+      ${c} ❌
+    </span>
+  `).join("");
+}
+
+function removeEditCourse(course) {
+  editCourses = editCourses.filter(c => c !== course);
+  renderEditCourses();
+}
+
+
+async function saveEdit() {
+  try {
+    const student = JSON.parse(localStorage.getItem("editStudent"));
+    if (!student) return alert("No student loaded");
+
+    const name = document.getElementById("editName").value.trim();
+const newId = document.getElementById("editId").value.trim();
+
+if (/\s/.test(newId)) {
+  return alert("Student ID cannot contain spaces");
+}
+
+if (!/^[a-zA-Z0-9]+$/.test(newId)) {
+  return alert("Student ID must contain only letters and numbers");
+}
+
+    if (!name || !newId) {
+      return alert("Name and ID required");
+    }
+
+    const imageInput = document.getElementById("editImage");
+
+    let image = student.image;
+
+if (imageInput && imageInput.files.length > 0) {
+  const file = imageInput.files[0];
+
+  const MAX_SIZE = 1.5 * 1024 * 1024;
+
+  if (file.size > MAX_SIZE) {
+    return alert("Image must be under 1.5MB");
+  }
+
+  image = await compressImage(file);
+}
+
+
+    console.log("SENDING DATA:", {
+      name,
+      newId,
+      courses: editCourses
+    });
+
+    const res = await fetch(`/api/students/${student.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        name,
+        newId,
+        courses: editCourses,
+        image
+      })
+    });
+
+    const text = await res.text();
+    console.log("SERVER RAW RESPONSE:", text);
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      alert("Server returned invalid JSON");
+      return;
+    }
+
+    if (!res.ok) {
+      alert(data.message || "Update failed");
+      return;
+    }
+
+    alert("Student updated successfully");
+    window.location.href = "students.html";
+
+  } catch (err) {
+    console.error("SAVE ERROR:", err);
+    alert("Error saving student (check console)");
+  }
+}
+
+async function editStudent(id) {
+  const students = await getStudents();
+  const student = students.find(s => s.id === id);
+
+  if (!student) return;
+
+  const newName = prompt("Edit name:", student.name);
+  if (!newName) return;
+
+  const newId = prompt("Edit ID:", student.id);
+  if (!newId) return;
+
+  const newCourses = prompt(
+    "Edit courses (comma separated):",
+    (student.courses || []).join(",")
+  );
+
+  const coursesArray = newCourses
+    ? newCourses.split(",").map(c => c.trim())
+    : [];
+
+  try {
+    const res = await fetch(`/api/students/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        name: newName,
+        newId: newId,
+        courses: coursesArray,
+        image: student.image
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return alert(data.message || "Update failed");
+    }
+
+    alert("Student updated");
+
+    loadStudents();
+
+  } catch (err) {
+    console.error(err);
+const text = await res.text();
+console.log("Server response:", text);
+
+let data;
+try {
+  data = JSON.parse(text);
+} catch {
+  return alert("Invalid server response");
+}
+
+if (!res.ok) {
+  return alert(data.message || "Update failed");
+}  }
+}
+
+
+function getInitials(name) {
+  if (!name) return "??";
+
+  return name
+    .split(" ")
+    .map(n => n[0])
+    .join("")
+    .toUpperCase();
+}
+
+function loadStudentDetails() {
+
+  const container = document.getElementById("studentProfile");
+
+  //  STOP if not on student-details page
+  if (!container) return;
+
+  const student = JSON.parse(localStorage.getItem("selectedStudent"));
+
+  if (!student) {
+    container.innerHTML = "<h2>No student selected</h2>";
+    return;
+  }
+
+  let imageBlock = "";
+
+  if (student.image && student.image.trim() !== "") {
+    imageBlock = `<img src="${student.image || 'default.png'}" class="profile-img">`;
+  } else {
+    imageBlock = `
+      <div class="profile-initials">
+        ${getInitials(student.name)}
+      </div>
+    `;
+  }
+  container.innerHTML = `
+    <div class="profile-card">
+
+      ${imageBlock}
+
+      <h2>${student.name}</h2>
+
+      <p><strong>ID:</strong> ${student.id || "N/A"}</p>
+
+      <p><strong>Status:</strong> ${student.status || "active"}</p>
+
+      <div class="course-section">
+        <h3>Courses</h3>
+        ${
+          student.courses && student.courses.length
+            ? student.courses.map(c => `<span class="course-tag">${c}</span>`).join("")
+            : "No courses"
+        }
+      </div>
+
+    </div>
+  `;
+}
+
+
+async function openStudentDetails(id) {
+  const students = await getStudents();
+
+  const cleanId = String(id).trim();
+
+  console.log("CLICKED ID:", `"${cleanId}"`);
+  console.log("ALL IDS:", students.map(s => `"${String(s.id).trim()}"`));
+
+  const student = students.find(
+    s => String(s.id).trim() === cleanId
+  );
+
+  if (!student) {
+    alert("Student not found");
+    return;
+  }
+
+  localStorage.setItem("selectedStudent", JSON.stringify(student));
+  window.location.href = "student-details.html";
+}
