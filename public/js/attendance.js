@@ -15,6 +15,18 @@ function isWeekend(dateStr) {
   return d.getDay() === 0 || d.getDay() === 6;
 }
 
+async function checkSession() {
+  const res = await fetch("/api/session", {
+    credentials: "include"
+  });
+
+  if (!res.ok) {
+    window.location.href = "index.html";
+    return false;
+  }
+
+  return true;
+}
 /* =========================
    GLOBAL STATE
 ========================= */
