@@ -45,21 +45,26 @@ window.addEventListener("DOMContentLoaded", async () => {
 	  await migrateStudents();
 	  console.log("Migrated students:", await getStudents());
 	  
-	  await loadStudents();
-
     const students = await getStudents();
     console.log("Students:", students);
 	  
 	  initStudentForm();
     loadStudents();  
     loadStudentDetails();
-	  
+
+
+    
 	   const datePicker = document.getElementById("datePicker");
-  if (datePicker) {
-    datePicker.value = todayString();
-    loadSelectedDate();
+if (datePicker) {
+  const today = todayString();
+  datePicker.value = today;
+
+  await renderAttendanceTable(today);
+
+   datePicker.addEventListener("change", loadSelectedDate);
+
   }
-	  
+ 
 	console.log("INIT DONE");
 
   } catch (err) {
@@ -88,6 +93,62 @@ document.getElementById("sortOption")?.addEventListener("change", () => {
   
   
 });
+
+async function renderAttendanceTable(date) {
+  const table = document.getElementById("attendanceTable");
+  if (!table) return;
+
+  const students = await getStudents();
+  const attendance = await getAttendance();
+
+  let html = `
+    <tr>
+      <th>Name</th>
+      <th>On Time</th>
+      <th>Late</th>
+      <th>Absent</th>
+    </tr>
+     `;
+
+  students.forEach(student => {
+    const record = attendance.find(
+      a => a.name === student.name && a.date === date
+    );
+
+html += `
+      <tr>
+        <td class="name-col">${student.name}</td>
+
+        <td>
+          <input type="radio" name="${student.name}" value="ontime"
+            ${record?.status === "ontime" ? "checked" : ""}>
+        </td>
+
+        <td>
+          <input type="radio" name="${student.name}" value="late"
+            ${record?.status === "late" ? "checked" : ""}>
+        </td>
+
+        <td>
+          <input type="radio" name="${student.name}" value="absent"
+            ${record?.status === "absent" ? "checked" : ""}>
+        </td>
+      </tr>    `;
+  });
+
+  table.innerHTML = html;
+}
+
+async function loadSelectedDate() {
+  const datePicker = document.getElementById("datePicker");
+  if (!datePicker) return;
+
+  const selectedDate = datePicker.value;
+
+  if (!selectedDate) return;
+
+  await renderAttendanceTable(selectedDate);
+}
 
 // migrate student (upgrade)
 
@@ -451,28 +512,32 @@ async function viewAllStudentRecords() {
 
 
 function markUnmarkedAsAbsent() {
-  const students = document.querySelectorAll("#attendanceTable tr td:first-child");
+  const rows = document.querySelectorAll("#attendanceTable tr");
 
-  students.forEach(td => {
-    const name = td.textContent.trim();
-    const radios = document.querySelectorAll(`input[name="${name}"]`);
-    const selected = document.querySelector(`input[name="${name}"]:checked`);
-    
+  rows.forEach(row => {
+    const nameCell = row.querySelector("td:first-child");
+    if (!nameCell) return;
+
+    const name = nameCell.textContent.trim();
+
+    const selected = row.querySelector("input[type='radio']:checked");
+
     if (!selected) {
-      // mark the "Absent" radio
-      const absentRadio = Array.from(radios).find(r => r.value === "absent");
-      if (absentRadio) absentRadio.checked = true;
+      const absentRadio = row.querySelector("input[value='absent']");
+      if (absentRadio) {
+        absentRadio.checked = true;
+      }
     }
   });
 
-  alert("All unmarked students have been marked as Absent");
-}
+  // 🔥 Force UI update immediately
+  const datePicker = document.getElementById("datePicker");
+  if (datePicker) {
+    renderAttendanceTable(datePicker.value);
+  }
 
-const markBtn = document.getElementById("markAbsentBtn");
-if (markBtn) {
-  markBtn.addEventListener("click", markUnmarkedAsAbsent);
+  alert("Unmarked students set to Absent");
 }
-
 
 async function clearMonthAttendance() {
   const datePicker = document.getElementById("datePicker");
@@ -481,62 +546,45 @@ async function clearMonthAttendance() {
     return;
   }
 
-  // Get the selected month in YYYY-MM format
-  const selectedMonth = datePicker.value.slice(0, 7); // "2026-04" for example
+  const selectedMonth = datePicker.value.slice(0, 7);
 
-  // Confirm action
-  if (!confirm(`Are you sure you want to delete ALL attendance for ${selectedMonth}? This cannot be undone.`)) {
-    return;
-  }
+  if (!confirm(`Delete ALL attendance for ${selectedMonth}?`)) return;
 
-  // Fetch existing attendance
   let attendance = await getAttendance();
 
-  // Filter out records NOT in the selected month
   attendance = attendance.filter(a => !a.date.startsWith(selectedMonth));
 
-  // Save updated attendance
-  await saveAttendance(attendance);
+  // SAVE TO SERVER
+  await fetch("/api/attendance", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ attendance })
+  });
 
-  alert(`All attendance for ${selectedMonth} has been cleared`);
+  alert("Month cleared");
 
-  // Re-render table
   await renderAttendanceTable(datePicker.value);
-}
-
-const clearBtn = document.getElementById("clearMonthBtn");
-if (clearBtn) {
-  clearBtn.addEventListener("click", clearMonthAttendance);
 }
 
 
 async function fullResetAttendance() {
-  if (!confirm("Are you sure you want to delete ALL attendance records? This cannot be undone.")) {
-    return;
-  }
+  if (!confirm("Delete ALL attendance records?")) return;
 
-  // Fetch current attendance
-  let attendance = await getAttendance();
+  // SAVE EMPTY ARRAY
+  await fetch("/api/attendance", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ attendance: [] })
+  });
 
-  // Clear all records
-  attendance = [];
+  alert("All attendance cleared");
 
-  // Save empty attendance
-  await saveAttendance(attendance);
-
-  alert("All attendance records have been cleared.");
-
-  // Re-render table
   const datePicker = document.getElementById("datePicker");
-  if (datePicker) {
-    await renderAttendanceTable(datePicker.value || todayString());
-  }
+  await renderAttendanceTable(datePicker.value || todayString());
 }
 
-const fullResetBtn = document.getElementById("fullResetBtn");
-if (fullResetBtn) {
-  fullResetBtn.addEventListener("click", fullResetAttendance);
-}
 
 async function loadStudents(search = "") {
   const container =

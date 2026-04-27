@@ -44,19 +44,43 @@
       color: white;
     }
 
-    table {
+    Table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
+      background: #fff;
     }
 
-    th, td {
+     th, td {
       border: 1px solid #ccc;
       padding: 8px;
       text-align: center;
     }
 
-    th { background: #f0f0f0; }
+     th {
+  background: #667eea;
+  color: white;
+  font-weight: bold;
+}
+
+tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+ tr:hover {
+  background: #e6e4e4;
+}
+
+.name-col {
+  text-align: left;
+  font-weight: 600;
+  width: 40%;
+}
+
+input[type="radio"] {
+  transform: scale(1.2);
+  cursor: pointer;
+}
 
     .record-box {
       margin-top: 10px;
@@ -334,9 +358,9 @@
   <label>
   <input type="checkbox" id="holidayToggle">
   Mark this day as Holiday / No School
-</label>
+</label><br><br>
 
-  <div id="attendanceTable"></div><br>
+  <table id="attendanceTable"></table><br>
 
   <div class="save-btn">  
     <button id="markAbsentBtn">Mark Remaining Students Absent</button>  
