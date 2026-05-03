@@ -30,8 +30,8 @@ async function renderDashboard() {
   );
 
 
-    const attendance = await getAttendance();
-    const students = await getStudents();
+    const attendance = await API.getAttendance();
+    const students = await API.getStudents();
 
     let summary = {};
     
@@ -167,8 +167,70 @@ let highlightHTML = `
     html += "</table>";
 
     document.getElementById("summaryTable").innerHTML = html;
+	
+	// ===== WEEKLY RENDER =====
+const selectedDate =
+  document.getElementById("datePicker")?.value ||
+  new Date().toISOString().slice(0,10);
+
+const weeklyData = await generateWeeklyReport(today);
+
+let weeklyHTML = `
+  <table>
+    <tr>
+      <th>Student</th>
+      <th>On Time</th>
+      <th>Late</th>
+      <th>Absent</th>
+    </tr>
+`;
+
+weeklyData.forEach(w => {
+  weeklyHTML += `
+    <tr>
+      <td>${w.name}</td>
+      <td>${w.ontime}</td>
+      <td>${w.late}</td>
+      <td>${w.absent}</td>
+    </tr>
+  `;
+});
+
+weeklyHTML += "</table>";
+
+document.getElementById("weeklySummary").innerHTML = weeklyHTML;
   }
 
+async function generateWeeklyReport(date) {
+  const { start, end } = getWeekRange(date);
+
+  const attendance = await API.getAttendance();
+  const students = await API.getStudents();
+
+  const summary = {};
+
+  students.forEach(s => {
+    summary[s.id] = {
+      name: s.name,
+      ontime: 0,
+      late: 0,
+      absent: 0
+    };
+  });
+
+  attendance
+    .filter(a => a.date >= start && a.date <= end)
+    .forEach(day => {
+      day.records.forEach(r => {
+
+		  const student = students.find(s => s.id === r.studentId);
+		  if (!student) return;
+		  summary[student.name][r.status]++;      
+	  });
+    });
+
+  return Object.values(summary);
+}
 	
 	function getWeekdaysInMonth(year, month) {
 
@@ -188,6 +250,53 @@ let highlightHTML = `
   }
 
   return weekdays;
+}
+
+function getWeekRange(dateStr) {
+  const date = new Date(dateStr);
+  const day = date.getDay();
+
+  const start = new Date(date);
+  start.setDate(date.getDate() - day);
+
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+
+  return {
+    start: start.toISOString().slice(0, 10),
+    end: end.toISOString().slice(0, 10)
+  };
+}
+
+function getMonth(date) {
+  return date.slice(0, 7);
+}
+
+async function generateMonthlyReport() {
+  const date = document.getElementById("datePicker").value;
+  const month = getMonth(date);
+
+  const attendance = await API.getAttendance();
+  const students = await API.getStudents();
+
+  const summary = {};
+
+  students.forEach(s => {
+    summary[s.id] = { ontime: 0, late: 0, absent: 0 };
+  });
+
+  attendance
+    .filter(a => a.date.startsWith(month))
+    .forEach(day => {
+      day.records.forEach(r => {
+        if (!summary[r.studentId]) return;
+        summary[r.studentId][r.status]++;
+      });
+    });
+
+  console.log("MONTHLY REPORT:", summary);
+
+  return summary;
 }
 
 

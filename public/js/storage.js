@@ -1,11 +1,27 @@
 // STUDENTS
 
 async function getStudents() {
-  const res = await fetch("/api/students", {
-    credentials: "include"
-  });
-  return await res.json();
+  try {
+    const res = await fetch("/api/students", {
+      credentials: "include"
+    });
+
+    const text = await res.text(); 
+
+    // if server returns HTML, user is not logged in
+    if (!text.trim().startsWith("[")) {
+      console.error("Not JSON response:", text);
+      return [];
+    }
+
+    return JSON.parse(text);
+
+  } catch (err) {
+    console.error("getStudents error:", err);
+    return [];
+  }
 }
+
 
 async function saveStudents(students) {
   await fetch("/api/students", {
@@ -28,7 +44,7 @@ async function getAttendance() {
 }
 
 async function saveAttendance(attendance) {
-  await fetch("/api/attendance", {
+  const res = await fetch("/api/attendance", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -36,6 +52,7 @@ async function saveAttendance(attendance) {
     credentials: "include",
     body: JSON.stringify(attendance)
   });
+  return res.json();
 }
 
 // USERS
@@ -75,8 +92,8 @@ async function exportMonthlyReport(){
 
   const month = selectedDate.slice(0,7);
 
-  const attendance = await getAttendance();
-  const students = await getStudents();
+  const attendance = await API.getAttendance();
+  const students = await API.getStudents();
 
   let summary = {};
 
@@ -86,16 +103,29 @@ async function exportMonthlyReport(){
   });
 
   // Count attendance
-  attendance
-    .filter(a => a.date.startsWith(month))
-    .forEach(day=>{
-      day.records.forEach(r=>{
-        if(summary[r.student]){
-          summary[r.student][r.status]++;
-        }
-      });
+// Count attendance
+attendance
+  .filter(day => day.date.startsWith(month))
+  .forEach(day => {
+
+    if (!day.records) return; // safety
+
+    day.records.forEach(r => {
+
+      const student = students.find(s => s.id === r.studentId);
+      if (!student) return;
+
+      if (!summary[student.name]) {
+        summary[student.name] = { ontime: 0, late: 0, absent: 0 };
+      }
+
+      summary[student.name][r.status]++;
+
     });
 
+  });
+	
+	
   // Convert to array + sort
   const ranking = Object.entries(summary)
     .map(([name,stats])=>({ name, ...stats }))
@@ -106,13 +136,13 @@ async function exportMonthlyReport(){
     return;
   }
 
-  // 🏆 TOP STUDENT
+  // TOP STUDENT
   const topScore = ranking[0].ontime;
   const topStudents = ranking.filter(s => s.ontime === topScore);
 
   let topHTML = `
     <div style="margin-bottom:20px; padding:10px; border:2px solid gold;">
-      <h3>🏆 Top Student (${month})</h3>
+      <h3>?? Top Student (${month})</h3>
   `;
 
   topStudents.forEach(s=>{
@@ -181,3 +211,5 @@ function toggleMenu(){
 	
 	window.addEventListener("DOMContentLoaded", loadUserProfile);
 }
+
+

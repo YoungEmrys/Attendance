@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Settings</title>
+
+<style>
+/* =========================
+   BASE
+========================= */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+/* MAIN CONTAINER */
+.container {
+  max-width: 1100px;
+  margin: auto;
+  background: #fff;
+  border-radius: 18px;
+  padding: 25px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+}
+
+/* HEADER */
+header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 30px;
+}
+
+header p {
+  margin-top: 5px;
+  color: #666;
+}
+
+/* GRID WRAPPER */
+#settingsCards {
+  display: grid;
+  gap: 18px;
+}
+
+/* =========================
+   CARD DESIGN
+========================= */
+.card {
+  background: #ffffff;
+  border: 1px solid #eee;
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  transition: 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.10);
+}
+
+.card h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 18px;
+  color: #333;
+}
+
+/* =========================
+   SUMMARY BOX
+========================= */
+#settingsSummary {
+  background: #f7f7f7;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #444;
+}
+
+/* =========================
+   FORM LAYOUT
+========================= */
+label {
+  display: block;
+  margin: 10px 0;
+  font-size: 14px;
+  color: #444;
+}
+
+/* INPUTS */
+input[type="time"],
+input[type="number"],
+select {
+  width: 100%;
+  max-width: 280px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  margin-top: 6px;
+}
+
+/* INLINE OPTION GROUPS */
+.inline-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 8px;
+}
+
+.inline-group label {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  background: #f7f7f7;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* CHECKBOX / RADIO */
+input[type="checkbox"],
+input[type="radio"] {
+  margin-right: 6px;
+  transform: scale(1.1);
+}
+
+/* SECTION DIVIDER */
+.section {
+  border-top: 1px solid #eee;
+  margin: 15px 0;
+  padding-top: 10px;
+}
+
+/* BUTTONS */
+button {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  margin-right: 8px;
+  transition: 0.2s;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+/* DANGER */
+.danger button {
+  background: #ff4d4d;
+  color: white;
+}
+
+/* SYSTEM MESSAGE */
+#lockMessage {
+  margin-top: 10px;
+  color: #b00020;
+  font-weight: bold;
+  display: none;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  input[type="time"],
+  input[type="number"],
+  select {
+    max-width: 100%;
+  }
+
+  .grid { 
+    display: grid;
+    gap: 8px;
+  }
+
+  @media (max-width: 768px) {
+  .grid.three{
+    grid-template-columns: 1fr;
+    }
+  }
+
+  .inline-group {
+    flex-direction: column;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <h1>Settings</h1>
+    <p>Control attendance behavior and system rules</p>
+  </header>
+
+  <div id="settingsCards">
+
+    <!-- SUMMARY -->
+    <section class="card">
+      <h2>Current Behavior</h2>
+      <div id="settingsSummary">Loading...</div>
+    </section>
+
+    <!-- ATTENDANCE RULES -->
+    <section class="card">
+      <h2>Attendance Rules</h2>
+
+      <label>
+        Late After
+        <input type="time" id="lateTime">
+      </label>
+
+      <label>
+        <input type="checkbox" id="graceEnabled">
+        Enable Grace Period
+      </label>
+
+      <label>
+        Grace Until
+        <input type="time" id="graceTime">
+      </label>
+
+      <div class="section"></div>
+
+      <label>Time Comparison Mode</label>
+      <div class="inline-group">
+        <label><input type="radio" name="compareMode" value="strict"> Strict</label>
+        <label><input type="radio" name="compareMode" value="rounded"> Rounded</label>
+      </div>
+
+      <label>
+        Default Status
+        <select id="defaultStatus">
+          <option value="absent">Absent</option>
+        </select>
+      </label>
+    </section>
+
+    <!-- IMPORT BEHAVIOR -->
+    <section class="card">
+      <h2>Import Behavior</h2>
+
+      <label>Existing Data Handling</label>
+      <div class="inline-group">
+        <label><input type="radio" name="importMode" value="merge"> Merge</label>
+        <label><input type="radio" name="importMode" value="replace"> Replace</label>
+        <label><input type="radio" name="importMode" value="skip"> Skip</label>
+      </div>
+
+      <label>
+        <input type="checkbox" id="autoDetectMonth">
+        Auto-detect Month/Year
+      </label>
+
+      <label>
+        Manual Month
+        <input type="number" id="manualMonth">
+      </label>
+
+      <label>
+        Manual Year
+        <input type="number" id="manualYear">
+      </label>
+
+      <div class="section"></div>
+
+      <label>Unknown/ Multiple Same IDs Handling</label>
+      <div class="inline-group">
+        <label><input type="radio" name="unknownMode" value="warn"> Warn </label>
+        <label><input type="radio" name="unknownMode" value="block"> Block</label>
+      </div>
+    </section>
+
+    <!-- IDENTITY -->
+    <section class="card">
+      <h2>Identity & Matching</h2>
+
+      <label>
+        <input type="checkbox" id="autoPad">
+        Auto-pad IDs
+      </label>
+
+      <label>Match Mode</label>
+      <div class="inline-group">
+        <label><input type="radio" name="matchMode" value="id"> ID Only</label>
+      </div>
+    </section>
+
+    <!-- DISPLAY -->
+    <section class="card">
+      <h2>Interface & Display</h2>
+
+      <label>Display Mode</label>
+      <div class="inline-group">
+        <label><input type="radio" name="displayMode" value="friendly"> Friendly</label>
+        <label><input type="radio" name="displayMode" value="compact"> Compact</label>
+      </div>
+
+      <label>Time Format</label>
+      <div class="inline-group">
+        <label><input type="radio" name="timeFormat" value="12h"> 12-hour</label>
+        <label><input type="radio" name="timeFormat" value="24h"> 24-hour</label>
+      </div>
+
+      <label>
+        <input type="checkbox" id="autoAbsent">
+        Auto-mark absent on save
+      </label>
+    </section>
+
+    <!-- DATA CONTROL -->
+    <section class="card danger">
+      <h2>Attendance Data Control</h2>
+      <button id="clearMonthBtn">Clear Month</button>
+      <button id="fullResetBtn">Full Reset</button>
+    </section>
+
+    <!-- SYSTEM -->
+    <section class="card">
+      <h2>System</h2>
+
+      <label>
+        <input type="checkbox" id="lockSettings">
+        Lock Settings
+      </label>
+
+      <div id="lockMessage">🔒 Settings locked</div>
+    </section>
+
+
+  <section class="card">
+  <h2>Actions</h2>
+  <div class="grid three">
+
+  <button id="saveSettingsBtn">Save Settings</button>
+  <button id="cancelSettingsBtn">Cancel Changes</button>
+  <button id="resetSettingsBtn">Reset to Defaults</button>
+</div>
+</section>
+</div>
+</div>
+
+</body>
+</html>

@@ -1,4 +1,10 @@
 Things Updated
 
-1. Student ID, image course, practical progress to student registry
-2. Display this on the student-record page
+1. edit registered student - ID, Image, Course, Name
+2. Id and Course added
+3. Id as a unique Identifier
+4. removed student-records
+4. Card UI/UX theme - Attendance, Registration
+5. import attendance from fingerprint data entry (xls, xlsx)
+6. weekly report added
+7. seperate register student and registered student

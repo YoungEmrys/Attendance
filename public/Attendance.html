@@ -7,9 +7,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="Cache-Control" content="no-store">
   <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
+  <meta http-equiv="Expires" content="0"> 
 
+   <script src="js/api.js"></script>
+   <script src="js/storage.js"></script>
 	<script src="js/auth.js"></script>	
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 		
   <style>
@@ -120,7 +123,6 @@ input[type="radio"] {
 
   box-shadow:0 8px 20px rgba(0,0,0,0.15);
 }
-/* NAV BUTTONS */
 
 .navbar button{
 
@@ -198,12 +200,15 @@ input[type="radio"] {
       display: grid;
       gap: 10px;
       justify-content: flex-start;
-      margin-bottom: 15px; 
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* 2 per row if space*/
+      grid-template-columns: 1fr;/* 2 per row if space*/
 
-   
-      
     }
+    
+    @media (min-width: 768px) {
+      .save-btn.two{
+    grid-template-columns: 1fr 1fr;
+  }
+}
 
     .save-btn button{
       background: #667eea;
@@ -218,19 +223,22 @@ input[type="radio"] {
     }
 
     .save-btn button:hover {
-      background-color: #2d46b5;
-      transform: translateY(-1px);
+      transform: translateY(-3px);
     
     }
 
-
-.clearAllBtn {
-  display: grid;
+    .clearAllBtn {
+      display: grid;
       gap: 10px;
       justify-content: flex-start;
-      margin-bottom: 15px; 
-      grid-template-columns: repeat(2, minmax(180px, 1fr)); /* 2 per row if space*/
-  
+      grid-template-columns: 1fr;/* 2 per row if space*/
+
+    }
+    
+    @media (min-width: 768px) {
+      .clearAllBtn.two{
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .clearAllBtn button {
@@ -246,22 +254,20 @@ input[type="radio"] {
 }
 
 .clearAllBtn button:hover {
-  background-color: #a23d1b;  /* Darker blue on hover */
-  transform: translateY(-1px);  /*Slight lift effect */
+  transform: translateY(-3px);  
 }
 
     .delete-btn { background: #f44336; }
 
     .delete-btn:hover {
       background-color: #c8372d;  
-      transform: translateY(-1px);  /*Slight lift effect */
+      transform: translateY(-1px);  
 }
 
 .xpt-btn {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
-      justify-content: flex-start;
       margin-bottom: 15px; 
       grid-template-columns: repeat( minmax(180px, 1fr)); /* 2 per row if space*/
 
@@ -281,8 +287,7 @@ input[type="radio"] {
 }
 
 .xpt-btn button:hover {  
-    background: #2f9b33;
-    transform: translateY(-1px);  /*Slight lift effect */
+    transform: translateY(-3px); 
 
 }
 	  
@@ -310,9 +315,283 @@ input[type="radio"] {
   background:#2f50e4;
 }
 
+/* =========================
+   GLOBAL CARD SYSTEM
+========================= */
+
+.container {
+  max-width: 1100px;
+  margin: auto;
+}
+
+/* GRID LAYOUT */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+/* DESKTOP GRID */
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1100px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* CARD */
+.card {
+  background: white;
+  padding: 15px;
+  border-radius: 14px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+/* STUDENT NAME */
+.card h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+
+/* BUTTON GROUP */
+.status-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* STATUS BUTTON */
+.status-buttons button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* COLORS */
+.btn-ontime { background: #4CAF50; }
+.btn-late { background: #ff9800; }
+.btn-absent { background: #f44336; }
+
+/* ACTIVE STATE */
+.active-status {
+  outline: 3px solid #000;
+}
 
 
-  </style>
+/* Time format */
+.time-display {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 8px 0;
+}
+
+.time-display.ontime {
+  color: green;
+}
+
+.time-display.late {
+  color: orange;
+}
+
+.time-display.absent {
+  color: red;
+}
+
+/* =========================
+   FILE UPLOAD
+========================= */
+#file{
+  display: none;
+}
+
+.file-upload {
+  padding:10px 20px;
+  border:none;
+  border-radius:25px;
+  background:rgba(255,255,255,0.6);
+  backdrop-filter:blur(5px);
+  color:#333;
+  font-weight:bold;
+  font-size:14px;
+  cursor:pointer;
+  box-shadow:0 5px 12px rgba(0,0,0,0.15);
+  text-align: center;
+}
+
+.file-upload:hover {
+      transform: translateY(-2px);
+}
+
+
+/* =========================
+   BUTTONS (GLOBAL)
+========================= */
+.btn {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+/* Upload / Preview */
+.btn-primary {
+  background: #667eea;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #5563d6;
+}
+
+/* Confirm */
+.btn-success {
+  background: #28a745;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #218838;
+}
+
+/* Cancel */
+.btn-danger {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #c82333;
+}
+
+/* Filter */
+.btn-filter {
+  background: #17a2b8;
+  color: white;
+}
+
+.btn-filter:hover {
+  background: #138496;
+}
+
+
+/* =========================
+   PREVIEW CONTAINER
+========================= */
+#previewContainer {
+  background: #fff;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+#previewContainer h3 {
+  margin-top: 15px;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+/* Row styling */
+.preview-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+.preview-row.unmatched {
+  color: red;
+}
+
+.prv{
+  width:94%;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:14px;
+  padding:1.5% 3%;
+  background:rgba(255,255,255,0.25);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,0.4);
+  box-shadow:0 8px 20px rgba(0,0,0,0.15);
+}
+
+.prv button{
+  padding:10px 20px;
+  border:none;
+  border-radius:25px;
+  background:rgba(255,255,255,0.6);
+  backdrop-filter:blur(5px);
+  color:#333;
+  font-weight:bold;
+  font-size:14px;
+  cursor:pointer;
+  box-shadow:0 5px 12px rgba(0,0,0,0.15);
+}
+
+.prv button:hover {
+      transform: translateY(-2px);
+}
+
+
+  .form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+@media (min-width: 768px) {
+  .form-grid.two{
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.date{
+  width: 100%;
+
+}
+.date input{
+  border: 1px #ddd solid;
+  border-radius: 6px;
+  width: 95%;
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+color:black;
+    cursor: pointer;
+    padding:12px 5px;
+    width: 100%;
+}
+
+.date-wrapper {
+  position: relative;
+}
+
+.date-label {
+  position: absolute;
+  left: 45px;
+  top: 19px;
+  background: white;
+  font-size: 16px;
+  color: #555;
+
+}
+
+</style>
 </head>
 
 <body onload= "checkAuth();">
@@ -334,7 +613,12 @@ input[type="radio"] {
   </button>
 
   <button onclick="window.location.href='students.html'">
-👨‍🎓 Student Registration
+📝 Student Registration
+</button>
+
+  <button
+onclick="window.location.href='registered-students.html'">
+👨‍🎓 Registered Students
 </button>
 
   <button class="active" onclick="window.location.href='attendance.html'">
@@ -352,28 +636,81 @@ input[type="radio"] {
 
   <!-- DATE PICKER -->
   <h2>Attendance Entry</h2>
-  <input type="date" id="datePicker" onchange="loadSelectedDate()">
+  <input type="date" id="datePicker" onchange="onDateChange()">
   <span id="lockStatus"></span><br><br>
+	
+	<div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+
+  <input 
+    type="text" 
+    id="attendanceSearch" 
+    placeholder="🔍 Search Student..."
+    style="flex:1; padding:10px; border-radius:8px; border:1px solid #ccc;"
+  >
+
+  <select id="attendanceSort" style="padding:10px; border-radius:8px;">
+    <option value="az">A → Z</option>
+    <option value="za">Z → A</option>
+  </select>
+
+</div><br>
+
+<div class="prv">
+<label> <h2>Select Dates </h2></label>
+
+  <div class="form-grid two">
+  <div class="date">
+    <div class="date-wrapper">
+  <span class="date-label">Start Date</span>
+ <input type="date" id="previewStart"/>
+</div> 
+</div>
+
+<div class="date">
+      <div class="date-wrapper">
+  <span class="date-label">End Date</span>
+ <input type="date" id="previewEnd" />
+  </div>
+</div>
+</div><br>
+
+<button onclick="applyPreviewFilter()" style="width: 100%">Confirm Provided Date </button>
+<br><br><br>
+
+<div class="form-grid two">
+<label for="file" class="file-upload"  id="uploadAttendance" accept=".xls,.xlsx"> 
+  Select Attendance File
+</label>
+
+<input id="file" type="file" />
+
+<button onclick="handleFile()" >Upload Attendance</button><br><br>
+</div>
+
+<div id="previewContainer"></div><br>
+
+<button onclick="confirmImport()">Confirm</button>
+<button onclick="cancelImport()">Cancel</button><br><br>
+</div><br>
 
   <label>
   <input type="checkbox" id="holidayToggle">
   Mark this day as Holiday / No School
 </label><br><br>
 
-  <table id="attendanceTable"></table><br>
+<div id="attendanceTable" class="grid"></div><br><br>
 
-  <div class="save-btn">  
-    <button id="markAbsentBtn">Mark Remaining Students Absent</button>  
-    
+  <div class="save-btn two">  
+<button onclick="markUnmarkedAsAbsent()">Mark Remaining Students Absent</button>
+
     <button  onclick="submitAttendance()">Save / Update</button>
-	</div>
+	</div><br>
 
-  <div class="clearAllBtn">
-    <button  id="clearMonthBtn">Clear Monthly Attendance</button>
+  <div class="clearAllBtn two">
+<button onclick="clearMonthAttendance()">Clear Monthly Attendance</button>
 
-    <button id="fullResetBtn">Reset Attendance </button>
-    
-  </div>    
+<button onclick="fullResetAttendance()">Reset Attendance</button>    
+  </div><br>    
   
   <div class="xpt-btn">
       <button  onclick="exportMonthlyReport()">Export Monthly Report</button><br>
@@ -382,7 +719,7 @@ input[type="radio"] {
 
 </div>
 
-<script src="js/storage.js"></script>	
+
 <script src="js/attendance.js"></script>
   
 </body>

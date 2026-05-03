@@ -8,7 +8,9 @@
 	<meta http-equiv="Cache-Control" content="no-store">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  
+      
+     
+ <script src="js/api.js"></script>
 	<script src="js/auth.js"></script>	
 	<script src="js/storage.js"></script>
 	<script src="js/attendance.js"></script>
@@ -93,18 +95,13 @@
   padding:10px 20px;
   border:none;
   border-radius:25px;
-
   background:rgba(255,255,255,0.6);
   backdrop-filter:blur(5px);
-
   color:#333;
   font-weight:bold;
   font-size:14px;
-
   cursor:pointer;
-
   transition:all 0.3s ease;
-
   box-shadow:0 5px 12px rgba(0,0,0,0.15);
 }
 
@@ -120,19 +117,6 @@
   background:#667eea;
   color:white;
 }
-
-.menu-toggle{
-  display:block;
-  font-size:20px;
-  padding:8px 14px;
-  border-radius:10px;
-  background:rgba(255, 255, 255, 0.6);
-  border:none;
-  cursor:pointer;
-  margin-bottom:10px;
-  color: #667eea;
-}
-
 
 /* MOBILE */
 
@@ -169,22 +153,25 @@
   cursor: pointer;
 }
 
-.tm{
-  display: flex;
+
+.tm button{
   float: right;
+  background-color:rgb(255, 255, 255);
+  color: #5f7af0; 
+  margin: 10px 5px 0 5px;
+  padding:6px 12px;
+  border:none;
+  border-radius:8px;
+  backdrop-filter:blur(5px);
+  font-weight:bold;
+  font-size:12px;
+  cursor:pointer;
+  transition:all 0.2s ease;
 
 }
 
-.tm button{
-  padding:7px 12px;
-  margin: 0 5px;
-  border:none;
-  border-radius:12px;
-  backdrop-filter:blur(5px);
-  font-weight:bold;
-  font-size:14px;
-  cursor:pointer;
-
+.tm button:hover{
+  transform: translateY(-3px);
 }
 
 .logt{
@@ -194,9 +181,6 @@
 
 }
 
-.logt:hover{
-  background:#2f50e4;
-}
    </style> 
 	
 </head>
@@ -212,12 +196,14 @@
 <div class="logo">
     <div class="user-profile"><span id="currentUser"></span></div>
 </div>
+  
+<button style="float: right; background-color: transparent; font-size: large;" onclick="window.location.href = 'settings.html'">⚙️</button>
 
 <div class="tm">
-  <button class="menu-toggle" onclick="toggleMenu()">☰</button>
 <button onclick="logout()"  class="logt">Logout</button>
+  <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+</div>
 
-</div>  
 
 <br><br><br><br>
 
@@ -225,13 +211,18 @@
   		<div class="navbar" id="navbar">
 			
 			
-  <button onclick="window.location.href='index.html'">
+  <button class="active" onclick="window.location.href='index.html'">
 📊 Dashboard 
 </button>
 														   
 
   <button onclick="window.location.href='students.html'">
-👨‍🎓 Student Registration
+📝 Student Registration
+</button>
+
+  <button
+onclick="window.location.href='registered-students.html'">
+👨‍🎓 Registered Students
 </button>
 
   <button onclick="window.location.href='attendance.html'">
@@ -261,6 +252,9 @@
 
   <h2>Monthly Summary</h2>
   <div id="summaryTable"></div>
+	
+	<h2>Weekly Summary</h2>
+<div id="weeklySummary"></div>
 
    <input type="date" id="datePicker">
 	<button onclick="exportMonthlyReport()">Save Report</button>

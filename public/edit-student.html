@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
   <title>Edit Student</title>
+  
+  <script src="js/api.js"></script>
+  <script src="js/storage.js"></script>
   <script src="js/auth.js"></script>
 	
 	<style>
@@ -85,12 +88,27 @@
   cursor: pointer;
 }
 
-/* Save button */
 .save-btn {
   width: 100%;
   padding: 12px;
   margin-top: 15px;
-  background: #28a745;
+  background: linear-gradient(135deg, #57d85c, #2ab431);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  transform: translateY(-1px);
+}
+	
+.cnc-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  background: linear-gradient(135deg, #57d8ba, #2ab4a4);
   color: white;
   border: none;
   border-radius: 8px;
@@ -98,11 +116,10 @@
   cursor: pointer;
 }
 
-.save-btn:hover {
-  background: #218838;
+.cnc-btn:hover {
+  transform: translateY(-1px);
 }
-	
-	
+
 	
 	
 	</style>
@@ -116,13 +133,14 @@
 
   <h2>Edit Student</h2>
 
+  <div id="editStudentForm">
   <div class="image-section">
-    <img id="editImagePreview" class="edit-image" src="" />
+    <img id="editImagePreview" class="edit-image" src="" alt=""/>
     <input type="file" id="editImage" accept="image/*" />
   </div>
 
-  <input id="editName" placeholder="Student Name" />
-  <input id="editId" placeholder="Student ID" />
+  <input type="text" id="editName" placeholder="Student Name" />
+  <input type="number" id="editId" placeholder="Student ID" />
 
   <div class="course-box">
     <input id="editCourseInput" placeholder="Add course" />
@@ -132,10 +150,11 @@
   <div id="editCourses"></div>
 
   <button class="save-btn" onclick="saveEdit()">Save Changes</button>
+  <button class="cnc-btn" onclick="goBack()">Cancel</button>
 
 </div>
-
-<script src="js/storage.js"></script>
+</div>	
+	
 <script src="js/attendance.js"></script>
 
 </body>

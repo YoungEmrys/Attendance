@@ -351,22 +351,6 @@ input, button {
 
 
 
-/* ======================
-   FORM GRID
-====================== */
-
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 15px;
-}
-
-/* Desktop */
-@media (min-width: 768px) {
-  .form-grid.two {
-    grid-template-columns: 1fr 1fr;
-  }
-}
 
 </style>
 
@@ -380,10 +364,11 @@ input, button {
 <button class="menu-toggle" onclick="toggleMenu()">☰</button>
 	<div id="userProfile" style="margin-left:auto; font-weight:bold; float: right">
 	
+
   </div>
-	
- <button onclick="logout()" class="logt">Logout</button>
-</div>	
+  <button onclick="logout()" class="logt">Logout</button>
+	</div>
+
 
 <div class="navbar" id="navbar">
 
@@ -391,16 +376,14 @@ input, button {
 📊 Dashboard
 </button>
 
-<button class="active" onclick="window.location.href='students.html'">
+<button onclick="window.location.href='students.html'">
 📝 Student Registration
 </button>
 	
-<button
-onclick="window.location.href='registered-students.html'">
+<button class="active" onclick="window.location.href='registered-students.html'">
 👨‍🎓 Registered Students
 </button>
-
-
+	
 <button onclick="window.location.href='attendance.html'">
 📋 Attendance
 </button>
@@ -422,51 +405,16 @@ onclick="window.location.href='registered-students.html'">
   <option value="top">Top Performance</option>
 </select>
 	
-<h3>Add Student</h3>
-
-<div id="studentForm">
-
-<div class="form-grid two">
-
-  <div>
-    <label>Student Name</label><br>
-    <input type="text" class="register" id="studentName" placeholder="Enter Student Name">
-  </div>
-
-  <div>
-    <label>Student ID</label><br>
-    <input type="number" class="register" id="studentId" placeholder="Enter Student ID">
-  </div>
-
-</div><br>
-
-<div class="form-grid two">
-
-  <div>
-    <label>Student Course</label><br>
-    <div class="student-Crs">
-      <input type="text" class="register" id="studentCourseInput" placeholder="Enter course">
-      <button type="button" id="addCourseBtn" class="plus">➕</button>
-    </div>
-    <div class="courseTags" id="courseTags"></div>
-  </div>
-
-  <div>
-    <label>Student Image</label><br>
-    <input type="file" id="studentImage" accept="image/*" class="file">
-    <img class="img-P" id="imagePreview" alt="">
-  </div>
-  </div><br>
-
-<div class="form-grid two">
-<button class="add-btn" type="button" id="addStudentBtn"> Add Student</button>
+	<button class="logt" style=" background: linear-gradient(135deg, #57A5D8, #2968B4); padding:10px; border-radius: 8px"  onclick="window.location.href='students.html'">
+📝 Register Students
+</button>
 	
-<button class="add-btn" style="  background: linear-gradient(135deg, #57A5D8, #2968B4); " onclick="window.location.href='registered-students.html'"> Registered Students </button>
-</div>
-	
-</div>
-</div>
-	
+<h3>Registered Students</h3>
+
+<div id="studentCards" class="student-grid"></div><br>
+</div>  
+
+
 <script src="js/attendance.js"></script>
 
 </body>

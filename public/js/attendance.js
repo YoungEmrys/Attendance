@@ -1,745 +1,171 @@
 console.log("Attendance script loaded");
 
-let editCourses = [];
+/* =========================
+   GLOBAL STATE
+========================= */
 
 /* =========================
-   DATE UTILITIES
+SETTINGS
 ========================= */
+
+function getSettings() {
+  const saved = localStorage.getItem("settings");
+
+  const DEFAULT_SETTINGS = {
+    lateTime: "08:30",
+    graceEnabled: false,
+    graceTime: "08:10",
+    compareMode: "strict",
+    autoAbsent: true,
+    displayMode: "friendly",
+    timeFormat: "12h"
+    idPadding: 3,
+  };
+
+  return saved ? JSON.parse(saved) : DEFAULT_SETTINGS;
+}
+
+
+/* =========================
+   HELPERS
+========================= */
+
+function getInitials(name) {
+  if (!name) return "??";
+  return name.split(" ").map(n => n[0]).join("").toUpperCase();
+}
 
 function todayString() {
   return new Date().toISOString().split("T")[0];
 }
 
-function isWeekend(dateStr) {
-  const d = new Date(dateStr);
-  return d.getDay() === 0 || d.getDay() === 6;
+function getDayName(dateStr) {
+  const [y, m, d] = dateStr.split("-");
+  const date = new Date(y, m - 1, d);  
+  
+  if (isNaN(d)) return "";
+  return date.toLocaleDateString("en-US", { weekday: "short" });
 }
 
-async function checkSession() {
-  const res = await fetch("/api/session", {
-    credentials: "include"
-  });
+function formatDate(dateStr) {
+  const settings = getSettings();
+const [y, m, d] = dateStr.split("-");
+const date = new Date(y, m - 1, d);
 
-  if (!res.ok) {
-    window.location.href = "index.html";
-    return false;
+  if (settings.displayMode === "compact") {
+    return date.toLocaleDateString("en-US", {
+      month: "2-digit",
+      day: "2-digit"
+    });
   }
 
-  return true;
+  return date.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric"
+  });
 }
+
+function normalizeId(id) {
+  const settings = getSettings();
+
+  let clean = String(id).trim();
+
+  // remove leading zeros first (important)
+  clean = String(parseInt(clean));
+
+  if (!settings.idPadding || settings.idPadding <= 0) {
+    return clean; // no padding
+  }
+
+  return clean.padStart(settings.idPadding, "0");
+}
+
+let attendanceData = {};
+
 /* =========================
-   GLOBAL STATE
+   INIT
 ========================= */
 
-let studentCourses = [];
+document.addEventListener("DOMContentLoaded", init);
 
-/* =========================
-   INIT (SAFE FOR ALL PAGES)
-========================= */
-
-
- 
-window.addEventListener("DOMContentLoaded", async () => {
+async function init() {
   try {
-    console.log("INIT RUNNING"); 
-	  await migrateStudents();
-	  console.log("Migrated students:", await getStudents());
-	  
-    const students = await getStudents();
-    console.log("Students:", students);
-	  
-	  initStudentForm();
-    loadStudents();  
-    loadStudentDetails();
+    console.log("INIT START");
 
-
-    
-	   const datePicker = document.getElementById("datePicker");
-if (datePicker) {
-  const today = todayString();
-  datePicker.value = today;
-
-  await renderAttendanceTable(today);
-
-   datePicker.addEventListener("change", loadSelectedDate);
-
-  }
- 
-	console.log("INIT DONE");
-
-  } catch (err) {
-    console.error("INIT ERROR:", err);
-  }
-  
- 
-let currentSearch = "";
-
-const searchInput = document.getElementById("searchStudent");
-
-if (searchInput) {
-  searchInput.addEventListener("input", (e) => {
-    currentSearch = e.target.value;
-    loadStudents(currentSearch);
-  });
-}
-
-document.getElementById("courseFilter")?.addEventListener("change", () => {
-  loadStudents(currentSearch);
-});
-
-document.getElementById("sortOption")?.addEventListener("change", () => {
-  loadStudents(currentSearch);
-});
-  
-  
-});
-
-async function renderAttendanceTable(date) {
-  const table = document.getElementById("attendanceTable");
-  if (!table) return;
-
-  const students = await getStudents();
-  const attendance = await getAttendance();
-
-  let html = `
-    <tr>
-      <th>Name</th>
-      <th>On Time</th>
-      <th>Late</th>
-      <th>Absent</th>
-    </tr>
-     `;
-
-  students.forEach(student => {
-    const record = attendance.find(
-      a => a.name === student.name && a.date === date
-    );
-
-html += `
-      <tr>
-        <td class="name-col">${student.name}</td>
-
-        <td>
-          <input type="radio" name="${student.name}" value="ontime"
-            ${record?.status === "ontime" ? "checked" : ""}>
-        </td>
-
-        <td>
-          <input type="radio" name="${student.name}" value="late"
-            ${record?.status === "late" ? "checked" : ""}>
-        </td>
-
-        <td>
-          <input type="radio" name="${student.name}" value="absent"
-            ${record?.status === "absent" ? "checked" : ""}>
-        </td>
-      </tr>    `;
-  });
-
-  table.innerHTML = html;
-}
-
-async function loadSelectedDate() {
-  const datePicker = document.getElementById("datePicker");
-  if (!datePicker) return;
-
-  const selectedDate = datePicker.value;
-
-  if (!selectedDate) return;
-
-  await renderAttendanceTable(selectedDate);
-}
-
-// migrate student (upgrade)
-
-async function migrateStudents() {
-  const students = await getStudents();
-
-  let changed = false;
-
-  const updated = students.map((s, index) => {
-    if (!s.id) {
-      s.id = "STD" + Date.now() + index;
-      changed = true;
-    }
-
-    if (!Array.isArray(s.courses)) {
-      s.courses = [];
-      changed = true;
-    }
-
-    if (!s.image) {
-      s.image = "";
-      changed = true;
-    }
-
-    return s;
-  });
-
-  if (!changed) {
-    console.log("No migration needed");
-    return;
-  }
-
-  console.log("Saving FULL migrated dataset...");
-
-  const res = await fetch("/api/students", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({
-      students: updated,
-      mode: "bulk"  
-    })
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    console.error(data);
-    alert("Migration failed");
-    return;
-  }
-
-  console.log("Migration SUCCESS");
-}
-
-
-/* =========================
-   STUDENT FORM LOGIC
-========================= */
-
-function initStudentForm() {
-  const studentNameInput = document.getElementById("studentName");
-  const studentIdInput = document.getElementById("studentId");
-  const courseInput = document.getElementById("studentCourseInput");
-  const addCourseBtn = document.getElementById("addCourseBtn");
-  const courseTags = document.getElementById("courseTags");
-  const imageInput = document.getElementById("studentImage");
-  const imagePreview = document.getElementById("imagePreview");
-  const addStudentBtn = document.getElementById("addStudentBtn");
-
-  if (!addStudentBtn) return; // Not on this page
-
-  /* Image Preview */
-  if (imageInput) {
-    imageInput.addEventListener("change", () => {
-      if (imageInput.files.length > 0) {
-        const reader = new FileReader();
-        reader.onload = () => (imagePreview.src = reader.result);
-        reader.readAsDataURL(imageInput.files[0]);
-      }
-    });
-  }
-
-  /* Add Course */
-  if (addCourseBtn) {
-    addCourseBtn.addEventListener("click", () => {
-      const course = courseInput.value.trim();
-      if (!course || studentCourses.includes(course)) return;
-
-      studentCourses.push(course);
-
-      const tag = document.createElement("span");
-      tag.className = "course-tag";
-      tag.textContent = course;
-
-      tag.onclick = () => {
-        studentCourses = studentCourses.filter(c => c !== course);
-        tag.remove();
-      };
-
-      courseTags.appendChild(tag);
-      courseInput.value = "";
-    });
-  }
-
-  /* Add Student */
-  addStudentBtn.addEventListener("click", async () => {
-   
-	  const name = studentNameInput.value.trim();
-	  
-const rawId = studentIdInput.value;
-const id = rawId.trim();
-
-// block spaces inside ID
-if (/\s/.test(id)) {
-  return alert("Student ID cannot contain spaces");
-}
-
-// allow only letters + numbers
-if (!/^[a-zA-Z0-9]+$/.test(id)) {
-  return alert("Student ID must contain only letters and numbers (no symbols)");
-}
-
-// optional: enforce length
-if (id.length < 2) {
-  return alert("Student ID is too short");
-}
-
-    if (!name || !id) return alert("Enter name and ID");
-    if (studentCourses.length === 0) return alert("Add at least one course");
-
-    let imageBase64 = "";
-
-if (imageInput && imageInput.files && imageInput.files.length > 0) {
-  const file = imageInput.files[0];
-	
-const MAX_SIZE = 1.5 * 1024 * 1024; // 1.5MB
-
-if (file.size > MAX_SIZE) {
-  return alert("Image must be under 1.5MB");
-}
-  imageBase64 = await compressImage(file);
-	
-}
-	  
-	  
-    const studentData = {
-      name,
-      id,
-      courses: [...studentCourses],
-      image: imageBase64,
-      status: "active"
-    };
-
-    try {
-      const res = await fetch("/api/students", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(studentData)
-      });
-
-const data = await res.json();
-
-if (!res.ok) {
-  return alert(data.message || "Failed to save student");
-}
-
-
-      alert("Student added!");
-
-      studentNameInput.value = "";
-      studentIdInput.value = "";
-      courseInput.value = "";
-      studentCourses = [];
-      courseTags.innerHTML = "";
-      imageInput.value = "";
-      imagePreview.src = "";
-
-      renderStudentCards();
+    // STUDENTS PAGE
+    if (document.getElementById("studentCards")) {
       loadStudents();
 
-    } catch (err) {
-      console.error(err);
-      alert("Error adding student");
-    }
-  });
-}
-
-async function deleteStudent(id) {
-  if (!confirm("Delete this student?")) return;
-
-  try {
-    const res = await fetch(`/api/students/${id}`, {
-      method: "DELETE",
-      credentials: "include"
-    });
-
-const text = await res.text();
-
-let data;
-try {
-  data = JSON.parse(text);
-} catch {
-  console.error("Server returned HTML:", text);
-  alert("Server error (check backend)");
-  return;
-}
-
-    if (!res.ok) {
-      return alert(data.message || "Delete failed");
-    }
-
-    alert("Student deleted");
-    loadStudents();
-
-  } catch (err) {
-    console.error(err);
-    alert("Error deleting student");
-  }
-}
-
-/* =========================
-   UTIL
-========================= */
-
-function compressImage(file) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const reader = new FileReader();
-
-    reader.onload = e => {
-      img.src = e.target.result;
-    };
-
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-
-      const MAX_WIDTH = 300;
-      const scale = MAX_WIDTH / img.width;
-
-      canvas.width = MAX_WIDTH;
-      canvas.height = img.height * scale;
-
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-      // compress quality (0.7 = good balance)
-      const compressed = canvas.toDataURL("image/jpeg", 0.7);
-
-      resolve(compressed);
-    };
-
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-
-searchInput.addEventListener("input", (e) => {
-  currentSearch = e.target.value;
-  loadStudents(currentSearch);
-});
-
-document.getElementById("courseFilter")?.addEventListener("change", () => {
-  loadStudents(currentSearch);
-});
-
-document.getElementById("sortOption")?.addEventListener("change", () => {
-  loadStudents(currentSearch);
-});
-
-studentIdInput.addEventListener("input", () => {
-  // remove spaces automatically
-  studentIdInput.value = studentIdInput.value.replace(/\s/g, "");
-});
-
-
-/* =========================
-   STUDENT CARDS
-========================= */
-
-async function renderStudentCards() {
-  const container = 
-		document.getElementById("studentCards");
-	
-  if (!container) return;
-
-  const students = await getStudents();
-
-  container.innerHTML = students.map((s, i) => `
-    <div class="student-card" 
-data-id="${s.id}"
-onclick="handleStudentClick(this)" style="flex-direction:column; align-items:flex-start; cursor:pointer;">
-      <strong>${s.name}</strong><br>
-      ID: ${s.id || "N/A"}
-  ${!s.courses.length ? "<small style='color:red'>No courses</small>" : ""}
-    </div>
-
-  `).join("");
-}
-
-function handleStudentClick(el) {
-  const id = el.getAttribute("data-id");
-  openStudentDetails(id);
-}
-
-
-/* =========================
-   STUDENT RECORD VIEW
-========================= */
-
-async function viewAllStudentRecords() {
-  const container = document.getElementById("studentRecord");
-  if (!container) return;
-
-  const students = await getStudents();
-  const attendance = await getAttendance();
-
-  let html = "";
-
-  students.forEach(student => {
-    let recordsHTML = "";
-
-    attendance.forEach(a => {
-      if (a.name === student.name) {
-        recordsHTML += `${a.date} - ${a.status}<br>`;
-      }
-    });
-
-    const imageBlock = student.image
-      ? `<img src="${student.image}" 
-              style="width:80px; height:100px; object-fit:cover; border-radius:12px;margin-right:10px;">`
-
-      : `<div style="width:80px; height:100px; object-fit:cover; border radius:12px;background:#ccc; display:flex;align-items:center;justify-content:center;margin-right:10px;">
-		  
-          ${getInitials(student.name)}
-        </div>`;
-
-    html += `
-    <div class="student-card" 
-     onclick="openStudentDetails('${s.id}')" 
-     style="flex-direction:column; align-items:flex-start; cursor:pointer;">
-        
-        <div style="display:flex; align-items:center; margin-bottom:8px;">
-          ${imageBlock}
-          <strong>${s.name}</strong>
-        </div>
-
-        <div style="font-size:14px;">
-          ${recordsHTML || "No records found"}
-        </div>
-
-      </div>
-    `;
-  });
-
-  container.innerHTML = html;
-}
-
-
-
-function markUnmarkedAsAbsent() {
-  const rows = document.querySelectorAll("#attendanceTable tr");
-
-  rows.forEach(row => {
-    const nameCell = row.querySelector("td:first-child");
-    if (!nameCell) return;
-
-    const name = nameCell.textContent.trim();
-
-    const selected = row.querySelector("input[type='radio']:checked");
-
-    if (!selected) {
-      const absentRadio = row.querySelector("input[value='absent']");
-      if (absentRadio) {
-        absentRadio.checked = true;
+      const input = document.getElementById("searchStudent");
+      if (input) {
+        input.addEventListener("input", (e) => {
+          loadStudents(e.target.value);
+        });
       }
     }
-  });
 
-  // 🔥 Force UI update immediately
-  const datePicker = document.getElementById("datePicker");
-  if (datePicker) {
-    renderAttendanceTable(datePicker.value);
-  }
+    // ATTENDANCE PAGE
+    if (document.getElementById("datePicker")) {
+      const datePicker = document.getElementById("datePicker");
 
-  alert("Unmarked students set to Absent");
-}
+      datePicker.value = todayString();
 
-async function clearMonthAttendance() {
-  const datePicker = document.getElementById("datePicker");
-  if (!datePicker || !datePicker.value) {
-    alert("Select a date first");
-    return;
-  }
+      await loadAttendanceForDate(datePicker.value);
 
-  const selectedMonth = datePicker.value.slice(0, 7);
-
-  if (!confirm(`Delete ALL attendance for ${selectedMonth}?`)) return;
-
-  let attendance = await getAttendance();
-
-  attendance = attendance.filter(a => !a.date.startsWith(selectedMonth));
-
-  // SAVE TO SERVER
-  await fetch("/api/attendance", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ attendance })
-  });
-
-  alert("Month cleared");
-
-  await renderAttendanceTable(datePicker.value);
-}
-
-
-async function fullResetAttendance() {
-  if (!confirm("Delete ALL attendance records?")) return;
-
-  // SAVE EMPTY ARRAY
-  await fetch("/api/attendance", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ attendance: [] })
-  });
-
-  alert("All attendance cleared");
-
-  const datePicker = document.getElementById("datePicker");
-  await renderAttendanceTable(datePicker.value || todayString());
-}
-
-
-async function loadStudents(search = "") {
-  const container =
-    document.getElementById("studentCards") ||
-    document.getElementById("studentList");
-
-  if (!container) return;
-
-  let students = await getStudents();
-  const attendance = await getAttendance();
-
-  const courseFilter = document.getElementById("courseFilter")?.value;
-  const sortOption = document.getElementById("sortOption")?.value;
-
-  // 🔍 SEARCH
-  students = students.filter(s =>
-    s.name.toLowerCase().includes(search.toLowerCase())
-  );
-
-  // 🎓 FILTER BY COURSE
-  if (courseFilter) {
-    students = students.filter(s =>
-      s.courses?.includes(courseFilter)
-    );
-  }
-
-  // 🏆 PERFORMANCE SCORE
-  const scores = {};
-  attendance.forEach(a => {
-    if (!scores[a.name]) scores[a.name] = 0;
-    if (a.status === "ontime") scores[a.name] += 2;
-    if (a.status === "late") scores[a.name] += 1;
-  });
-
-  // 🔃 SORT
-
-  const sort = sortOption || "az";
-
-  if (sortOption === "az") {
-    students.sort((a, b) => a.name.localeCompare(b.name));
-  }
-
-  if (sortOption === "za") {
-    students.sort((a, b) => b.name.localeCompare(a.name));
-  }
-
-  if (sortOption === "top") {
-    students.sort((a, b) =>
-      (scores[b.name] || 0) - (scores[a.name] || 0)
-    );
-  }
-
-  container.innerHTML = students.map((s) => `
-<div class="student-card" 
-     onclick="openStudentDetails('${s.id}')"
-     style="cursor:pointer;">
-
-  <div style="display:flex; align-items:center; gap:10px;">
-    
-    ${
-      s.image
-        ? `<img src="${s.image}" style="width:60px; height:80px; object-fit:cover; border-radius:10px;">`
-        : `<div style="width:60px; height:80px; object-fit:cover; border-radius:10px;background:#ccc;
-            display:flex;align-items:center;justify-content:center;">
-            ${getInitials(s.name)}
-          </div>`
+      datePicker.addEventListener("change", onDateChange);
     }
 
-    <div>
-      <strong>${s.name}</strong><br>
-     <strong>ID: ${s.id || "N/A"}</strong><br>
-    <strong><small>${(s.courses || []).join(", ")}</small></strong>
-    </div>
-
-  </div>
-
-  
-  <div style="display:flex;">
-    <button onclick="event.stopPropagation(); goToEdit('${s.id}')">✏️ Edit </button> 
-
-    <button onclick="event.stopPropagation(); deleteStudent('${s.id}')">
-      🗑️ Delete
-    </button>
-  </div>
-
-</div>
-  `).join("") || "<p>No students found</p>";
+    if (document.getElementById("editStudentForm")) {
+  loadEditStudent();
 }
 
-
-const studentContainer = document.getElementById("studentCards");
-if (studentContainer) {
-  loadStudents();
+    // SAVE BUTTON
+const saveBtn = document.getElementById("saveAttendanceBtn");
+if (saveBtn) {
+  saveBtn.addEventListener("click", submitAttendance);
 }
 
-async function goToEdit(id) {
-  const students = await getStudents();
-  const student = students.find(s => s.id === id);
-
-  if (!student){
-    alert("Student not found");
-    return;
-  
-  }
-
-  localStorage.setItem("editStudent", JSON.stringify(student));
-  window.location.href = "edit-student.html";
+// MARK ABSENT
+const markAbsentBtn = document.getElementById("markAbsentBtn");
+if (markAbsentBtn) {
+  markAbsentBtn.addEventListener("click", markUnmarkedAsAbsent);
 }
 
-
-async function loadEditStudent() {
-  const stored = JSON.parse(localStorage.getItem("editStudent"));
-  if (!stored) return;
-
-  const students = await getStudents();
-  const student = students.find(s => s.id === stored.id);
-
-  if (!student) {
-    alert("Student not found");
-    return;
-  }
-
-  document.getElementById("editName").value = student.name || "";
-  document.getElementById("editId").value = student.id || "";
-
-  editCourses = [...(student.courses || [])];
-
-  renderEditCourses();
-
-  // ✅ Bind button AFTER page loads
-  const btn = document.getElementById("addCourseBtnEdit");
-  if (btn) {
-    btn.addEventListener("click", addEditCourse);
-  }
-
-  // Optional: press ENTER to add
-  const input = document.getElementById("editCourseInput");
-  if (input) {
-    input.addEventListener("keypress", e => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        addEditCourse();
-      }
-    });
-  }
-
-const imageInput = document.getElementById("editImage");
-const preview = document.getElementById("editImagePreview");
-
-// show existing image
-if (preview) {
-  preview.src = student.image || "";
+// CLEAR MONTH
+const clearBtn = document.getElementById("clearMonthBtn");
+if (clearBtn) {
+  clearBtn.addEventListener("click", clearMonthAttendance);
 }
 
-// live preview when user selects new image
+// RESET
+const resetBtn = document.getElementById("resetAttendanceBtn");
+if (resetBtn) {
+  resetBtn.addEventListener("click", fullResetAttendance);
+}
+
+    // ADD STUDENT BUTTON
+    const btn = document.getElementById("addStudentBtn");
+    if (btn) {
+      btn.addEventListener("click", addStudent);
+    }
+
+    // COURSE BUTTON
+    const courseBtn = document.getElementById("addCourseBtn");
+    if (courseBtn) {
+      courseBtn.addEventListener("click", () => {
+        const input = document.getElementById("studentCourseInput");
+        const value = input.value.trim();
+        if (!value) return;
+
+        const tag = document.createElement("span");
+        tag.textContent = value;
+
+        document.getElementById("courseTags").appendChild(tag);
+        input.value = "";
+      });
+    }
+
+    const imageInput = document.getElementById("studentImage");
 if (imageInput) {
   imageInput.addEventListener("change", () => {
     const file = imageInput.files[0];
@@ -747,17 +173,466 @@ if (imageInput) {
 
     const reader = new FileReader();
     reader.onload = e => {
-      preview.src = e.target.result;
+      document.getElementById("imagePreview").src = e.target.result;
     };
     reader.readAsDataURL(file);
   });
 }
+
+    console.log("INIT DONE");
+
+  } catch (err) {
+    console.error("INIT ERROR:", err);
+  }
 }
+
+
+/* =========================
+   GLOBAL ACTIONS
+========================= */
+
+window.openStudentDetails = async function(id) {
+const res = await API.getStudents();
+  const students = res.data || res;
+  
+  const student = students.find(s => String(s.id) === String(id));
+
+  if (!student) {
+    alert("Student not found");
+    return;
+  }
+
+localStorage.setItem("selectedStudent", JSON.stringify(student));
+
+window.location.href = "student-details.html";
+};
+
+window.editStudent = async function(id) {
+  const res = await API.getStudents();
+  const students = res.data || res;
+
+  const student = students.find(s => String(s.id) === String(id));
+
+  if (!student) {
+    alert("Student not found");
+    return;
+  }
+
+  localStorage.setItem("editStudent", JSON.stringify(student));
+  window.location.href = "edit-student.html";
+};
+
+window.deleteStudent = async function(id) {
+  if (!confirm("Delete this student?")) return;
+
+  try {
+    await API.deleteStudent(id);
+    alert("Deleted successfully");
+    loadStudents();
+
+  } catch (err) {
+    console.error(err);
+    alert("Delete failed");
+  }
+};
+
+
+/* =========================
+   SETTINGS FUNCTION
+========================= */
+
+
+/* =========================
+   LOAD STUDENTS
+========================= */
+
+async function loadStudents(search = "") {
+  const container = document.getElementById("studentCards");
+  if (!container) return;
+
+  try {
+const res = await API.getStudents();
+const students = res.data || res;
+
+    let filtered = students;
+
+    if (search && search.trim() !== "") {
+      const q = search.toLowerCase();
+      filtered = students.filter(s =>
+        (s.name || "").toLowerCase().includes(q)
+      );
+    }
+
+    if (filtered.length === 0) {
+      container.innerHTML = "<p>No students found</p>";
+      return;
+    }
+
+    container.innerHTML = filtered.map(s => `
+      <div class="student-card" onclick="openStudentDetails('${s.id}')">
+
+        <div class="student-header">
+          <div class="student-img">
+            ${
+              s.image
+                ? `<img src="${s.image}" class="student-img">`
+                : getInitials(s.name)
+            }
+          </div>
+
+          <div>
+            <strong>${s.name}</strong><br>
+            <small>ID: ${s.id}</small><br>
+            <small>${(s.courses || []).join(", ")}</small>
+          </div>
+        </div>
+
+        <div>
+          <button class= "edit-btn"  onclick="event.stopPropagation(); editStudent('${s.id}')">Edit</button>
+          <button class= "delete-btn" onclick="event.stopPropagation(); deleteStudent('${s.id}')">Delete</button>
+        </div>
+
+      </div>
+    `).join("");
+
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = "<p style='color:red'>Failed to load students</p>";
+  }
+}
+
+/* =========================
+   ADD STUDENT
+========================= */
+
+async function addStudent() {
+  try {
+    const name = document.getElementById("studentName").value.trim();
+    const id = document.getElementById("studentId").value.trim();
+
+    if (!name || !id) {
+      alert("Student name and ID are required");
+      return;
+    }
+
+    if (!/^\d+$/.test(id)) {
+  alert("Student ID must contain numbers only");
+  return;
+}
+
+const res = await API.getStudents();
+const students = res.data || res;
+
+if (students.some(s => normalizeId(s.id) === normalizeId(id))) {
+  alert("Student ID already exists");
+  return;
+}
+
+    const courseTags = document.querySelectorAll("#courseTags span");
+    const courses = Array.from(courseTags).map(tag => tag.textContent);
+
+    
+    let image = "";
+
+    const MAX_IMAGE_SIZE_MB = 1;
+
+    const imageInput = document.getElementById("studentImage");
+
+    if (imageInput && imageInput.files.length > 0) {
+      const file = imageInput.files[0];
+
+      const sizeMB = file.size / (1024 * 1024);
+
+      if (sizeMB > MAX_IMAGE_SIZE_MB) {
+    alert(`Image too large. Max allowed is ${MAX_IMAGE_SIZE_MB}MB`);
+    return;
+  }
+      const reader = new FileReader();
+
+      image = await new Promise(resolve => {
+        reader.onload = e => resolve(e.target.result);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    await API.addStudent({ name, id, courses, image });
+
+    alert("Student Added Successfully");
+
+    // clear form
+    document.getElementById("studentName").value = "";
+    document.getElementById("studentId").value = "";
+    document.getElementById("courseTags").innerHTML = "";
+    document.getElementById("studentImage").value = "";
+    document.getElementById("imagePreview").src = "";
+loadStudents();
+
+  } catch (err) {
+    console.error(err);
+    alert("Failed to add student");
+  }
+}
+
+/* =========================
+   MARK AS ABSENT
+========================= */
+
+function markUnmarkedAsAbsent() {
+  API.getStudents().then(res => {
+    const students = res.data || res;
+    const settings = getSettings();
+
+    if (settings.autoAbsent) {
+      students.forEach(s => {
+        if (!attendanceData[s.id]) {
+          attendanceData[s.id] = {
+            status: "absent",
+            time: null
+          };
+        }
+      });
+    }
+
+    renderAttendanceTable(students);
+  });
+}
+
+
+/* =========================
+   ATTENDANCE
+========================= */
+
+async function loadAttendanceForDate(date) {
+  const res = await API.getStudents();
+  const students = res.data || res;
+
+  const attendance = await API.getAttendance();
+
+  attendanceData = {};
+
+  const day = attendance.find(a => a.date === date);
+
+  if (day) {
+    day.records.forEach(r => {
+      attendanceData[normalizeId(r.studentId)] = {
+        status: r.status,
+        time: r.time || null
+      };
+    });
+  }
+
+  renderAttendanceTable(students);
+}
+
+
+async function onDateChange() {
+  const date = document.getElementById("datePicker").value;
+  if (!date) return;
+
+  attendanceData = {};
+  await loadAttendanceForDate(date);
+}
+
+
+/* =========================
+   RENDER ATTENDANCE TABLE
+========================= */
+
+function formatTime(t) {
+  const settings = getSettings();
+
+  if (!t || t === "--:--") return "--:--";
+
+  if (settings.timeFormat === "24h") {
+    return t;
+  }
+
+  const [h, m] = t.split(":");
+  let hour = parseInt(h);
+  const ampm = hour >= 12 ? "PM" : "AM";
+
+  if (hour > 12) hour -= 12;
+  if (hour === 0) hour = 12;
+
+  return `${hour}:${m} ${ampm}`;
+}
+
+
+async function renderAttendanceTable(students) {
+  const container = document.getElementById("attendanceTable");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  students.forEach(s => {
+    const record = attendanceData[normalizeId(s.id)] || {};    
+    const status = record.status || "";
+    const time = record.time || "--:--";
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <h3>${s.name}</h3>
+
+      <div class="time-display ${status}">
+        ${formatTime(time)}
+      </div>
+
+      <div class="status-buttons">
+
+        <button class="btn-ontime ${status === "ontime" ? "active-status" : ""}"
+          onclick="setStatus('${s.id}','ontime',this)">
+          On Time
+        </button>
+
+        <button class="btn-late ${status === "late" ? "active-status" : ""}"
+          onclick="setStatus('${s.id}','late',this)">
+          Late
+        </button>
+
+        <button class="btn-absent ${status === "absent" ? "active-status" : ""}"
+          onclick="setStatus('${s.id}','absent',this)">
+          Absent
+        </button>
+
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+
+/* =========================
+   SET STATUS
+========================= */
+
+function setStatus(id, status, btn) {
+  id = normalizeId(id);
+
+  if (!attendanceData[id]) {
+    attendanceData[id] = { time: null };
+  }
+
+  attendanceData[id].status = status;
+
+  const parent = btn.parentElement;
+
+  parent.querySelectorAll("button").forEach(b => {
+    b.classList.remove("active-status");
+  });
+
+  btn.classList.add("active-status");
+
+  // update color on time display
+  const card = btn.closest(".card");
+  const timeDiv = card.querySelector(".time-display");
+
+  timeDiv.className = "time-display " + status;
+}
+
+/* =========================
+   EDIT STUDENT
+========================= */
+
+let editCourses = [];
+
+function loadEditStudent() {
+  const student = JSON.parse(localStorage.getItem("editStudent"));
+  if (!student) return;
+
+  document.getElementById("editName").value = student.name || "";
+  document.getElementById("editId").value = student.id || "";
+
+  // Load courses
+  editCourses = [...(student.courses || [])];
+  renderEditCourses();
+
+  // Image preview
+  const preview = document.getElementById("editImagePreview");
+  if (preview) {
+    preview.src = student.image || "";
+  }
+
+  // Realtime image preview
+  const imageInput = document.getElementById("editImage");
+  if (imageInput) {
+    imageInput.addEventListener("change", () => {
+      const file = imageInput.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        preview.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Add course button
+  const btn = document.getElementById("addCourseBtnEdit");
+  if (btn) {
+    btn.addEventListener("click", addEditCourse);
+  }
+}
+
+/* =========================
+   SAVE EDIT
+========================= */
+
+async function saveEdit() {
+  const student = JSON.parse(localStorage.getItem("editStudent"));
+  if (!student) return alert("No student loaded");
+
+  const name = document.getElementById("editName").value.trim();
+  const id = document.getElementById("editId").value.trim();
+
+  if (!name || !id) return alert("Student Name and ID required");
+
+  if (!/^\d+$/.test(id)) {
+  alert("Student ID must contain numbers only");
+  return;
+}
+
+  let image = student.image;
+
+  const MAX_IMAGE_SIZE_MB = 1;
+  const imageInput = document.getElementById("editImage");
+
+  if (imageInput && imageInput.files.length > 0) {
+
+    const file = imageInput.files[0];
+    const sizeMB = file.size / (1024 * 1024);
+    const reader = new FileReader();
+
+    if (sizeMB > MAX_IMAGE_SIZE_MB) {
+    alert(`Image too large. Max allowed is ${MAX_IMAGE_SIZE_MB}MB`);
+    return;
+  }
+    image = await new Promise(resolve => {
+      reader.onload = e => resolve(e.target.result);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  await API.updateStudent(student.id, {
+    name,
+    id,
+    courses: editCourses,
+    image
+  });
+
+  alert("Student updated");
+  window.location.href = "registered-students.html";
+}
+
+/* =========================
+   UPDATE COURSE IN EDIT PAGE
+========================= */
 
 function addEditCourse() {
   const input = document.getElementById("editCourseInput");
-  if (!input) return;
-
   const value = input.value.trim();
 
   if (!value) return;
@@ -775,18 +650,9 @@ function addEditCourse() {
 
 function renderEditCourses() {
   const container = document.getElementById("editCourses");
-  if (!container) return;
 
   container.innerHTML = editCourses.map(c => `
-    <span style="
-      display:inline-block;
-      margin:5px;
-      padding:5px 10px;
-      background:#667eea;
-      color:white;
-      border-radius:6px;
-      cursor:pointer;
-    " onclick="removeEditCourse('${c}')">
+    <span onclick="removeEditCourse('${c}')">
       ${c} ❌
     </span>
   `).join("");
@@ -797,226 +663,485 @@ function removeEditCourse(course) {
   renderEditCourses();
 }
 
-
-async function saveEdit() {
-  try {
-    const student = JSON.parse(localStorage.getItem("editStudent"));
-    if (!student) return alert("No student loaded");
-
-    const name = document.getElementById("editName").value.trim();
-const newId = document.getElementById("editId").value.trim();
-
-if (/\s/.test(newId)) {
-  return alert("Student ID cannot contain spaces");
+function goBack() {
+  window.location.href = "registered-students.html";
 }
 
-if (!/^[a-zA-Z0-9]+$/.test(newId)) {
-  return alert("Student ID must contain only letters and numbers");
-}
-
-    if (!name || !newId) {
-      return alert("Name and ID required");
-    }
-
-    const imageInput = document.getElementById("editImage");
-
-    let image = student.image;
-
-if (imageInput && imageInput.files.length > 0) {
-  const file = imageInput.files[0];
-
-  const MAX_SIZE = 1.5 * 1024 * 1024;
-
-  if (file.size > MAX_SIZE) {
-    return alert("Image must be under 1.5MB");
-  }
-
-  image = await compressImage(file);
-}
-
-
-    console.log("SENDING DATA:", {
-      name,
-      newId,
-      courses: editCourses
-    });
-
-    const res = await fetch(`/api/students/${student.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        name,
-        newId,
-        courses: editCourses,
-        image
-      })
-    });
-
-    const text = await res.text();
-    console.log("SERVER RAW RESPONSE:", text);
-
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      alert("Server returned invalid JSON");
-      return;
-    }
-
-    if (!res.ok) {
-      alert(data.message || "Update failed");
-      return;
-    }
-
-    alert("Student updated successfully");
-    window.location.href = "students.html";
-
-  } catch (err) {
-    console.error("SAVE ERROR:", err);
-    alert("Error saving student (check console)");
-  }
-}
-
-async function editStudent(id) {
-  const students = await getStudents();
-  const student = students.find(s => s.id === id);
-
-  if (!student) return;
-
-  const newName = prompt("Edit name:", student.name);
-  if (!newName) return;
-
-  const newId = prompt("Edit ID:", student.id);
-  if (!newId) return;
-
-  const newCourses = prompt(
-    "Edit courses (comma separated):",
-    (student.courses || []).join(",")
-  );
-
-  const coursesArray = newCourses
-    ? newCourses.split(",").map(c => c.trim())
-    : [];
-
-  try {
-    const res = await fetch(`/api/students/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        name: newName,
-        newId: newId,
-        courses: coursesArray,
-        image: student.image
-      })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      return alert(data.message || "Update failed");
-    }
-
-    alert("Student updated");
-
-    loadStudents();
-
-  } catch (err) {
-    console.error(err);
-const text = await res.text();
-console.log("Server response:", text);
-
-let data;
-try {
-  data = JSON.parse(text);
-} catch {
-  return alert("Invalid server response");
-}
-
-if (!res.ok) {
-  return alert(data.message || "Update failed");
-}  }
-}
-
-
-function getInitials(name) {
-  if (!name) return "??";
-
-  return name
-    .split(" ")
-    .map(n => n[0])
-    .join("")
-    .toUpperCase();
-}
-
+/* =========================
+   LOAD DETAILS (CLEAN)
+========================= */
 function loadStudentDetails() {
-
-  const container = document.getElementById("studentProfile");
-
-  //  STOP if not on student-details page
-  if (!container) return;
-
   const student = JSON.parse(localStorage.getItem("selectedStudent"));
 
+  const profileBar = document.getElementById("profileBar");
+  const coursesContainer = document.getElementById("coursesContainer");
+
+  if (!profileBar) return;
+
   if (!student) {
-    container.innerHTML = "<h2>No student selected</h2>";
+    profileBar.innerHTML = "<p style='color:red'>Student not found</p>";
     return;
   }
 
-  let imageBlock = "";
+  /* PROFILE BAR*/
+  profileBar.innerHTML = `
+    <div class="profile-bar">
 
-  if (student.image && student.image.trim() !== "") {
-    imageBlock = `<img src="${student.image || 'default.png'}" class="profile-img">`;
-  } else {
-    imageBlock = `
-      <div class="profile-initials">
-        ${getInitials(student.name)}
-      </div>
-    `;
-  }
-  container.innerHTML = `
-    <div class="profile-card">
+      <img 
+        src="${student.image || ''}" 
+        class="profile-img"
+        onerror="this.src='https://via.placeholder.com/90'"
+      />
 
-      ${imageBlock}
-
-      <h2>${student.name}</h2>
-
-      <p><strong>ID:</strong> ${student.id || "N/A"}</p>
-
-      <p><strong>Status:</strong> ${student.status || "active"}</p>
-
-      <div class="course-section">
-        <h3>Courses</h3>
-        ${
-          student.courses && student.courses.length
-            ? student.courses.map(c => `<span class="course-tag">${c}</span>`).join("")
-            : "No courses"
-        }
-      </div>
-
-    </div>
+      <div class="profile-info">
+        <h3>${student.name}</h3>
+        <p><strong>ID:</strong> ${student.id}</p>
+        <p><strong>Courses:</strong> ${(student.courses || []).join(", ")}</p>      </div>
+     </div>
   `;
+
+  /* COURSES */
+if (coursesContainer) {
+    if (!student.courses || student.courses.length === 0) {
+      coursesContainer.innerHTML = `<p class="empty">No courses assigned</p>`;
+    }  
+  }
+
+}
+
+/* INIT */
+document.addEventListener("DOMContentLoaded", loadStudentDetails);
+
+
+
+/* =========================
+   SAVE ATTENDANCE
+========================= */
+
+async function submitAttendance() {
+  const date = document.getElementById("datePicker").value;
+  if (!date) return alert("Select date first");
+
+const res = await API.getStudents();
+const students = res.data || res;
+
+let attendance = await API.getAttendance();
+
+  // Fill unmarked as absent
+const settings = getSettings();
+
+if (settings.autoAbsent) {
+  students.forEach(s => {
+    const id = normalizeId(s.id);
+
+    if (!attendanceData[id]) {
+      attendanceData[id] = {
+        status: "absent",
+        time: null
+      };
+    }
+  });
+}
+
+  // Remove existing date
+  attendance = attendance.filter(a => a.date !== date);
+
+  // Add new & save attendance
+  attendance.push({
+    date,
+    records: students.map(s => {
+      const id = normalizeId(s.id);
+
+      return{
+      studentId: id,
+      status: attendanceData[id]?.status,
+      time: attendanceData[id]?.time
+    };
+  })
+})
+
+  await API.saveAttendance(attendance);
+
+  alert("Attendance saved successfully");
 }
 
 
-async function openStudentDetails(id) {
-  const students = await getStudents();
+/* =========================
+   CLEAR MONTH
+========================= */
 
-  const cleanId = String(id).trim();
+async function clearMonthAttendance() {
+  if (!confirm("Clear this month's attendance?")) return;
 
-  console.log("CLICKED ID:", `"${cleanId}"`);
-  console.log("ALL IDS:", students.map(s => `"${String(s.id).trim()}"`));
+  const date = document.getElementById("datePicker").value;
+  if (!date) return;
 
-  const student = students.find(
-    s => String(s.id).trim() === cleanId
-  );
+  const month = date.slice(0, 7);
 
-  if (!student) {
-    alert("Student not found");
+  let attendance = await API.getAttendance();
+
+  attendance = attendance.filter(day => !day.date.startsWith(month));
+
+  await API.saveAttendance(attendance);
+
+  alert("Month cleared");
+
+  await loadAttendanceForDate(date);
+}
+
+
+/* =========================
+   FULL RESET
+========================= */
+
+async function fullResetAttendance() {
+  if (!confirm("Delete ALL attendance?")) return;
+
+await API.saveAttendance([]);
+
+  alert("All attendance deleted");
+
+  const date = document.getElementById("datePicker").value;
+  await loadAttendanceForDate(date);
+}
+
+
+/* =========================
+   FILE HANDLER
+========================= */
+
+async function handleFile() {
+  const input = document.getElementById("file");
+  const file = input.files[0];
+
+  if (!file) {
+    alert("Select a file first");
     return;
   }
 
-  localStorage.setItem("selectedStudent", JSON.stringify(student));
-  window.location.href = "student-details.html";
+  // 🔥 CLEAR OLD DATA
+  window.previewData = null;
+  document.getElementById("previewContainer").innerHTML = "";
+
+  const data = await file.arrayBuffer();
+
+  const workbook = XLSX.read(data, { type: "array" });
+
+  const sheetName = workbook.SheetNames[0];
+  const sheet = workbook.Sheets[sheetName];
+
+  const rows = XLSX.utils.sheet_to_json(sheet);
+
+  console.log("RAW ROWS:", rows);
+
+  processRows(rows);
+}
+
+
+/* =========================
+   PROCESSOR FOR ROWS
+========================= */
+
+function processRows(rows) {
+  const grouped = {};
+  const seen = {};
+
+  if (!rows || rows.length < 2) {
+    console.error("Invalid file");
+    return;
+  }
+
+  /* =========================
+     1. FIND HEADER ROW (DATES)
+  ========================= */
+  const headerIndex = rows.findIndex(row =>
+    Object.values(row).some(v => typeof v === "number" && v >= 1 && v <= 31)
+  );
+
+  if (headerIndex === -1) {
+    console.error("No header row found");
+    return;
+  }
+
+  const headerRow = rows[headerIndex];
+
+  /* =========================
+     2. BUILD DAY MAP
+  ========================= */
+  const dayMap = {};
+
+  Object.entries(headerRow).forEach(([key, value]) => {
+    if (typeof value === "number" && value >= 1 && value <= 31) {
+      dayMap[key] = value;
+    }
+  });
+
+  console.log("DAY MAP:", dayMap);
+
+  /* =========================
+     3. DETECT YEAR + MONTH FROM FILE NAME (AUTO)
+  ========================= */
+let today = new Date();
+let year = today.getFullYear();
+let month = today.getMonth() + 1;
+
+if (Object.values(dayMap).some(d => d <= 3)) {
+  const prev = new Date(today.getFullYear(), today.getMonth() - 1);
+  month = prev.getMonth() + 1;
+  year = prev.getFullYear();
+}
+
+  // Try to extract from first column header text
+  const firstRow = rows[0];
+  const titleText = Object.values(firstRow).join(" ");
+
+  const match = titleText.match(/(\d{4})-(\d{2})/);
+  if (match) {
+    year = parseInt(match[1]);
+    month = parseInt(match[2]);
+  }
+
+  console.log("Detected:", { year, month });
+
+  /* =========================
+     4. PROCESS DATA ROWS
+  ========================= */
+  const dataRows = rows.slice(headerIndex + 1);
+
+  dataRows.forEach(row => {
+    // 🔥 Find ID dynamically (first non-empty value)
+    let rawId = null;
+
+    for (let key of Object.keys(row)) {
+      if (row[key]) {
+        rawId = String(row[key]).trim();
+        break;
+      }
+    }
+
+    if (!rawId) return;
+    const id = normalizeId(rawId);
+
+    Object.keys(dayMap).forEach(colKey => {
+      let time = row[colKey];
+
+      if (!time) return;
+
+      // Handle Excel numeric time
+      if (typeof time === "number") {
+        time = XLSX.SSF.format("hh:mm", time);
+      }
+
+      if (typeof time !== "string") return;
+
+      time = time.trim();
+
+      if (!/^\d{1,2}:\d{2}$/.test(time)) return;
+
+      const day = dayMap[colKey];
+
+      const maxDays = new Date(year, month, 0).getDate();
+      if (day < 1 || day > maxDays) return;
+
+      const date = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+      const uniqueKey = id + "_" + date;
+      if (seen[uniqueKey]) return;
+
+      seen[uniqueKey] = true;
+
+      if (!grouped[date]) grouped[date] = {};
+      grouped[date][id] = time;
+    });
+  });
+
+  console.log("GROUPED:", grouped);
+
+  buildPreview(grouped);
+}
+
+
+/* =================================
+   MATCHING STUDENT WITH TIME RULE
+====================================*/
+
+async function buildPreview(grouped) {
+  const res = await API.getStudents();
+  const students = res.data || res;
+
+  const studentMap = {};
+  students.forEach(s => {
+    studentMap[normalizeId(s.id)] = s;
+  });
+
+const settings = getSettings();
+const LATE_TIME = settings.lateTime;
+
+  const previewData = [];
+
+  Object.keys(grouped).forEach(date => {
+    const records = [];
+
+    const dayData = grouped[date];
+
+students.forEach(s => {
+  const id = normalizeId(s.id);
+
+  const time = dayData[id] || null;
+
+  let status = "absent";
+
+  if (time) {
+    if (settings.compareMode === "strict") {
+      status = time > LATE_TIME ? "late" : "ontime";
+    }
+  }
+
+  records.push({
+    studentId: id,
+    name: s.name,
+    time: time || "--:--",
+    status,
+    matched: true
+  });
+});
+
+
+    // detect unmatched IDs
+    Object.keys(dayData).forEach(rawId => {
+      const id = normalizeId(rawId);
+
+      if (!studentMap[id]) {
+        records.push({
+          studentId: id,
+          name: "Unknown",
+          time: dayData[id],
+          status: dayData[id] > LATE_TIME ? "late" : "ontime",
+          matched: false
+        });
+      }
+    });
+
+    previewData.push({ date, records });
+  });
+
+  console.log("PREVIEW DATA:", previewData);
+
+  renderPreview(previewData);
+}
+
+/* =========================
+  ATTENDANCE PREVIEW FILTER
+============================ */
+
+function applyPreviewFilter() {
+  if (!window.previewData) return;
+
+  const start = document.getElementById("previewStart").value;
+  const end = document.getElementById("previewEnd").value;
+
+  if (!start || !end) {
+    renderPreview(window.previewData);
+    return;
+  }
+
+  const filtered = window.previewData.filter(day => {
+    return day.date >= start && day.date <= end;
+  });
+
+  renderPreview(filtered);
+}
+
+
+/* =========================
+   ATTENDANCE PREVIEW
+========================= */
+
+function renderPreview(data) {
+  const container = document.getElementById("previewContainer");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  data.forEach(day => {
+    const section = document.createElement("div");
+
+    section.innerHTML = `
+      <h3>${formatDate(day.date)} (${getDayName(day.date)})</h3>
+      ${day.records.map(r => `
+  <div class="preview-row ${r.matched ? "" : "unmatched"}">
+    <span>${r.studentId}</span>
+    <span>${r.name}</span>
+    <span>${r.time}</span>
+    <span>${r.status}</span>
+  </div>
+`).join("")}
+    `;
+
+    container.appendChild(section);
+  });
+
+  window.previewData = data; // store globally for confirm
+}
+
+
+/* =========================
+   CONFIRM IMPORT
+========================= */
+
+async function confirmImport() {
+  if (!window.previewData) return;
+
+  let attendance = await API.getAttendance();
+
+window.previewData.forEach(day => {
+  let existing = attendance.find(a => a.date === day.date);
+
+  const newRecords = day.records
+    .filter(r => r.matched)
+    .map(r => ({
+      studentId: r.studentId,
+      status: r.status,
+      time: r.time
+    }));
+
+  if (!existing) {
+    attendance.push({
+      date: day.date,
+      records: newRecords
+    });
+  } else {
+    // 🔥 merge per student (overwrite only those present)
+    newRecords.forEach(newRec => {
+      const index = existing.records.findIndex(
+        r => r.studentId === newRec.studentId
+      );
+
+      if (index >= 0) {
+        existing.records[index] = newRec; // overwrite
+      } else {
+        existing.records.push(newRec);
+      }
+    });
+  }
+});
+  await API.saveAttendance(attendance);
+
+await loadAttendanceForDate(
+  document.getElementById("datePicker").value
+);
+
+  alert("Import successful");
+}
+
+
+
+
+/* =========================
+   CANCEL IMPORT
+========================= */
+
+function cancelImport() {
+  document.getElementById("previewContainer").innerHTML = "";
+  window.previewData = null;
 }

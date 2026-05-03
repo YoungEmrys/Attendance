@@ -4,8 +4,8 @@ window.location.href="attendance.html";
 
 async function renderPerformance(){
 
-const students = await getStudents();
-const attendance = await getAttendance();
+const students = await API.getStudents();
+const attendance = await API.getAttendance();
 	
 	if(!Array.isArray(students) || !Array.isArray(attendance)){
 console.error("Invalid data", students, attendance);
@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", renderPerformance);
 
 	async function checkAlerts(){
 
-const attendance=await getAttendance();
+const attendance= await API.getAttendance();
 		
 		if(!Array.isArray(attendance)){
 console.error("Invalid attendance data:", attendance);
