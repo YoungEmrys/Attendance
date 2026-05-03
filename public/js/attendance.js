@@ -18,7 +18,7 @@ function getSettings() {
     compareMode: "strict",
     autoAbsent: true,
     displayMode: "friendly",
-    timeFormat: "12h"
+    timeFormat: "12h",
     idPadding: 3,
   };
 
