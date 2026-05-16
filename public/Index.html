@@ -12,8 +12,8 @@
      
  <script src="js/api.js"></script>
 	<script src="js/auth.js"></script>	
-	<script src="js/storage.js"></script>
-	<script src="js/attendance.js"></script>
+	<script src="js/edit-student.js"></script>
+  <script src="js/attendance.js"></script>
 
 	
 
@@ -22,11 +22,11 @@
       font-family: Arial, sans-serif;
       background: linear-gradient(135deg, #667eea, #764ba2);
       margin: 0;
-      padding: 3% 5%;
+      padding: 3% 3%;
     }
 
 .container {
-  max-width: 1100px;
+  max-width: 1130px;
   margin: auto;
   background: rgba(255,255,255,0.9);
   padding: 25px;
@@ -40,16 +40,6 @@
       padding: 6px;
       margin: 5px 0;
     }
-
-    button {
-      background: #2196F3;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
 
     table {
       width: 100%;
@@ -80,11 +70,11 @@
   justify-content:center;
   align-items:center;
   flex-wrap:wrap;
-  gap:14px;
+  gap:5px;
   padding:1.5% 3%;
   background:rgba(255,255,255,0.25);
   backdrop-filter:blur (12px);
-  webkit-backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
   border-radius:20px;
   border:1px solid rgba(255,255,255,0.4);
   box-shadow:0 8px 20px rgba(0,0,0,0.15);
@@ -164,21 +154,75 @@
   border-radius:8px;
   backdrop-filter:blur(5px);
   font-weight:bold;
-  font-size:12px;
+  font-size:16px;
   cursor:pointer;
-  transition:all 0.2s ease;
-
+  transition:all 0.2s ease-in-out;
 }
 
 .tm button:hover{
-  transform: translateY(-3px);
+  transform: translateY(-2px);
+  box-shadow: 0 7px 25px -4px rgba(0,0,0,0.2);
 }
 
-.logt{
- 
-  color: #f0f0f0;
-    background:#667eea;
+.logt{ 
+  color: #f0f0f0;    
+  background:#667eea;
+}
 
+.settings {
+  float: right; 
+  background-color: transparent; 
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: none;
+  border-radius: 50px;
+  text-align: center;
+  transition:all 0.3s ease-in-out;
+}
+
+.settings:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 10px 10px -4px rgba(0,0,0,0.3);
+  background-color: #f0f0f0;
+}
+
+/* GRID WRAPPER */
+#settingsCards {
+  display: grid;
+  gap: 18px;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #eee;
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+.card button{
+  transition: 0.3s ease-in-out;
+  border: none;
+  background-color: #8195ed;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  color: white;
+
+
+}
+
+.card button:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 10px 10px -4px rgba(0,0,0,0.3);
+}
+
+.card h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 18px;
+  color: #333;
 }
 
    </style> 
@@ -190,21 +234,24 @@
 <div class="container">
 
   <div class="logo">
-    <a href="index.html"><img src="Upload/p2f logo.png" height="50" alt="Company Logo"/></a>
+    <a href="index.html"><img src="Upload/p2f logo.png" loading="lazy" height="50" alt="Company Logo"/></a>
   </div>
   
 <div class="logo">
     <div class="user-profile"><span id="currentUser"></span></div>
 </div>
+<button class="settings" onclick="window.location.href='holidays.html'">
+  📅
+</button>
   
-<button style="float: right; background-color: transparent; font-size: large;" onclick="window.location.href = 'settings.html'">⚙️</button>
+<button class="settings" onclick="window.location.href = 'settings.html'">
+  ⚙️
+</button>
 
 <div class="tm">
 <button onclick="logout()"  class="logt">Logout</button>
-  <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+  <button onclick="toggleMenu()">☰</button>
 </div>
-
-
 <br><br><br><br>
 
 <!-- Navigation-->
@@ -240,30 +287,36 @@ onclick="window.location.href='registered-students.html'">
 
 <!-- Attendance Report-->
 	
-  <h1>Monthly Attendance Dashboard</h1> 
+  <h1>Attendance Dashboard</h1>
 
+  <div id="settingsCards">
 
-  <h2>Select Month</h2>
+<div class="card">  
+  <h2 >Select Month</h2>
   <input type="month" id="monthPicker" onchange="renderDashboard()">
-	
-<div id="monthlyTotal" style="margin-top:10px; font-weight:bold;"></div>
+</div>
 
-  <div id="topStudent"></div>
+<div class="card" id="monthlyTotal" style="margin-top:10px; font-weight:bold;"></div>
 
+  <div class="card" id="topStudent"></div>
+
+<div class="card">  	
+  <h2>Weekly Summary</h2>
+<div id="weeklySummary"></div>
+</div>
+
+ <div class="card">
   <h2>Monthly Summary</h2>
   <div id="summaryTable"></div>
-	
-	<h2>Weekly Summary</h2>
-<div id="weeklySummary"></div>
+</div> 
 
-   <input type="date" id="datePicker">
-	<button onclick="exportMonthlyReport()">Save Report</button>
+   <div class="card">
+     <h2>Generate Report</h2>
+    <button class="save" onclick="exportMonthlyReport()">Save Report</button>
+</div>
 
-	<h3>Data Backup</h3>
 
-<button onclick="backupData()">Backup Data</button>
 
-  <input type="file" id="importFile" accept=".json" onchange="importBackup(event)">
 
 </div>
 

@@ -5,11 +5,14 @@
 <title>Student Registry</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-	
+
+<script src="js/core/settings.js"></script>
+<script src="js/core/utils.js"></script>
 <script src="js/api.js"></script>
-	<script src="js/storage.js"></script>
-	<script src="js/auth.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/students.js"></script>
+<script src="js/edit-student.js"></script>
+<script src="js/attendance.js"></script>
 
 <style>
 
@@ -82,24 +85,6 @@ input, button {
   box-shadow:0 10px 20px rgba(0,0,0,0.25);
 }
 
-.logt{
-  padding:7px 12px;
-  margin: 0 5px;
-  border:none;
-  border-radius:12px;
-  background:#667eea;
-  backdrop-filter:blur(5px);
-  font-weight:bold;
-  font-size:14px;
-  cursor:pointer;
-    color:white;
-
-}
-
-.logt:hover{
-  background:#2f50e4;
-}
-
 /* ACTIVE PAGE */
 
 .navbar button.active{
@@ -107,19 +92,6 @@ input, button {
   color:white;
 }
 
-/* MOBILE MENU */
-
-.menu-toggle{
-  display:block;
-  font-size:20px;
-  padding:8px 14px;
-  border-radius:10px;
-  background:rgba(255, 255, 255, 0.6);
-  border:none;
-  cursor:pointer;
-  margin-bottom:10px;
-  color: #667eea;
-}
 
 /* MOBILE */
 
@@ -269,6 +241,13 @@ input, button {
 .student-card:hover {
   transform: translateY(-3px);
 }
+  
+  .student-card.inactive-card {
+  opacity: 0.55;
+  filter: grayscale(0.35);
+  border: 2px dashed #999;
+  background: #f3f3f3;
+}
 
 .student-header {
   display: flex;
@@ -329,6 +308,7 @@ input, button {
   border-radius:6px;
   padding: 3px 5%;
   cursor: pointer;
+  
 
 
 }
@@ -349,7 +329,65 @@ input, button {
 
 }
 
+  .tm button{
+  float: right;
+  background-color:rgb(255, 255, 255);
+  color: #5f7af0; 
+  padding:6px 12px;
+  margin: 10px 0 0 8px;
+  border:none;
+  border-radius:8px;
+  backdrop-filter:blur(5px);
+  font-weight:bold;
+  font-size:16px;
+  cursor:pointer;
+  transition:all 0.2s ease;
+}
 
+.tm button:hover{
+  transform: translateY(-3px);
+  background-color:rgb(255, 255, 255);
+}
+
+
+.settings {
+  float: right; 
+  background-color: transparent; 
+  font-size: 20px;
+  border: none;
+}
+
+.rs{
+  background: linear-gradient(1478deg, #57A5D8, #2968B4);
+  padding:10px; 
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.rs:hover{
+  transform: translateY(-2);
+  background-color: #2968B4;
+}
+
+.status-btn {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  margin-left: 5px;
+  font-size: 12px;
+}
+
+.status-btn.active {
+  background: #ef4444;
+  color: white;
+}
+
+.status-btn.inactive {
+  background: #22c55e;
+  color: white;
+}
 
 
 </style>
@@ -359,15 +397,15 @@ input, button {
 <body onload="checkAuth()">
 
 <div class="container">
-	
-	<div class = "header">
-<button class="menu-toggle" onclick="toggleMenu()">☰</button>
-	<div id="userProfile" style="margin-left:auto; font-weight:bold; float: right">
-	
 
-  </div>
-  <button onclick="logout()" class="logt">Logout</button>
-	</div>
+<button class="settings" onclick="window.location.href = 'settings.html'">⚙️</button>
+    <div class="tm">	
+
+    <button class="logt" onclick="logout()">Logout</button>
+<button style="float: left;" onclick="toggleMenu()">☰</button>
+	<div id="userProfile" style="float: right; margin-top: 14px;font-weight: bold;" ></div>
+</div><br><br><br>
+	
 
 
 <div class="navbar" id="navbar">
@@ -405,7 +443,7 @@ input, button {
   <option value="top">Top Performance</option>
 </select>
 	
-	<button class="logt" style=" background: linear-gradient(135deg, #57A5D8, #2968B4); padding:10px; border-radius: 8px"  onclick="window.location.href='students.html'">
+	<button class="rs"  onclick="window.location.href='students.html'">
 📝 Register Students
 </button>
 	
@@ -415,7 +453,6 @@ input, button {
 </div>  
 
 
-<script src="js/attendance.js"></script>
 
 </body>
 </html>

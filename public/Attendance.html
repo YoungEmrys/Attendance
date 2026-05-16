@@ -8,11 +8,15 @@
 	<meta http-equiv="Cache-Control" content="no-store">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0"> 
-
-   <script src="js/api.js"></script>
-   <script src="js/storage.js"></script>
+  
+  <script src="js/holidays.js"></script>
+  <script src="js/edit-student.js"></script>
+  <script src="js/core/settings.js"></script>
+  <script src="js/core/utils.js"></script>
+  <script src="js/api.js"></script>
 	<script src="js/auth.js"></script>	
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="/js/xlsx.full.min.js"></script>
+	<script src="js/importer.js"></script>	
 
 		
   <style>
@@ -159,19 +163,7 @@ input[type="radio"] {
   color:white;
 }
 
-/* MOBILE MENU */
 
-.menu-toggle{
-  display:block;
-  font-size:20px;
-  padding:8px 14px;
-  border-radius:10px;
-  background:rgba(255, 255, 255, 0.6);
-  border:none;
-  cursor:pointer;
-  margin-bottom:10px;
-  color: #667eea;
-}
 
 /* MOBILE */
 
@@ -189,7 +181,7 @@ input[type="radio"] {
 
   .navbar button{
     width:100%;
-    text-align:left;         /* text aligns left */
+    text-align:left;        
   }
 }
 
@@ -406,9 +398,8 @@ input[type="radio"] {
   color: red;
 }
 
-/* =========================
-   FILE UPLOAD
-========================= */
+<!--FILE UPLOAD--> 
+
 #file{
   display: none;
 }
@@ -485,9 +476,7 @@ input[type="radio"] {
 }
 
 
-/* =========================
-   PREVIEW CONTAINER
-========================= */
+/* PREVIEW CONTAINER*/
 #previewContainer {
   background: #fff;
   border-radius: 10px;
@@ -543,7 +532,8 @@ input[type="radio"] {
 }
 
 .prv button:hover {
-      transform: translateY(-2px);
+  transition: 0.3s ease-in-out;
+      transform: translateY(-3px);
 }
 
 
@@ -591,20 +581,48 @@ color:black;
 
 }
 
+  .tm button{
+  float: right;
+  background-color:rgb(255, 255, 255);
+  color: #5f7af0; 
+  padding:6px 12px;
+  margin: 10px 0 0 8px;
+  border:none;
+  border-radius:8px;
+  backdrop-filter:blur(5px);
+  font-weight:bold;
+  font-size:16px;
+  cursor:pointer;
+  transition:all 0.2s ease;
+}
+
+.tm button:hover{
+  transform: translateY(-3px);
+  background-color:rgb(255, 255, 255);
+}
+
+.settings {
+  float: right; 
+  background-color: transparent; 
+  font-size: 20px;
+}
+
+
 </style>
+
 </head>
 
-<body onload= "checkAuth();">
-	
+<body onload="checkAuth()">
+
 <div class="container">
 
-	<div class = "header">
-<button class="menu-toggle" onclick="toggleMenu()">☰</button>
-	<div id="userProfile" style="margin-left:auto; font-weight:bold; float: right">
-</div>
-	<button onclick="logout()" style="float: right;"  class="logt">Logout</button>
+	<button class="settings" onclick="window.location.href = 'settings.html'">⚙️</button>
 
-	</div>
+    <div class="tm">
+    <button class="logt" onclick="logout()" class="logt">Logout</button>
+<button style="float: left;" onclick="toggleMenu()">☰</button>
+	<div id="userProfile" style="float: right; margin-top: 14px;font-weight: bold;" ></div>
+</div><br><br><br>
     
 		<div class="navbar" id="navbar">
 

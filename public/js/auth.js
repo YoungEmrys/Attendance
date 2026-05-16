@@ -1,3 +1,9 @@
+window.addEventListener("error", (e) => {
+  console.error("GLOBAL ERROR:", e.message);
+});
+
+console.log("auth.js Loaded");
+
 // ADD USER
 async function getUsers(){
 
@@ -5,25 +11,134 @@ async function getUsers(){
     credentials:"include"
   });
 
-  return await res.json();
+const data = await res.json();
+
+if(!res.ok){
+  throw new Error(
+    data.message || "Failed to fetch users"
+  );
 }
 
-//SAVE USERS
-async function saveUsers(users){
+return data.data;
+}
 
-  await fetch("/api/users",{
+// CREATE USER
+async function createUser(user){
+
+  const res = await fetch("/api/users",{
     method:"POST",
     headers:{
       "Content-Type":"application/json"
     },
     credentials:"include",
-    body:JSON.stringify(users)
+    body:JSON.stringify(user)
   });
 
+  const result = await res.json();
+
+  if(!res.ok){
+    throw new Error(data.message || "Failed to create user");
+  }
+
+  return result.data;
 }
 
+// DELETE USER
+async function removeUser(username){
+
+  const res = await fetch(`/api/users/${username}`,{
+    method:"DELETE",
+    credentials:"include"
+  });
+
+  const result = await res.json();
+
+  if(!res.ok){
+    throw new Error(data.message || "Failed to delete user");
+  }
+
+  return result.data;
+}
+
+/* ===========================
+   RESTORE BACKUP
+=========================== */
+
+async function restoreBackup(){
+
+  const fileInput =
+    document.getElementById("restoreFile");
+
+  const file = fileInput.files[0];
+
+  if(!file){
+    alert("Select backup file");
+    return;
+  }
+
+  const confirmRestore = confirm(
+    "This will replace ALL current data. Continue?"
+  );
+
+  if(!confirmRestore) return;
+
+  try{
+    const text = await file.text();
+
+    const backupData = JSON.parse(text);
+
+    const res = await fetch("/api/restore",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      credentials:"include",
+      body:JSON.stringify(backupData)
+    });
+
+    const data = await res.json();
+
+    if(!res.ok){
+      alert(data.message);
+      return;
+    }
+
+    alert("Database restored successfully");
+
+    location.reload();
+
+  }catch(err){
+    console.error(err);
+
+    alert("Invalid backup file");
+  }
+}
+
+
+// UPDATE USER
+async function updateUser(username, updates){
+
+  const res = await fetch(`/api/users/${username}`,{
+    method:"PUT",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    credentials:"include",
+    body:JSON.stringify(updates)
+  });
+
+  const result = await res.json();
+
+  if(!res.ok){
+    throw new Error(data.message || "Failed to update user");
+  }
+
+  return result.data;
+}
+
+
 // LOGIN
-async function login() {
+window.login = async function login() {
 
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
@@ -44,31 +159,33 @@ async function login() {
     return;
   }
 
-  const data = await res.json();
+const result = await res.json();
+const user = result.data;
 
-  console.log("Login data:", data);  // DEBUG
-
-  sessionStorage.setItem("username", data.username);
-  sessionStorage.setItem("role", data.role);
+sessionStorage.setItem("username", user.username);
+sessionStorage.setItem("role", user.role);
 
   window.location.href = "index.html";
 
 }
 // LOGOUT
-async function logout(){
+window.logout = async function logout(){
 
   await fetch("/api/logout", { 
     method: "POST", 
     credentials: "include"
   });
 
+  sessionStorage.clear();
+
   window.location.replace ("login.html");
 
 }
 
-//
-// ADMIN USER MANAGEMENT
-//
+
+/* ===========================
+ ADMIN USER MANAGEMENT
+=========================== */
 
 // Load Users
 async function loadUsers() {
@@ -79,7 +196,7 @@ async function loadUsers() {
 
 }
 
-// user profile
+//USER PROFILE
 
 async function loadUserProfile() {
   try {
@@ -89,20 +206,27 @@ async function loadUserProfile() {
 
     if (!res.ok) return;
 
-    const user = await res.json();
-
+    const result = await res.json();
+    const user = result.data;
     const box = document.getElementById("userProfile");
-    if (box) {
-      box.textContent = `👤 ${user.username}`;
-    }
+
+if(box){
+  box.textContent = `👤 ${user.username}`;
+}
   } catch (err) {
     console.error(err);
   }
 }
 
-window.addEventListener("DOMContentLoaded", loadUserProfile);
+if(document.getElementById("userProfile")){
+  window.addEventListener("DOMContentLoaded", loadUserProfile);
+}
 
-// Add User
+
+/* ===========================
+   ADD USER
+=========================== */
+
 async function addUser() {
 
   const username = document.getElementById("newUsername").value;
@@ -113,33 +237,49 @@ async function addUser() {
   alert("Please enter username and password");
   return;
 }
-  const users = await getUsers();
+try{
 
-  if (users.some(u => u.username === username)) {
-    alert("Username already exists");
+    await createUser({
+      username, password, role
+    });
+
+    alert("User created");
+
+    loadUsers();
+
+  }catch(err){
+
+    alert(err.message);
+
+  }
+}
+
+/* ===========================
+   DELETE USER
+=========================== */
+
+async function deleteUser(username) {
+
+  if(!confirm(`Delete ${username}?`)){
     return;
   }
 
-  users.push({ username, password, role });
+  try{
+    await removeUser(username);
 
-  await saveUsers(users);
+    alert("User deleted");
 
-  loadUsers();
+    loadUsers();
 
+  }catch(err){
+    alert(err.message);
+  }
 }
 
-// Delete User
-async function deleteUser(username) {
 
-  let users = await getUsers();
-
-  users = users.filter(u => u.username !== username);
- 
-  await saveUsers(users);
-
-  loadUsers();
-
-}
+/* ===========================
+   USERS RENDER
+=========================== */
 
 function renderUsers(users) {
 
@@ -176,24 +316,28 @@ ${user.role === "admin"
 
 }
 
-// Reset Password
+/* ===========================
+  RESET PASSWORD
+=========================== */
+
 async function resetPassword(username) {
 
   const newPassword = prompt("Enter new password:");
 
   if (!newPassword) return;
 
-  const users = await getUsers();
+  try{
+    await updateUser(username,{
+      password:newPassword
+    });
 
-  const user = users.find(u => u.username === username);
-
-  if (user) {
-    user.password = newPassword;
-    await saveUsers(users);
     alert("Password reset successfully");
-  }
 
+  }catch(err){
+    alert(err.message);
+  }
 }
+
 
 // DISPLAY LOGGED USER
 function displayUser() {
@@ -205,14 +349,39 @@ function displayUser() {
   if (el) el.textContent = username;
 }
 
-function checkAdmin() {
-  const role = sessionStorage.getItem("role");
+/* ===========================
+   ADMIN CHECK
+=========================== */
 
-  if (role !== "admin") {
-    alert("Access restricted to admin");
-    window.location.href = "index.html";
+async function checkAdmin(){
+
+  try{
+    const res = await fetch("/api/session",{
+      credentials:"include"
+    });
+
+    if(!res.ok){
+      window.location.href = "login.html";
+      return;
+    }
+
+const result = await res.json();
+const user = result.data;
+
+    if(user.role !== "admin"){
+      alert("Access restricted to admin");
+      window.location.href = "index.html";
+    }
+
+  }catch(err){
+    window.location.href = "login.html";
   }
 }
+
+
+/* ===========================
+   SEARCH USER
+=========================== */
 
 async function searchUsers() {
 
@@ -228,32 +397,43 @@ async function searchUsers() {
 
 }
 
+/* ===========================
+   EDIT USER
+=========================== */
+
 async function editUser(username){
 
-const users = await getUsers();
+  const newRole = prompt(
+    "Enter role (admin or user):"
+  );
 
-const user = users.find(u => u.username === username);
+  if(!newRole) return;
 
-if(!user) return;
+  const roleLower = newRole.toLowerCase();
 
-const newRole = prompt("Enter role (admin or user):", user.role);
+  if(roleLower !== "admin" && roleLower !== "user"){
+    alert("Invalid role");
+    return;
+  }
 
-if(!newRole) return;
+  try{
+    await updateUser(username,{
+      role:roleLower
+    });
 
-const roleLower = newRole.toLowerCase();
-	
-if(newRole !== "admin" && newRole !== "user"){
-alert("Invalid role");
-return;
+    alert("Role updated");
+
+    loadUsers();
+
+  }catch(err){
+    alert(err.message);
+  }
 }
 
-user.role = roleLower;
 
-saveUsers(users);
-
-loadUsers();
-
-}
+/* ===========================
+   SIGN UP
+=========================== */
 
 async function signup() {
   const username = document.getElementById("signupUsername").value.trim();
@@ -264,28 +444,36 @@ async function signup() {
   }
 
   try {
-    let users = await getUsers();
-
-    if (users.some(u => u.username === username)) {
-      return alert("Username already exists");
-    }
-
-    users.push({
-      username,
-      password,
-      role: "user"
+const res = await fetch("/api/signup",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        username,
+        password
+      })
     });
 
-    await saveUsers(users);
+    const data = await res.json();
 
+    if(!res.ok){
+      alert(data.message);
+      return;
+    }
+    
     alert("Account created successfully!");
     window.location.href = "login.html";
 
   } catch (err) {
     console.error(err);
-    alert("Signup failed (check console)");
+    alert("Signup failed");
   }
 }
+
+/* ===========================
+   FORGOT PASSWORD
+=========================== */
 
 async function forgotPassword(){
 
@@ -304,30 +492,39 @@ const newPass = prompt("Enter new password");
 
 if(!newPass) return;
 
-user.password = await hashPassword(newPass);
-
-saveUsers(users);
+await updateUser(username,{
+  password:newPass
+});
 
 alert("Password reset successfully");
 }
 
+/* ===========================
+   CHECK SESSION
+=========================== */
+
 async function checkSession(){
 
-  const res = await fetch("/api/students", {
-    credentials: "include"
-  });
+  try{
+    const res = await fetch("/api/session",{
+      credentials:"include"
+    });
 
-  if(res.status === 401){
+    if(!res.ok){
+      window.location.href = "login.html";
+    }
+
+  }catch(err){
     window.location.href = "login.html";
   }
-
 }
+
 
 /* ===========================
    AUTO LOGOUT SYSTEM
 =========================== */
 
-const SESSION_TIMEOUT = 15 * 60 * 1000; // 5s
+const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 mins
 
 function resetSessionTimer() {
   sessionStorage.setItem("lastActivity", Date.now());
@@ -350,6 +547,8 @@ function checkSessionTimeout() {
   }
 }
 
+//START SESSION
+
 function startSessionMonitor() {
 
   resetSessionTimer();
@@ -361,6 +560,8 @@ function startSessionMonitor() {
   setInterval(checkSessionTimeout, 10 * 1000); // check every 10 seconds
 }
 
+// CHECK AUTH
+
 async function checkAuth(){
 
   try{
@@ -370,15 +571,29 @@ async function checkAuth(){
     });
 
     if(!res.ok){
+          sessionStorage.clear();
       window.location.replace("login.html");
+      
+      return false;
     }
 
+    return true;
+
   }catch(err){
-
+        sessionStorage.clear();
     window.location.replace("login.html");
-
+    return false;
   }
+}
 
+
+// INIT USERS
+
+async function initUsersPage(){
+
+  await checkAuth();
+  await checkAdmin();
+  await loadUsers();
 }
 
 document.addEventListener("keydown", function(e){
@@ -391,4 +606,70 @@ document.addEventListener("keydown", function(e){
   }
 });
 
-	
+const protectedPages = [
+  "index.html",
+  "students.html",
+  "settings.html",
+  "registered-students.html",
+  "Holidays.html",
+  "attendance.html",
+  "users.html"
+];
+
+const currentPage =
+  window.location.pathname.split("/").pop();
+
+
+document.addEventListener(
+  "DOMContentLoaded",
+  async () => {
+
+    // ONLY protect secured pages
+    if(!protectedPages.includes(currentPage)){
+      return;
+    }
+
+    const ok = await checkAuth();
+
+    if(!ok){
+      return;
+    }
+
+    startSessionMonitor();
+
+    // Load profile
+    if(typeof loadUserProfile === "function"){
+      loadUserProfile();
+    }
+
+    // Dashboard
+    if(typeof renderDashboard === "function"){
+      renderDashboard();
+    }
+
+    // Attendance
+    if(typeof loadAttendance === "function"){
+      loadAttendance();
+    }
+
+    // Holiday checker
+    const dateInput =
+      document.getElementById("datePicker");
+
+    if(dateInput){
+
+      dateInput.addEventListener(
+        "change",
+        checkHolidayWarning
+      );
+
+      checkHolidayWarning();
+    }
+  }
+);
+
+//INIT HOLIDAY PAGE
+async function initHolidayPage(){
+  await checkAuth();
+  await loadHolidays();
+}

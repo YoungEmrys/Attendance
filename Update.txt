@@ -8,3 +8,11 @@ Things Updated
 5. import attendance from fingerprint data entry (xls, xlsx)
 6. weekly report added
 7. seperate register student and registered student
+8. Added settings panel for more control
+9. added database versioner for easy update migrate
+10.added dormant/active status for student (attendance and registered
+students)
+11. Major achitectual changes  
+a. API.js (Centralized API layer), 
+b. server expect {success:true,data: [...]}, frontend response {result.data/data.data}
+c. seperation of modules (helpers,mini settings, students, edit student, utils, holiday, importer)

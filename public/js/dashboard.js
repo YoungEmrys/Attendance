@@ -1,3 +1,4 @@
+console.log("dashboard.js Loaded");
 
 function formatFullDate(dateString) {
 
@@ -16,6 +17,9 @@ function formatFullDate(dateString) {
   }
 
 async function renderDashboard() {
+  const today = new Date()
+  .toISOString()
+  .split("T")[0];
 
 	const monthInput = document.getElementById("monthPicker");
   if (!monthInput) return;
@@ -29,9 +33,9 @@ async function renderDashboard() {
     parseInt(monthIndex) - 1
   );
 
+const students = await API.getStudents();
 
-    const attendance = await API.getAttendance();
-    const students = await API.getStudents();
+  const attendance = await API.getAttendance();
 
     let summary = {};
     
@@ -56,11 +60,15 @@ async function renderDashboard() {
         if (day.type === "holiday") return;
 
         totalDays++;
-
+        
         day.records.forEach(r => {
-          if (summary[r.student]) {
-            summary[r.student][r.status]++;
-          }
+          const student = students.find(
+            s => s.id === r.studentId
+          );
+          
+          if (!student) return;
+          
+          summary[student.name][r.status]++;
         });
       });
 	  
@@ -204,8 +212,9 @@ document.getElementById("weeklySummary").innerHTML = weeklyHTML;
 async function generateWeeklyReport(date) {
   const { start, end } = getWeekRange(date);
 
-  const attendance = await API.getAttendance();
-  const students = await API.getStudents();
+const attendance = await API.getAttendance();
+
+const students = await API.getStudents();
 
   const summary = {};
 
@@ -225,7 +234,7 @@ async function generateWeeklyReport(date) {
 
 		  const student = students.find(s => s.id === r.studentId);
 		  if (!student) return;
-		  summary[student.name][r.status]++;      
+		  summary[student.id][r.status]++;      
 	  });
     });
 
@@ -276,8 +285,9 @@ async function generateMonthlyReport() {
   const date = document.getElementById("datePicker").value;
   const month = getMonth(date);
 
-  const attendance = await API.getAttendance();
-  const students = await API.getStudents();
+const attendance = await API.getAttendance();
+
+const students = await API.getStudents();
 
   const summary = {};
 

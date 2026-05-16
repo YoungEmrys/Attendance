@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Holiday Manager</title>
+
+  <meta http-equiv="Cache-Control" content="no-store">
+
+  <script src="js/holidays.js"></script>
+  <script src="js/auth.js"></script>
+
+  <style>
+  
+  body{
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      margin: 0;
+      padding: 3% 3%;
+    
+  }
+
+  .container {
+  max-width: 1100px;
+  margin: auto;
+  background: rgba(255,255,255,0.9);
+  padding: 25px;
+  border-radius: 18px;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+}
+
+    h2{
+      margin-bottom:20px;
+    }
+
+    input{
+    cursor: pointer; 
+    background-color: #ffffff;
+    padding:20px; 
+    border:1px solid #ccc; 
+    border-radius:6px;
+    width: auto;
+    }
+
+    button:hover{          
+      transform: translateY(-2px);        
+      box-shadow: 0 10px 10px -4px rgba(0,0,0,0.3);
+
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      background:white;
+      border-radius: 6px;
+    }
+
+    th, td{
+      padding:12px;
+      border-bottom:1px solid #ddd;
+      text-align:center;
+    }
+
+    .grid{
+  display: grid;
+  gap: 18px;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #eee;
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+  .form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+@media (min-width: 768px) {
+  .form-grid.two {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+    .delete-btn{
+      padding: 10px 10px;
+      width: 75px;
+      border:none;
+      border-radius:6px;
+      border: 1px solid #dbdada;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+
+    }
+
+    .delete-btn:hover{
+      background:#e53935;
+      color:white;
+    }
+
+    .add-btn{
+      cursor: pointer; 
+    padding:20px; 
+    border: 1px solid #dbdada;
+    border-radius:6px;
+    width: 100%;      
+    transition: all 0.3s ease-in-out;
+
+    }
+
+    .add-btn:hover{
+            background-color: rgb(14, 198, 54);
+    }
+
+    .back{
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+  padding: 4px 0;
+  color: #333;
+  background-color: #cfcece;
+  width: 50px;
+  font-size: 14px;
+  text-align: center;
+  transition: all 0.3s ease-in-out;
+}    
+
+  </style>
+
+</head>
+
+<body onload="initHolidayPage(); checkAuth();">
+  
+  <div class="container">
+      <button class="back" onclick="window.location.href = 'index.html'">◀⬅</button>
+
+<h2>Holiday Calendar</h2>
+
+<div class="form-grid two"> 
+  <input type="date" id="holidayDate">
+  <input type="text" id="holidayName" placeholder="Holiday Name">
+</div>
+<br>
+
+  <button class="add-btn" onclick="addHoliday()">
+    Add Holiday
+  </button>
+<br><br>
+
+
+
+<table>
+
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Name</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+
+  <tbody class="card" id="holidaysTable"></tbody>
+
+</table>
+</div>
+
+</body>
+</html>

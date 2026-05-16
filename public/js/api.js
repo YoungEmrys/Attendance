@@ -1,69 +1,156 @@
+console.log("API.js Loaded");
+
 const API = {
 
   async request(url, options = {}) {
+
     const res = await fetch(url, {
       credentials: "include",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        ...(options.headers || {})
       },
       ...options
     });
 
-    const data = await res.json();
+    let data;
 
-    if (!res.ok) {
-      throw new Error(data.message || "Request failed");
+    try {
+      data = await res.json();
+    } catch {
+      data = {
+        success: false,
+        message: "Invalid server response"
+      };
     }
 
-    return data;
+    if (!res.ok) {
+      throw new Error(
+        data.message || "Request failed"
+      );
+    }
+
+    return data.data;
   },
 
-  async getStudents() {
-    const res = await this.request("/api/students");
+  /* =========================
+     STUDENTS
+  ========================= */
 
-    // IMPORTANT: return ONLY data array
-    return res.data || res;
+  getStudents() {
+    return this.request("/api/students");
   },
 
-  async addStudent(student) {
+  addStudent(student) {
     return this.request("/api/students", {
       method: "POST",
       body: JSON.stringify(student)
     });
   },
 
-  async updateStudent(id, data) {
+  updateStudent(id, student) {
     return this.request(`/api/students/${id}`, {
       method: "PUT",
-      body: JSON.stringify(data)
+      body: JSON.stringify(student)
     });
   },
 
-  async deleteStudent(id) {
+  deleteStudent(id) {
     return this.request(`/api/students/${id}`, {
       method: "DELETE"
     });
   },
 
-  async getAttendance() {
+  /* =========================
+     ATTENDANCE
+  ========================= */
+
+  getAttendance() {
     return this.request("/api/attendance");
   },
 
-  async saveAttendance(attendance) {
+  saveAttendance(attendance) {
     return this.request("/api/attendance", {
       method: "POST",
-      body: JSON.stringify({ attendance })
-    });
+      body: JSON.stringify({attendance})
+  });
   },
 
-  async getUsers() {
+  /* =========================
+     USERS
+  ========================= */
+
+  getUsers() {
     return this.request("/api/users");
   },
 
-  async saveUsers(users) {
+  createUser(user) {
     return this.request("/api/users", {
       method: "POST",
-      body: JSON.stringify(users)
+      body: JSON.stringify(user)
+    });
+  },
+
+  updateUser(username, updates) {
+    return this.request(`/api/users/${username}`, {
+      method: "PUT",
+      body: JSON.stringify(updates)
+    });
+  },
+
+  deleteUser(username) {
+    return this.request(`/api/users/${username}`, {
+      method: "DELETE"
+    });
+  },
+
+  /* =========================
+     AUTH
+  ========================= */
+
+  login(credentials) {
+    return this.request("/api/login", {
+      method: "POST",
+      body: JSON.stringify(credentials)
+    });
+  },
+
+  logout() {
+    return this.request("/api/logout", {
+      method: "POST"
+    });
+  },
+
+  getSession() {
+    return this.request("/api/session");
+  },
+
+  signup(data) {
+    return this.request("/api/signup", {
+      method: "POST",
+      body: JSON.stringify(data)
+    });
+  },
+
+  /* =========================
+     HOLIDAYS
+  ========================= */
+
+  getHolidays() {
+    return this.request("/api/holidays");
+  },
+
+  createHoliday(holiday) {
+    return this.request("/api/holidays", {
+      method: "POST",
+      body: JSON.stringify(holiday)
+    });
+  },
+
+  deleteHoliday(date) {
+    return this.request(`/api/holidays/${date}`, {
+      method: "DELETE"
     });
   }
+
 };

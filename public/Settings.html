@@ -4,6 +4,13 @@
 <meta charset="UTF-8" />
 <title>Settings</title>
 
+<script src="js/core/settings.js"></script>
+<script src="js/core/utils.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/edit-student.js"></script>
+<script src="js/attendance.js"></script>
+
 <style>
 /* =========================
    BASE
@@ -14,8 +21,8 @@ body {
   padding: 20px;
   background: linear-gradient(135deg, #667eea, #764ba2);
 }
-
 /* MAIN CONTAINER */
+
 .container {
   max-width: 1100px;
   margin: auto;
@@ -44,7 +51,7 @@ header p {
 /* GRID WRAPPER */
 #settingsCards {
   display: grid;
-  gap: 18px;
+  gap: 15px;
 }
 
 /* =========================
@@ -55,13 +62,13 @@ header p {
   border: 1px solid #eee;
   border-radius: 14px;
   padding: 18px 20px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-  transition: 0.2s ease;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.14);
 }
 
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.10);
+.card button:hover{
+  transform: translateY(-3px);
+      transition: 0.3s ease-in-out;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
 }
 
 .card h2 {
@@ -143,18 +150,16 @@ button {
   border: none;
   cursor: pointer;
   font-weight: bold;
-  margin-right: 8px;
   transition: 0.2s;
-}
-
-button:hover {
-  opacity: 0.9;
+  background-color: #eee;
+  
 }
 
 /* DANGER */
-.danger button {
-  background: #ff4d4d;
+.danger button:hover{
+    background: #ff4d4d;
   color: white;
+
 }
 
 /* SYSTEM MESSAGE */
@@ -175,7 +180,7 @@ button:hover {
 
   .grid { 
     display: grid;
-    gap: 8px;
+    gap: 10px;
   }
 
   @media (max-width: 768px) {
@@ -188,14 +193,25 @@ button:hover {
     flex-direction: column;
   }
 }
+
+.back{
+  padding: 4px 0;
+  color: #333;
+  background-color: #cfcece;
+  width: 50px;
+  font-size: 14px;
+  text-align: center;
+}
 </style>
 </head>
 
-<body>
+<body onload="checkAuth()">
 
 <div class="container">
 
   <!-- HEADER -->
+
+  <button class="back" onclick="window.location.href = 'index.html'">◀⬅</button>
   <header>
     <h1>Settings</h1>
     <p>Control attendance behavior and system rules</p>
@@ -317,11 +333,36 @@ button:hover {
     </section>
 
     <!-- DATA CONTROL -->
-    <section class="card danger">
+    <div class= "card danger button">
       <h2>Attendance Data Control</h2>
-      <button id="clearMonthBtn">Clear Month</button>
-      <button id="fullResetBtn">Full Reset</button>
-    </section>
+      <label>Active or Dormant Mode</label>
+      <label>
+  <input type="checkbox" id="showInactiveStudents">
+  Show Dormant Students
+</label>
+
+  <input type="date" id="datePicker" onchange="onDateChange()">
+  <span id="lockStatus"></span><br><br>
+
+      <button onclick="clearMonthAttendance()">Clear Month</button>
+      <button onclick="fullResetAttendance()">Full Reset</button>
+    </div>
+
+    
+    <div class="card danger button">
+<h2>Restore Backup</h2>
+<div class="grid three">
+
+<input type="file" id="restoreFile" accept=".json">
+
+<button onclick="restoreBackup()">
+Restore Database
+</button>
+</div>
+<strong><p style="color:red;font-size:14px;">
+Warning: This replaces ALL current data.
+</p></strong>
+</div>
 
     <!-- SYSTEM -->
     <section class="card">
@@ -332,7 +373,7 @@ button:hover {
         Lock Settings
       </label>
 
-      <div id="lockMessage">🔒 Settings locked</div>
+      <div id="lockMessage">🔒</div>
     </section>
 
 
@@ -340,13 +381,31 @@ button:hover {
   <h2>Actions</h2>
   <div class="grid three">
 
-  <button id="saveSettingsBtn">Save Settings</button>
-  <button id="cancelSettingsBtn">Cancel Changes</button>
-  <button id="resetSettingsBtn">Reset to Defaults</button>
+  <button 
+    onmouseover="this.style.background='rgb(14, 201, 14)'; this.style.color='white'" 
+    onmouseout="this.style.background='#eee'; this.style.color='black'" 
+  id="saveSettingsBtn">Save Settings
+  </button>
+
+  <button
+    onmouseover="this.style.background='rgb(85, 154, 245)'; this.style.color='white'" 
+    onmouseout="this.style.background='#eee'; this.style.color='black'" 
+    id="cancelSettingsBtn">Cancel Changes</button>
+
+  <button 
+  onmouseover="this.style.background='#ff4d4d'; this.style.color='white'" 
+  onmouseout="this.style.background='#eee'; this.style.color='black'" 
+  id="resetSettingsBtn">Reset to Defaults
+</button>
+
 </div>
 </section>
+
+
 </div>
 </div>
 
+<script src="js/settings.js"></script>
 </body>
 </html>
+

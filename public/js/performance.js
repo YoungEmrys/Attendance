@@ -131,4 +131,14 @@ document.getElementById("performanceTable").innerHTML;
 
 }
 
+function toggleMenu(){
+  const nav = document.getElementById("navbar");
+  nav.classList.toggle("show");
+	
+	if(document.getElementById("userProfile")){
+  window.addEventListener("DOMContentLoaded", loadUserProfile);
+}
+}
+
+
 document.addEventListener("DOMContentLoaded", checkAlerts);

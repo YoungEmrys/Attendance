@@ -5,11 +5,13 @@
   <title>Edit Student</title>
   
   <script src="js/api.js"></script>
-  <script src="js/storage.js"></script>
   <script src="js/auth.js"></script>
+  <script src="js/edit-student.js"></script> 
 	
 	<style>
 		.edit-container {
+      display: grid;
+      gap: 10px;
   max-width: 400px;
   margin: 40px auto;
   padding: 20px;
@@ -17,6 +19,7 @@
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
   font-family: Arial, sans-serif;
+  align-items: right;
 }
 
 .edit-container h2 {
@@ -24,13 +27,63 @@
   margin-bottom: 20px;
 }
 
-.edit-container input {
+.edit-container input[type="text"],
+.edit-container input[type="file"],
+.edit-container input[type="number"],
+.edit-container textarea,
+.edit-container select {
   width: 100%;
   padding: 10px;
   margin-bottom: 12px;
   border-radius: 8px;
   border: 1px solid #ddd;
   font-size: 14px;
+}
+
+.status-section {
+  margin: 16px 0;
+}
+
+.status-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.status-toggle input {
+  display: none;
+}
+
+.status-slider {
+  display: inline-block;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: #22c55e;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+  user-select: none;
+}
+
+.status-toggle input:not(:checked) + .status-slider {
+  background: #ef4444;
+}
+
+.status-toggle input:checked + .status-slider::after {
+  content: "ACTIVE";
+}
+
+.status-toggle input:not(:checked) + .status-slider::after {
+  content: "INACTIVE";
+}
+
+.status-slider {
+  font-size: 14px;
+}
+
+.status-slider::after {
+  content: "";
 }
 
 .image-section {
@@ -97,11 +150,13 @@
   border: none;
   border-radius: 5px;
   font-size: 15px;
-  cursor: pointer;
+  cursor: pointer;  
+  transition: 0.2s ease-in;
+
 }
 
 .save-btn:hover {
-  transform: translateY(-1px);
+  transform: translateY(-3px);
 }
 	
 .cnc-btn {
@@ -113,14 +168,16 @@
   border: none;
   border-radius: 8px;
   font-size: 15px;
-  cursor: pointer;
+  cursor: pointer;  
+  transition: 0.2s ease-in-out;
+
 }
 
 .cnc-btn:hover {
-  transform: translateY(-1px);
-}
+  transform: translateY(-3px);
+  
+}	
 
-	
 	
 	</style>
 		
@@ -139,8 +196,26 @@
     <input type="file" id="editImage" accept="image/*" />
   </div>
 
-  <input type="text" id="editName" placeholder="Student Name" />
+  <div>
+  <input type="text" id="editName" placeholder="Student Name" /> 
+</div>
+
+<div>
   <input type="number" id="editId" placeholder="Student ID" />
+ </div>
+
+<div class="status-section">
+
+  <label class="status-label">Student Status</label>
+
+  <label class="status-toggle">
+
+    <input type="checkbox" id="editActive" checked>
+    <span class="status-slider"></span>
+
+  </label>
+</div>
+<br><br>
 
   <div class="course-box">
     <input id="editCourseInput" placeholder="Add course" />

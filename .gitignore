@@ -5,7 +5,10 @@ node_modules/
 .env
 
 # Backup folder (optional, if you don't want backups in repo)
-backup/
+backups/
+
+# Upload folder
+Uploads
 
 # Logs
 *.log

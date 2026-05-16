@@ -9,10 +9,7 @@
 <meta http-equiv="Expires" content="0">
 
   <script src="js/api.js"></script>
-  <script src="js/storage.js"></script>
 	<script src="js/auth.js"></script>	
-	<script> checkAuth(); </script>
-	
 	<script src="js/dashboard.js"></script>	
   <script src="js/performance.js"> </script>
 	
@@ -26,7 +23,7 @@ margin:0;
 }
 
 .container{
-background:white;
+background: rgba(255,255,255,0.9);
 max-width:1000px;
 margin:auto;
 padding:25px;
@@ -65,23 +62,6 @@ cursor:pointer;
       margin: 0.7% 0.5%;
     }
 
-    .logt{
-  padding:7px 12px;
-  margin: 0 5px;
-  border:none;
-  border-radius:12px;
-  background:#667eea;
-  backdrop-filter:blur(5px);
-  font-weight:bold;
-  font-size:14px;
-  cursor:pointer;
-    color:white;
-
-}
-
-.logt:hover{
-  background:#2f50e4;
-}
 	  
 .navbar{
   width:94%;
@@ -138,20 +118,6 @@ cursor:pointer;
   color:white;
 }
 
-/* MOBILE MENU */
-
-.menu-toggle{
-  display:block;
-  font-size:20px;
-  padding:8px 14px;
-  border-radius:10px;
-  background:rgba(255, 255, 255, 0.6);
-  border:none;
-  cursor:pointer;
-  margin-bottom:10px;
-  color: #667eea;
-}
-
 /* MOBILE */
 
 @media(max-width:700px){
@@ -168,31 +134,66 @@ cursor:pointer;
 
   .navbar button{
     width:100%;
-    text-align:left;         /* text aligns left */
+    text-align:left;       
   }
 
 }
 
-	  .header{
-		  height: auto;
-		  display: flex;
-		  align-items: center;
-	  }
+    .tm button{
+  float: right;
+  background-color:rgb(255, 255, 255);
+  color: #5f7af0; 
+  padding:6px 12px;
+  margin: 10px 0 0 8px;
+  border:none;
+  border-radius:8px;
+  backdrop-filter:blur(5px);
+  font-weight:bold;
+  font-size:16px;
+  cursor:pointer;
+  transition:all 0.2s ease;
+}
+
+.tm button:hover{
+  transform: translateY(-3px);
+}
+
+.logt{
+ 
+  color: #f0f0f0;
+    background:#667eea;
+
+}
+
+.settings {
+  float: right; 
+  background-color: transparent; 
+  font-size: 20px;
+}
+
+.settings:hover{
+  transform: translateY(-3);
+}
+
+
 
 </style>
 
 </head>
 
-<body>
+<body onload="checkAuth()">
 
 <div class="container">
 
-	<div class = "header">
-<button class="menu-toggle" onclick="toggleMenu()">☰</button>
-	<div id="userProfile" style="margin-left:auto; font-weight:bold; float: right">
-  </div>
-  <button onclick="logout()" style="float: right;"  class="logt">Logout</button>
- 		</div>
+	<button class="settings" onclick="window.location.href = 'settings.html'">⚙️</button>
+
+    <div class="tm">    
+      <button class="logt" onclick="logout()" class="logt">Logout</button>
+<button style="float: left;" onclick="toggleMenu()">☰</button>
+	<div id="userProfile" style="float: right; margin-top: 14px;font-weight: bold;" ></div>
+</div><br><br><br>
+  
+ 		
 
   		<div class="navbar" id="navbar">
 
