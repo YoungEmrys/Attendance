@@ -67,24 +67,6 @@ function getVisibleStudents(students) {
   return students.filter(s => s.active !== false);
 }
 
-function formatTime(t) {
-  const settings = getSettings();
-
-  if (!t || t === "--:--") return "--:--";
-
-  if (settings.timeFormat === "24h") {
-    return t;
-  }
-
-  const [h, m] = t.split(":");
-  let hour = parseInt(h);
-  const ampm = hour >= 12 ? "PM" : "AM";
-
-  if (hour > 12) hour -= 12;
-  if (hour === 0) hour = 12;
-
-  return `${hour}:${m} ${ampm}`;
-}
 
 window.getInitials = getInitials;
 window.todayString = todayString;
@@ -93,4 +75,3 @@ window.formatDate = formatDate;
 window.normalizeId = normalizeId;
 window.getActiveStudents = getActiveStudents;
 window.getVisibleStudents = getVisibleStudents;
-window.formatTime = formatTime;

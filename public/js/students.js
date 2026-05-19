@@ -2,6 +2,7 @@
 
 console.log("students.js Loaded");
 
+// STUDENTS DETAILS
 window.openStudentDetails = async function(id) {
   const students = await API.getStudents();
   const student = students.find(s => String(s.id) === String(id));
@@ -11,11 +12,11 @@ window.openStudentDetails = async function(id) {
     return;
   }
 
-localStorage.setItem("selectedStudent", JSON.stringify(student));
-
-window.location.href = "student-details.html";
+window.location.href = `student-details.html?id=${id}`;
 };
 
+
+// EDIT STUDENTS
 window.editStudent = async function(id) {
 const students = await API.getStudents();
 
@@ -26,8 +27,7 @@ const students = await API.getStudents();
     return;
   }
 
-  localStorage.setItem("editStudent", JSON.stringify(student));
-  window.location.href = "edit-student.html";
+window.location.href = `edit-student.html?id=${id}`;
 };
 
 window.deleteStudent = async function(id) {

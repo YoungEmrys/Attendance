@@ -4,9 +4,26 @@ console.log("edit-student.js Loaded")
 
 let editCourses = [];
 
-function loadEditStudent() {
-  const student = JSON.parse(localStorage.getItem("editStudent"));
-  if (!student) return;
+async function loadEditStudent() {
+const params = new URLSearchParams(window.location.search);
+
+const studentId = params.get("id");
+
+if (!studentId) {
+  alert("No student selected");
+  return;
+}
+
+const students = await API.getStudents();
+
+const student = students.find(
+  s => String(s.id) === String(studentId)
+);
+
+if (!student) {
+  alert("Student not found");
+  return;
+} 
 
   document.getElementById("editName").value = student.name || "";
   document.getElementById("editId").value = student.id || "";
@@ -45,13 +62,27 @@ function loadEditStudent() {
   }
 }
 
-/* =========================
-   SAVE EDIT
-========================= */
-
+// SAVE EDIT
 async function saveEdit() {
-  const student = JSON.parse(localStorage.getItem("editStudent"));
-  if (!student) return alert("No student loaded");
+const params = new URLSearchParams(window.location.search);
+
+const studentId = params.get("id");
+
+if (!studentId) {
+  alert("No student selected");
+  return;
+}
+
+const students = await API.getStudents();
+
+const student = students.find(
+  s => String(s.id) === String(studentId)
+);
+
+if (!student) {
+  alert("Student not found");
+  return;
+} 
 
   const name = document.getElementById("editName").value.trim();
   const id = document.getElementById("editId").value.trim();
@@ -122,6 +153,8 @@ function addEditCourse() {
   renderEditCourses();
 }
 
+
+// EDIT COURSE
 function renderEditCourses() {
   const container = document.getElementById("editCourses");
 
@@ -141,14 +174,26 @@ function goBack() {
   window.location.href = "registered-students.html";
 }
 
-/* =========================
-   LOAD DETAILS (CLEAN)
-========================= */
-function loadStudentDetails() {
-  const student = JSON.parse(localStorage.getItem("selectedStudent"));
+// LOAD STUDENT DETAILS
+async function loadStudentDetails() {
+const profileBar = document.getElementById("profileBar");
+const coursesContainer = document.getElementById("coursesContainer");
+const params = new URLSearchParams(window.location.search);
 
-  const profileBar = document.getElementById("profileBar");
-  const coursesContainer = document.getElementById("coursesContainer");
+const studentId = params.get("id");
+
+if (!studentId) {
+  profileBar.innerHTML =
+    "<p style='color:red'>No student selected</p>";
+  return;
+}
+const students = await API.getStudents();
+
+const student = students.find(
+  s => String(s.id) === String(studentId)
+);
+
+  
 
   if (!profileBar) return;
 
