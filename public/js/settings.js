@@ -210,20 +210,23 @@ function setupEvents() {
    CONFIRMATIONS
 ========================= */
 
-function confirmSave() {
-  if (!confirm("Save changes to settings?")) return;
+async function confirmSave() {
+
+   const confirmed = await showConfirm("Save Changes to Settings?");
+  if (!confirmed) return;
 
   readSettingsFromUI();
   saveSettings();
 
-  alert("Settings saved");
+  showToast("Settings Saved");
 
     applySettingsToUI();
   updateSummary();
 }
 
-function confirmReset() {
-  if (!confirm("Reset all settings to default?")) return;
+async function confirmReset() {
+  const confirmed = await showConfirm("Reset All Settings to Default?");
+  if (!confirmed) return;
 
   currentSettings = { ...DEFAULT_SETTINGS };
   currentSettings.lockSettings = false;
@@ -231,13 +234,15 @@ function confirmReset() {
   saveSettings();
   applySettingsToUI();
 
-  alert("Settings reset");
+  showToast("Settings Reset");
   updateSummary();
 }
 
-function cancelChanges() {
-  if (!confirm("Discard unsaved changes?")) return;
+async function cancelChanges() {
   
+  const confirmed = await showConfirm("Discard Unsaved Changes?");
+    if (!confirmed) return;
+
   loadSettings(); 
   applySettingsToUI();
   updateSummary();

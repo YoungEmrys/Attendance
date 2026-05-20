@@ -119,7 +119,7 @@ async function addHoliday(){
   const name = document.getElementById("holidayName").value.trim();
 
   if(!date || !name){
-    alert("Enter holiday date and name");
+    alert("Enter Holiday Date and Name");
     return;
   }
 
@@ -130,7 +130,7 @@ async function addHoliday(){
       name
     });
 
-    alert("Holiday added");
+    showToast("Holiday added");
 
     document.getElementById("holidayDate").value = "";
     document.getElementById("holidayName").value = "";
@@ -155,7 +155,7 @@ async function deleteHoliday(date){
 
     await removeHoliday(date);
 
-    alert("Holiday deleted");
+    showToast("Holiday deleted");
 
     loadHolidays();
 

@@ -76,8 +76,8 @@ async function restoreBackup(){
     return;
   }
 
-  const confirmRestore = confirm(
-    "This will replace ALL current data. Continue?"
+  const confirmRestore = await showConfirm(
+    "This Will Replace ALL Current Data. Continue?"
   );
 
   if(!confirmRestore) return;
@@ -234,7 +234,7 @@ async function addUser() {
   const role = document.getElementById("newRole").value;
 
 	if (!username || !password) {
-  alert("Please enter username and password");
+  alert("Please Enter Username and Password");
   return;
 }
 try{
@@ -243,7 +243,7 @@ try{
       username, password, role
     });
 
-    alert("User created");
+    showToast("User Created");
 
     loadUsers();
 
@@ -254,10 +254,7 @@ try{
   }
 }
 
-/* ===========================
-   DELETE USER
-=========================== */
-
+// DELETE USER
 async function deleteUser(username) {
 
   if(!confirm(`Delete ${username}?`)){
@@ -267,7 +264,7 @@ async function deleteUser(username) {
   try{
     await removeUser(username);
 
-    alert("User deleted");
+    showToast("User Deleted");
 
     loadUsers();
 
@@ -277,10 +274,7 @@ async function deleteUser(username) {
 }
 
 
-/* ===========================
-   USERS RENDER
-=========================== */
-
+// USERS RENDER
 function renderUsers(users) {
 
   const table = document.getElementById("usersTable");
@@ -331,7 +325,7 @@ async function resetPassword(username) {
       password:newPassword
     });
 
-    alert("Password reset successfully");
+    showToast("Password Reset Successfully");
 
   }catch(err){
     alert(err.message);
@@ -369,7 +363,7 @@ const result = await res.json();
 const user = result.data;
 
     if(user.role !== "admin"){
-      alert("Access restricted to admin");
+      alert("Access Restricted to Admin");
       window.location.href = "index.html";
     }
 
@@ -412,7 +406,7 @@ async function editUser(username){
   const roleLower = newRole.toLowerCase();
 
   if(roleLower !== "admin" && roleLower !== "user"){
-    alert("Invalid role");
+    alert("Invalid Role");
     return;
   }
 
@@ -421,7 +415,7 @@ async function editUser(username){
       role:roleLower
     });
 
-    alert("Role updated");
+    showToast("Role Updated");
 
     loadUsers();
 
@@ -440,7 +434,7 @@ async function signup() {
   const password = document.getElementById("signupPassword").value.trim();
 
   if (!username || !password) {
-    return alert("Enter username and password");
+    return alert("Enter Username and Password");
   }
 
   try {
@@ -462,7 +456,7 @@ const res = await fetch("/api/signup",{
       return;
     }
     
-    alert("Account created successfully!");
+    showToast("Account created successfully!");
     window.location.href = "login.html";
 
   } catch (err) {
@@ -477,18 +471,18 @@ const res = await fetch("/api/signup",{
 
 async function forgotPassword(){
 
-const username = prompt("Enter your username");
+const username = prompt("Enter Your Username");
 
 const users = await getUsers();
 
 const user = users.find(u => u.username === username);
 
 if(!user){
-alert("User not found");
+alert("User Not Found");
 return;
 }
 
-const newPass = prompt("Enter new password");
+const newPass = prompt("Enter New Password");
 
 if(!newPass) return;
 
@@ -496,7 +490,7 @@ await updateUser(username,{
   password:newPass
 });
 
-alert("Password reset successfully");
+showToast("Password reset successfully");
 }
 
 /* ===========================
@@ -520,10 +514,7 @@ async function checkSession(){
 }
 
 
-/* ===========================
-   AUTO LOGOUT SYSTEM
-=========================== */
-
+// AUTO LOGOUT SYSTEM
 const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 mins
 
 function resetSessionTimer() {
@@ -541,14 +532,13 @@ function checkSessionTimeout() {
 
   if (timePassed > SESSION_TIMEOUT) {
 
-    alert("Session expired. Please login again.");
+    alert("Session Expired. Please Login Again.");
 
     logout();
   }
 }
 
 //START SESSION
-
 function startSessionMonitor() {
 
   resetSessionTimer();
@@ -561,7 +551,6 @@ function startSessionMonitor() {
 }
 
 // CHECK AUTH
-
 async function checkAuth(){
 
   try{
@@ -588,7 +577,6 @@ async function checkAuth(){
 
 
 // INIT USERS
-
 async function initUsersPage(){
 
   await checkAuth();

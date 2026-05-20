@@ -6,7 +6,7 @@ async function handleFile() {
   const file = input.files[0];
 
   if (!file) {
-    alert("Select a file first");
+    alert("Please Select Exported Attendance File");
     return;
   }
 
@@ -370,7 +370,7 @@ window.previewData.forEach(day => {
       records: newRecords
     });
   } else {
-    // 🔥 merge per student (overwrite only those present)
+    // merge per student (overwrite only those present)
     newRecords.forEach(newRec => {
       const index = existing.records.findIndex(
         r => r.studentId === newRec.studentId
@@ -390,7 +390,7 @@ await loadAttendanceForDate(
   document.getElementById("datePicker").value
 );
 
-  alert("Import successful");
+  showToast("Import Successful");
 }
 
 

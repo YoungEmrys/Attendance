@@ -10,7 +10,7 @@ const params = new URLSearchParams(window.location.search);
 const studentId = params.get("id");
 
 if (!studentId) {
-  alert("No student selected");
+  alert("No Student Selected");
   return;
 }
 
@@ -21,7 +21,7 @@ const student = students.find(
 );
 
 if (!student) {
-  alert("Student not found");
+  alert("Student Not Found");
   return;
 } 
 
@@ -69,7 +69,7 @@ const params = new URLSearchParams(window.location.search);
 const studentId = params.get("id");
 
 if (!studentId) {
-  alert("No student selected");
+  alert("No Student Selected");
   return;
 }
 
@@ -80,17 +80,17 @@ const student = students.find(
 );
 
 if (!student) {
-  alert("Student not found");
+  alert("Student Not Found");
   return;
 } 
 
   const name = document.getElementById("editName").value.trim();
   const id = document.getElementById("editId").value.trim();
 
-  if (!name || !id) return alert("Student Name and ID required");
+  if (!name || !id) return alert("Student Name and ID Required");
 
   if (!/^\d+$/.test(id)) {
-  alert("Student ID must contain numbers only");
+  ("Student ID Must Contain Numbers Only");
   return;
 }
 
@@ -128,14 +128,10 @@ if (!student) {
   
   console.log("UPDATED STUDENT ACTIVE:", active);
 
-  alert("Student updated");
-  window.location.href = "registered-students.html";
+  showToast("Student Updated");
 }
 
-/* =========================
-   UPDATE COURSE IN EDIT PAGE
-========================= */
-
+// UPDATE COURSE
 function addEditCourse() {
   const input = document.getElementById("editCourseInput");
   const value = input.value.trim();
@@ -177,6 +173,8 @@ function goBack() {
 // LOAD STUDENT DETAILS
 async function loadStudentDetails() {
 const profileBar = document.getElementById("profileBar");
+if (!profileBar) return;
+
 const coursesContainer = document.getElementById("coursesContainer");
 const params = new URLSearchParams(window.location.search);
 

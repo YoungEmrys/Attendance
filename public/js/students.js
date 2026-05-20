@@ -8,7 +8,7 @@ window.openStudentDetails = async function(id) {
   const student = students.find(s => String(s.id) === String(id));
 
   if (!student) {
-    alert("Student not found");
+    alert("Student Not Found");
     return;
   }
 
@@ -16,31 +16,36 @@ window.location.href = `student-details.html?id=${id}`;
 };
 
 
-// EDIT STUDENTS
+// EDIT STUDENT
 window.editStudent = async function(id) {
 const students = await API.getStudents();
 
   const student = students.find(s => String(s.id) === String(id));
 
   if (!student) {
-    alert("Student not found");
+    showToast("Student not found");
     return;
   }
 
 window.location.href = `edit-student.html?id=${id}`;
 };
 
+
+//DELETE STUDENT
 window.deleteStudent = async function(id) {
-  if (!confirm("Delete this student?")) return;
+  
+  const confirmed = await showConfirm("Delete this student?");
+
+if (!confirmed) return;
 
   try {
     await API.deleteStudent(id);
-    alert("Deleted successfully");
+    showToast("Student Deleted Successfully");
     loadStudents();
 
   } catch (err) {
     console.error(err);
-    alert("Delete failed");
+    showToast("Delete Failed");
   }
 };
 
@@ -51,7 +56,7 @@ const students = await API.getStudents();
 
     const student = students.find(s => String(s.id) === String(id));
 
-    if (!student) return alert("Student not found");
+    if (!student) return alert("Student Not Found");
 
     await API.updateStudent(id, {
       ...student,
@@ -62,7 +67,7 @@ const students = await API.getStudents();
 
   } catch (err) {
     console.error(err);
-    alert("Failed to update status");
+    showToast("Failed to update status");
   }
 };
 
@@ -75,10 +80,7 @@ window.toggleMenu = function(){
 }
 }
 
-/* =========================
-   LOAD STUDENTS
-========================= */
-
+// LOAD STUDENT
 async function loadStudents(search = "") {
   const container = document.getElementById("studentCards");
   if (!container) return;
@@ -145,29 +147,26 @@ const students = await API.getStudents();
   }
 }
 
-/* =========================
-   ADD STUDENT
-========================= */
-
+// AD STUDENT
 async function addStudent() {
   try {
     const name = document.getElementById("studentName").value.trim();
     const id = document.getElementById("studentId").value.trim();
 
     if (!name || !id) {
-      alert("Student name and ID are required");
+      alert("Student Name and ID  Required");
       return;
     }
 
     if (!/^\d+$/.test(id)) {
-  alert("Student ID must contain numbers only");
+  alert("Student ID Must Contain Numbers Only");
   return;
 }
 
 const students = await API.getStudents();
 
 if (students.some(s => normalizeId(s.id) === normalizeId(id))) {
-  alert("Student ID already exists");
+  alert("Student ID Already Exists");
   return;
 }
 
@@ -187,7 +186,7 @@ if (students.some(s => normalizeId(s.id) === normalizeId(id))) {
       const sizeMB = file.size / (1024 * 1024);
 
       if (sizeMB > MAX_IMAGE_SIZE_MB) {
-    alert(`Image too large. Max allowed is ${MAX_IMAGE_SIZE_MB}MB`);
+    alert(`Image Too large. Max Allowed is ${MAX_IMAGE_SIZE_MB}MB`);
     return;
   }
       const reader = new FileReader();
@@ -200,7 +199,7 @@ if (students.some(s => normalizeId(s.id) === normalizeId(id))) {
 
     await API.addStudent({ name, id, courses, image, active: true });
 
-    alert("Student Added Successfully");
+    showToast("Student Added Successfully");
 
     // clear form
     document.getElementById("studentName").value = "";
@@ -212,7 +211,7 @@ loadStudents();
 
   } catch (err) {
     console.error(err);
-    alert("Failed to add student");
+    alert("Failed To Add Student");
   }
 }
 

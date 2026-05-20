@@ -38,27 +38,74 @@ async function init() {
     // SAVE BUTTON
 const saveBtn = document.getElementById("saveAttendanceBtn");
 if (saveBtn) {
-  saveBtn.addEventListener("click", submitAttendance);
+  saveBtn.addEventListener("click", async() => {
+    showLoader();
+    disableButton(saveBtn, "Saving...");
+
+    try{
+      await submitAttendance();
+
+    } catch(err){
+      console.error(err);
+      showToast("Save Failed", "error");
+
+    } finally {
+      hideLoader();
+      enableButton(saveBtn);
+    }
+  });
 }
 
 // MARK ABSENT
 const markAbsentBtn = document.getElementById("markAbsentBtn");
 if (markAbsentBtn) {
-  markAbsentBtn.addEventListener("click", markUnmarkedAsAbsent);
+  markAbsentBtn.addEventListener("click", async() => {
+    showLoader();
+    disableButton(markAbsentBtn);
+
+    try{
+      await markAbsentBtn();
+      
+    } finally {
+      hideLoader();
+      enableButton(markAbsentBtn);
+    }
+  });
 }
 
 // CLEAR MONTH
 const clearBtn = document.getElementById("clearMonthBtn");
 if (clearBtn) {
-  clearBtn.addEventListener("click", clearMonthAttendance);
+  clearBtn.addEventListener("click", async() => {
+    showLoader();
+    disableButton(clearBtn);
+
+    try{
+      await clearMonthAttendance();
+      
+    } finally {
+      hideLoader();
+      enableButton(clearBtn);
+    }
+  });
 }
 
 // RESET
 const resetBtn = document.getElementById("resetAttendanceBtn");
 if (resetBtn) {
-  resetBtn.addEventListener("click", fullResetAttendance);
-}
+  resetBtn.addEventListener("click", async() => {
+    showLoader();
+    disableButton(resetBtn);
 
+    try{
+      await fullResetAttendance();
+      
+    } finally {
+      hideLoader();
+      enableButton(resetBtn);
+    }
+  });
+}
     // ADD STUDENT BUTTON
     const btn = document.getElementById("addStudentBtn");
     if (btn) {

@@ -1,28 +1,23 @@
+/* NOTIFICATION*/
 .toast {
   position: fixed;
-
-  left: 37%;
-  bottom: 70px;
-
-  transform: translateX(-50%) translateY(20px);
-
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
   min-width: 220px;
   padding: 14px 18px;
   border-radius: 12px;
-
   color: white;
   font-weight: 600;
   z-index: 9999;
-
   opacity: 0;
-
   transition: all 0.3s ease;
-
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
-.toast.show{
-  opacity:1;
-  transform:translateY(0);
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-20px);
 }
 
 .toast-success{
@@ -40,3 +35,4 @@
 .toast-info{
   background:#2196f3;
 }
+

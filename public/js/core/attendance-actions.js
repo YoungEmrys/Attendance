@@ -28,20 +28,21 @@ function markUnmarkedAsAbsent() {
 async function submitAttendance() {
 
   const date = document.getElementById("datePicker").value;
-  if (!date) return alert("Select date first");
+  if (!date) return alert("Select Date First");
 const selectedDate = document.getElementById("datePicker").value;
 
 const holiday = await isHoliday(selectedDate);
 
 if(holiday){
   alert(
-    `Attendance disabled.\n${holiday.name} is a holiday.`
+    `Attendance disabled.\n${holiday.name} is a Holiday.`
   );
 
   return;
 }
 
 let attendance = await API.getAttendance();
+
 
   // Fill unmarked as absent
 const settings = getSettings();
@@ -79,16 +80,19 @@ attendance.push({
   })
 });
 
+
+
 await API.saveAttendance(attendance);
 
-  showToast("Attendance saved successfully");
+  showToast("Attendance Saved successfully");
 }
 
 
 // CLEAR MONTH
 
 async function clearMonthAttendance() {
-  if (!confirm("Clear this month's attendance?")) return;
+ const confirmed = await showConfirm("Delete Attendance for This Month?");
+  if (!confirmed) return;
 
   const date = document.getElementById("datePicker").value;
   if (!date) return;
@@ -101,7 +105,7 @@ async function clearMonthAttendance() {
 
   await API.saveAttendance(attendance);
 
-  alert("Month cleared");
+  showToast("Month Attendance Deleted");
 
   await loadAttendanceForDate(date);
 }
@@ -110,11 +114,12 @@ async function clearMonthAttendance() {
 // RESET ATTENDANCE
 
 async function fullResetAttendance() {
-  if (!confirm("Delete ALL attendance?")) return;
+  const confirmed = await showConfirm("Delete Attendance for all the Months?");
+  if (!confirmed) return;
 
 await API.saveAttendance([]);
 
-  alert("All attendance deleted");
+  showToast("All Attendance Cleared");
 
   const date = document.getElementById("datePicker").value;
   await loadAttendanceForDate(date);
