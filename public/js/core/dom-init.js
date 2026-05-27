@@ -168,3 +168,12 @@ renderDashboard();
 
 })
 
+// USERS INIT
+async function initUsersPage(){
+
+  await checkAuth();
+  await checkAdmin();
+  await loadUsers();
+}
+initUsersPage();
+

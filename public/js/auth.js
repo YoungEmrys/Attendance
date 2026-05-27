@@ -72,7 +72,7 @@ async function restoreBackup(){
   const file = fileInput.files[0];
 
   if(!file){
-    alert("Select backup file");
+    showToast("Select Backup File", "warning");
     return;
   }
 
@@ -99,18 +99,17 @@ async function restoreBackup(){
     const data = await res.json();
 
     if(!res.ok){
-      alert(data.message);
+      showToast(data.message,"warning");
       return;
     }
 
-    alert("Database restored successfully");
+    showToast("Database Restored Successfully",);
 
     location.reload();
 
   }catch(err){
     console.error(err);
-
-    alert("Invalid backup file");
+    ("Invalid backup file");
   }
 }
 
@@ -155,7 +154,7 @@ window.login = async function login() {
   console.log("Login status:", res.status);   // DEBUG
 
   if (!res.ok) {
-    alert("Invalid login");
+    showToast("Please Enter Correct Credentials", "warning");
     return;
   }
 
@@ -177,9 +176,7 @@ window.logout = async function logout(){
   });
 
   sessionStorage.clear();
-
   window.location.replace ("login.html");
-
 }
 
 
@@ -234,7 +231,7 @@ async function addUser() {
   const role = document.getElementById("newRole").value;
 
 	if (!username || !password) {
-  alert("Please Enter Username and Password");
+  showToast("Please Enter Username and Password", "warning");
   return;
 }
 try{
@@ -243,23 +240,22 @@ try{
       username, password, role
     });
 
-    showToast("User Created");
+    showToast("User Created", "success");
 
     loadUsers();
 
   }catch(err){
 
-    alert(err.message);
+    showToast(err.message, "error");
 
   }
 }
 
 // DELETE USER
 async function deleteUser(username) {
-
-  if(!confirm(`Delete ${username}?`)){
-    return;
-  }
+  
+  const confirm = await showConfirm(`Delete ${username}?`);
+  if(!confirm) return;
 
   try{
     await removeUser(username);
@@ -269,7 +265,7 @@ async function deleteUser(username) {
     loadUsers();
 
   }catch(err){
-    alert(err.message);
+    showToast(err.message, "error");
   }
 }
 
@@ -328,7 +324,7 @@ async function resetPassword(username) {
     showToast("Password Reset Successfully");
 
   }catch(err){
-    alert(err.message);
+    showToast(err.message, "error");
   }
 }
 
@@ -363,7 +359,7 @@ const result = await res.json();
 const user = result.data;
 
     if(user.role !== "admin"){
-      alert("Access Restricted to Admin");
+      showToast("Access Restricted to Admin", "warning");
       window.location.href = "index.html";
     }
 
@@ -406,7 +402,7 @@ async function editUser(username){
   const roleLower = newRole.toLowerCase();
 
   if(roleLower !== "admin" && roleLower !== "user"){
-    alert("Invalid Role");
+    showToast("Invalid Role", "warning");
     return;
   }
 
@@ -420,7 +416,7 @@ async function editUser(username){
     loadUsers();
 
   }catch(err){
-    alert(err.message);
+    showToast(err.message, "warning");
   }
 }
 
@@ -434,7 +430,7 @@ async function signup() {
   const password = document.getElementById("signupPassword").value.trim();
 
   if (!username || !password) {
-    return alert("Enter Username and Password");
+    return showToast("Enter Username and Password", "warning");
   }
 
   try {
@@ -456,12 +452,14 @@ const res = await fetch("/api/signup",{
       return;
     }
     
-    showToast("Account created successfully!");
+    showToast("Account Created Successfully!");
+    await new Promise(r => setTimeout(r, 1000));
+
     window.location.href = "login.html";
 
   } catch (err) {
     console.error(err);
-    alert("Signup failed");
+    showToast("Signup Failed", "error");
   }
 }
 
@@ -478,7 +476,7 @@ const users = await getUsers();
 const user = users.find(u => u.username === username);
 
 if(!user){
-alert("User Not Found");
+showToast("User Not Found", "info");
 return;
 }
 
@@ -515,13 +513,13 @@ async function checkSession(){
 
 
 // AUTO LOGOUT SYSTEM
-const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 mins
+const SESSION_TIMEOUT =  30 * 60 * 1000; // 30 mins
 
 function resetSessionTimer() {
   sessionStorage.setItem("lastActivity", Date.now());
 }
 
-function checkSessionTimeout() {
+async function checkSessionTimeout() {
 
   const lastActivity = sessionStorage.getItem("lastActivity");
 
@@ -531,9 +529,8 @@ function checkSessionTimeout() {
   const timePassed = now - lastActivity;
 
   if (timePassed > SESSION_TIMEOUT) {
-
-    alert("Session Expired. Please Login Again.");
-
+    const confirmed = await showConfirm("Session Expired. Please Login To Continue.");
+    
     logout();
   }
 }
@@ -576,14 +573,6 @@ async function checkAuth(){
 }
 
 
-// INIT USERS
-async function initUsersPage(){
-
-  await checkAuth();
-  await checkAdmin();
-  await loadUsers();
-}
-
 document.addEventListener("keydown", function(e){
   if(e.key === "Enter"){ 
     const loginForm = document.getElementById("loginform");
@@ -595,13 +584,13 @@ document.addEventListener("keydown", function(e){
 });
 
 const protectedPages = [
-  "index.html",
   "students.html",
   "settings.html",
   "registered-students.html",
   "Holidays.html",
   "attendance.html",
-  "users.html"
+  "users.html",
+  "index.html"
 ];
 
 const currentPage =

@@ -7,7 +7,15 @@ async function generateMonthlyReport() {
 
 const attendance = await API.getAttendance();
 
-const students = await API.getStudents();
+let students = [];
+
+try {
+  students = await API.getStudents();
+  saveCachedStudents(students);
+
+} catch {
+  students = getCachedStudents();
+}
 
   const summary = {};
 
@@ -36,7 +44,15 @@ async function generateWeeklyReport(date) {
 
 const attendance = await API.getAttendance();
 
-const students = await API.getStudents();
+let students = [];
+
+try {
+  students = await API.getStudents();
+  saveCachedStudents(students);
+
+} catch {
+  students = getCachedStudents();
+}
 
   const summary = {};
 

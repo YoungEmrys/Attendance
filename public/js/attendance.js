@@ -13,14 +13,44 @@ window.attendanceData = {};
 
 async function loadAttendanceForDate(date) {
 
-const students = await API.getStudents();
+let students = [];
+
+try {
+  students = await API.getStudents();
+  saveCachedStudents(students);
+
+} catch {
+  students = getCachedStudents();
+}
 
  // only active students for attendance page
 const activeStudents = getActiveStudents(students);
 
 attendanceData = {};
-const attendance = await API.getAttendance() || [];
+
+let attendance = [];
+
+try {
+  attendance = await API.getAttendance();
+
+} catch {
+  attendance = await getOfflineAttendance();
+}
+
 const day = attendance.find(a => a.date === date);
+
+if (day) {
+
+  day.records.forEach(record => {
+
+    attendanceData[record.studentId] = {
+      status: record.status,
+      time: record.time
+    };
+
+  });
+
+}
 
 
   if (day) {

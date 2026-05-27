@@ -4,11 +4,19 @@ console.log("students.js Loaded");
 
 // STUDENTS DETAILS
 window.openStudentDetails = async function(id) {
-  const students = await API.getStudents();
+let students = [];
+
+try {
+  students = await API.getStudents();
+  saveCachedStudents(students);
+
+} catch {
+  students = getCachedStudents();
+}
   const student = students.find(s => String(s.id) === String(id));
 
   if (!student) {
-    alert("Student Not Found");
+    showToast("Student Not Found", "info");
     return;
   }
 
@@ -18,12 +26,19 @@ window.location.href = `student-details.html?id=${id}`;
 
 // EDIT STUDENT
 window.editStudent = async function(id) {
-const students = await API.getStudents();
+let students = [];
 
+try {
+  students = await API.getStudents();
+  saveCachedStudents(students);
+
+} catch {
+  students = getCachedStudents();
+}
   const student = students.find(s => String(s.id) === String(id));
 
   if (!student) {
-    showToast("Student not found");
+    showToast("Student Not Found", "info" );
     return;
   }
 
@@ -34,29 +49,36 @@ window.location.href = `edit-student.html?id=${id}`;
 //DELETE STUDENT
 window.deleteStudent = async function(id) {
   
-  const confirmed = await showConfirm("Delete this student?");
+  const confirmed = await showConfirm("Delete Student?");
 
 if (!confirmed) return;
 
   try {
     await API.deleteStudent(id);
-    showToast("Student Deleted Successfully");
+    showToast("Student Deleted Successfully", "success");
     loadStudents();
 
   } catch (err) {
     console.error(err);
-    showToast("Delete Failed");
+    showToast("Delete Failed", "error");
   }
 };
 
 window.toggleStudentStatus = async function(id, currentState) {
   try {
 
-const students = await API.getStudents();
+let students = [];
 
+try {
+  students = await API.getStudents();
+  saveCachedStudents(students);
+
+} catch {
+  students = getCachedStudents();
+}
     const student = students.find(s => String(s.id) === String(id));
 
-    if (!student) return alert("Student Not Found");
+    if (!student) return showToast("Student Not Found", "info");
 
     await API.updateStudent(id, {
       ...student,
@@ -67,7 +89,7 @@ const students = await API.getStudents();
 
   } catch (err) {
     console.error(err);
-    showToast("Failed to update status");
+    showToast("Failed to update status", "error");
   }
 };
 
@@ -86,8 +108,15 @@ async function loadStudents(search = "") {
   if (!container) return;
 
   try {
-const students = await API.getStudents();
+let students = [];
 
+try {
+  students = await API.getStudents();
+  saveCachedStudents(students);
+
+} catch {
+  students = getCachedStudents();
+}
     let filtered = students;
     filtered = getVisibleStudents(filtered);
 
@@ -154,19 +183,27 @@ async function addStudent() {
     const id = document.getElementById("studentId").value.trim();
 
     if (!name || !id) {
-      alert("Student Name and ID  Required");
+      showToast("Student Name and ID  Required", "warning");
       return;
     }
 
     if (!/^\d+$/.test(id)) {
-  alert("Student ID Must Contain Numbers Only");
+  showToast("Student ID Must Contain Numbers Only");
   return;
 }
 
-const students = await API.getStudents();
+let students = [];
+
+try {
+  students = await API.getStudents();
+  saveCachedStudents(students);
+
+} catch {
+  students = getCachedStudents();
+}
 
 if (students.some(s => normalizeId(s.id) === normalizeId(id))) {
-  alert("Student ID Already Exists");
+  showToast("Student ID Already Exists", "warning");
   return;
 }
 
@@ -186,7 +223,7 @@ if (students.some(s => normalizeId(s.id) === normalizeId(id))) {
       const sizeMB = file.size / (1024 * 1024);
 
       if (sizeMB > MAX_IMAGE_SIZE_MB) {
-    alert(`Image Too large. Max Allowed is ${MAX_IMAGE_SIZE_MB}MB`);
+    showToast(`Image Too large. Max Allowed is ${MAX_IMAGE_SIZE_MB}MB`, "warning");
     return;
   }
       const reader = new FileReader();
@@ -199,7 +236,7 @@ if (students.some(s => normalizeId(s.id) === normalizeId(id))) {
 
     await API.addStudent({ name, id, courses, image, active: true });
 
-    showToast("Student Added Successfully");
+    showToast("Student Added Successfully", "success");
 
     // clear form
     document.getElementById("studentName").value = "";
@@ -211,7 +248,7 @@ loadStudents();
 
   } catch (err) {
     console.error(err);
-    alert("Failed To Add Student");
+    showToast("Failed To Add Student", "error");
   }
 }
 

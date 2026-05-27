@@ -4,7 +4,16 @@ window.location.href="attendance.html";
 
 async function renderPerformance(){
 
-const students = await API.getStudents();
+let students = [];
+
+try {
+  students = await API.getStudents();
+  saveCachedStudents(students);
+
+} catch {
+  students = getCachedStudents();
+}
+
 const attendance = await API.getAttendance();
 	
 	if(!Array.isArray(students) || !Array.isArray(attendance)){

@@ -10,18 +10,26 @@ const params = new URLSearchParams(window.location.search);
 const studentId = params.get("id");
 
 if (!studentId) {
-  alert("No Student Selected");
+  showToast("No Student Selected", "warning");
   return;
 }
 
-const students = await API.getStudents();
+let students = [];
+
+try {
+  students = await API.getStudents();
+  saveCachedStudents(students);
+
+} catch {
+  students = getCachedStudents();
+}
 
 const student = students.find(
   s => String(s.id) === String(studentId)
 );
 
 if (!student) {
-  alert("Student Not Found");
+  showToast("Student Not Found", "info");
   return;
 } 
 
@@ -69,28 +77,36 @@ const params = new URLSearchParams(window.location.search);
 const studentId = params.get("id");
 
 if (!studentId) {
-  alert("No Student Selected");
+  showToast("No Student Selected", "warning");
   return;
 }
 
-const students = await API.getStudents();
+let students = [];
+
+try {
+  students = await API.getStudents();
+  saveCachedStudents(students);
+
+} catch {
+  students = getCachedStudents();
+}
 
 const student = students.find(
   s => String(s.id) === String(studentId)
 );
 
 if (!student) {
-  alert("Student Not Found");
+  showToast("Student Not Found", "info");
   return;
 } 
 
   const name = document.getElementById("editName").value.trim();
   const id = document.getElementById("editId").value.trim();
 
-  if (!name || !id) return alert("Student Name and ID Required");
+  if (!name || !id) return showToast("Student Name and ID Required", "warning");
 
   if (!/^\d+$/.test(id)) {
-  ("Student ID Must Contain Numbers Only");
+  showToast("Student ID Must Contain Numbers Only", "warning");
   return;
 }
 
@@ -106,7 +122,7 @@ if (!student) {
     const reader = new FileReader();
 
     if (sizeMB > MAX_IMAGE_SIZE_MB) {
-    alert(`Image too large. Max allowed is ${MAX_IMAGE_SIZE_MB}MB`);
+    showToast(`Image too large. Max allowed is ${MAX_IMAGE_SIZE_MB}MB`, "warning");
     return;
   }
     image = await new Promise(resolve => {
@@ -139,7 +155,7 @@ function addEditCourse() {
   if (!value) return;
 
   if (editCourses.includes(value)) {
-    alert("Course already added");
+    showToast("Course Already Added", "warning");
     return;
   }
 
@@ -185,7 +201,15 @@ if (!studentId) {
     "<p style='color:red'>No student selected</p>";
   return;
 }
-const students = await API.getStudents();
+let students = [];
+
+try {
+  students = await API.getStudents();
+  saveCachedStudents(students);
+
+} catch {
+  students = getCachedStudents();
+}
 
 const student = students.find(
   s => String(s.id) === String(studentId)

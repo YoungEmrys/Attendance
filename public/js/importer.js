@@ -6,7 +6,7 @@ async function handleFile() {
   const file = input.files[0];
 
   if (!file) {
-    alert("Please Select Exported Attendance File");
+    showToast("Please Select Exported Attendance File", "Warning");
     return;
   }
 
@@ -211,7 +211,15 @@ if (!/^\d{2}:\d{2}$/.test(time)) return;
 ====================================*/
 
 async function buildPreview(grouped) {
-const students = await API.getStudents();
+let students = [];
+
+try {
+  students = await API.getStudents();
+  saveCachedStudents(students);
+
+} catch {
+  students = getCachedStudents();
+}
 
   const studentMap = {};
   students.forEach(s => {
@@ -293,7 +301,11 @@ if (time) {
   ATTENDANCE PREVIEW FILTER
 ============================ */
 
-function applyPreviewFilter() {
+async function applyPreviewFilter() {
+    showLoader();
+  await new Promise(r => setTimeout(r, 1000));
+  hideLoader();
+
   if (!window.previewData) return;
 
   const start = document.getElementById("previewStart").value;
@@ -316,7 +328,12 @@ function applyPreviewFilter() {
    ATTENDANCE PREVIEW
 ========================= */
 
-function renderPreview(data) {
+async function renderPreview(data) {
+
+    showLoader();
+  await new Promise(r => setTimeout(r, 1000));
+  hideLoader();
+
   const container = document.getElementById("previewContainer");
   if (!container) return;
 

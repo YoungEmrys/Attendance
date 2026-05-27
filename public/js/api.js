@@ -1,5 +1,6 @@
 console.log("API.js Loaded");
 
+
 const API = {
 
   async request(url, options = {}) {
@@ -13,25 +14,35 @@ const API = {
       ...options
     });
 
-    let data;
+    let data = null;
 
     try {
-      data = await res.json();
-    } catch {
-      data = {
-        success: false,
-        message: "Invalid server response"
-      };
-    }
 
-    if (!res.ok) {
-      throw new Error(
-        data.message || "Request failed"
-      );
-    }
+    data = await res.clone().json();
 
-    return data.data;
-  },
+  } catch {
+
+    data = {
+      success: false,
+      message: "Invalid server response"
+    };
+
+  }
+
+  if (!res.ok) {
+
+    const offline = res.status === 503;
+
+    throw new Error(
+      offline
+        ? "Offline"
+        : (data.message || "Request Failed")
+    );
+  }
+
+  return data.data;
+},
+
 
   /* =========================
      STUDENTS

@@ -1,7 +1,12 @@
 console.log("attendance-actions.js Loaded")
 
 // MARK AS ABSENT
-function markUnmarkedAsAbsent() {
+async function markUnmarkedAsAbsent() {
+
+  showLoader();
+  await new Promise(r => setTimeout(r, 1000));
+  hideLoader();
+
   API.getStudents().then(students => {
     students = getActiveStudents(students);
     const settings = getSettings();
@@ -28,25 +33,43 @@ function markUnmarkedAsAbsent() {
 async function submitAttendance() {
 
   const date = document.getElementById("datePicker").value;
-  if (!date) return alert("Select Date First");
+  if (!date) return showToast("Select Date First", "warning");
+  
 const selectedDate = document.getElementById("datePicker").value;
 
 const holiday = await isHoliday(selectedDate);
 
 if(holiday){
-  alert(
-    `Attendance disabled.\n${holiday.name} is a Holiday.`
+  showToast(
+    `Attendance Disabled.\n${holiday.name} is a Holiday.`, 
+    "warning"
   );
 
   return;
 }
 
-let attendance = await API.getAttendance();
+let attendance = [];
 
+try{
+  attendance = await API.getAttendance();
+
+} catch {
+
+  attendance = await getOfflineAttendance();
+}
 
   // Fill unmarked as absent
 const settings = getSettings();
-const students = await API.getStudents();
+let students = [];
+
+try {
+  students = await API.getStudents();
+  saveCachedStudents(students);
+
+} catch {
+  students = getCachedStudents();
+}
+
 const activeStudents = getActiveStudents(students);
 
 if (settings.autoAbsent) {
@@ -63,11 +86,8 @@ if (settings.autoAbsent) {
   });
 }
 
-// remove existing same date
-attendance = attendance.filter(a => a.date !== date);
+const attendanceDay = {
 
-// add updated day
-attendance.push({
   date,
   records: activeStudents.map(s => {
     const id = normalizeId(s.id);
@@ -78,15 +98,96 @@ attendance.push({
       time: attendanceData[id]?.time || null
     };
   })
-});
+};
 
+// remove existing same date
+const updatedAttendance = [
+  ...attendance.filter(a => a.date !== date),
+  attendanceDay
+];
 
+showLoader();
 
-await API.saveAttendance(attendance);
+try {
+  await new Promise(
+    r => setTimeout(r, 2000)
+  );
 
-  showToast("Attendance Saved successfully");
+console.log("FINAL PAYLOAD:", attendance);
+
+   //ONLINE SAVE
+  try {
+    await API.saveAttendance(updatedAttendance); 
+
+    showToast(
+      "Attendance Saved Successfully",
+      "success"
+    );
+
+  } catch (err) {
+    console.error(err);
+
+    if (err.message === "Offline") {
+      
+/* =========================
+   OFFLINE SAVE
+========================= */
+
+    try {
+
+      await saveAttendanceOffline({
+        date,
+        records: attendanceDay.records
+      });
+
+      await addToSyncQueue({
+
+        id:
+          "attendance_" +
+          Date.now(),
+
+        type:
+          "attendance_save",
+
+        payload:
+          attendanceDay,
+
+        status:
+          "pending",
+
+        createdAt:
+          new Date().toISOString()
+
+      });
+
+    showToast(
+        "Saved Offline • Pending Sync",
+        "warning"
+      );
+
+    } catch (offlineErr) {
+
+      console.error(offlineErr);
+
+    showToast(
+      "Server Save Failed",
+      "error"
+    );
+  }
+} else {
+
+    console.error(err);
+
+    showToast(
+      "Server Save Failed",
+      "error"
+    );
+  }
 }
 
+} finally {
+  hideLoader();
+}}
 
 // CLEAR MONTH
 
@@ -100,9 +201,12 @@ async function clearMonthAttendance() {
   const month = date.slice(0, 7);
 
   let attendance = await API.getAttendance();
-
+ 
   attendance = attendance.filter(day => !day.date.startsWith(month));
 
+  showLoader();
+await new Promise(r => setTimeout(r, 2000));
+hideLoader();
   await API.saveAttendance(attendance);
 
   showToast("Month Attendance Deleted");
@@ -124,4 +228,3 @@ await API.saveAttendance([]);
   const date = document.getElementById("datePicker").value;
   await loadAttendanceForDate(date);
 };
-

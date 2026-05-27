@@ -18,7 +18,15 @@ async function renderDashboard() {
     parseInt(monthIndex) - 1
   );
 
-const students = await API.getStudents();
+let students = [];
+
+try {
+  students = await API.getStudents();
+  saveCachedStudents(students);
+
+} catch {
+  students = getCachedStudents();
+}
 
   const attendance = await API.getAttendance();
 

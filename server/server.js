@@ -205,7 +205,7 @@ app.post("/api/signup", (req, res) => {
   if (exists) {
     return res.status(400).json({
       success: false,
-      message: "Username already exists"
+      message: "Username Already Exists"
     });
   }
 
@@ -375,7 +375,7 @@ app.post("/api/holidays", checkAuth, (req,res)=>{
   if(exists){
     return res.status(400).json({
       success: false,
-      message:"Holiday already exists"
+      message:"Holiday Already Exists"
     });
   }
 
@@ -690,6 +690,10 @@ app.use((err, req, res, next) => {
 // =========================
 // START SERVER
 // =========================
-app.listen(PORT, () => {
-  console.log("Server running on port", PORT);
+app.listen(PORT, "0.0.0.0", () => {
+
+  console.log(
+    `Server running on:
+    http://localhost:${PORT}`
+  );
 });

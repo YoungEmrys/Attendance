@@ -15,4 +15,6 @@ students)
 11. Major achitectual changes  
 a. API.js (Centralized API layer), 
 b. server expect {success:true,data: [...]}, frontend response {result.data/data.data}
-c. seperation of modules (helpers,mini settings, students, edit student, utils, holiday, importer)
+c. seperation of modules (helpers,mini settings, students, edit student, utils, holiday, 
+importer, attendance, loader, modal, notification,)
+d. PWA system (manifest, service workers, offline state)

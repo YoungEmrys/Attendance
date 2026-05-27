@@ -3,7 +3,7 @@ console.log("ui.js Loaded")
 // NOTIFICATION
 function showToast(message, type = "success") {
 
-  const toast = document.createElement("div");
+  const toast = document.createElement("toast");
 
   toast.className = `toast toast-${type}`;
 
@@ -24,6 +24,7 @@ function showToast(message, type = "success") {
 
   }, 3000);
 }
+
 
 // CONFIRM MESSAGE
 function showConfirm(message) {

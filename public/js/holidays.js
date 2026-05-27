@@ -15,17 +15,19 @@ async function isHoliday(date){
 // GET HOLIDAYS
 async function getHolidays(){
 
-  const res = await fetch("/api/holidays",{
-    credentials:"include"
-  });
+  try {
+    const holidays = await API.getHolidays();
+    saveCachedHolidays(holidays);
 
-  const data = await res.json();
+    return holidays;
 
-  if(!res.ok){
-    throw new Error(data.message || "Failed to load holidays");
+  } catch (err) {
+    console.warn(
+      "Using Cached Holidays"
+    );
+
+    return getCachedHolidays();
   }
-
-  return data.data;
 }
 
 // ADD HOLIDAY
@@ -43,7 +45,7 @@ async function createHoliday(holiday){
   const result = await res.json();
 
   if(!res.ok){
-    throw new Error(data.message || "Failed to create holiday");
+    throw new Error, showToast(data.message || "Failed to Create Holiday", "error");
   }
 
   return result.data;
@@ -60,7 +62,7 @@ async function removeHoliday(date){
   const result = await res.json();
 
   if(!res.ok){
-    throw new Error(data.message || "Failed to delete holiday");
+    throw new Error, showToast(data.message || "Failed to Delete Holiday", "error");
   }
 
   return result.data;
@@ -77,7 +79,7 @@ async function loadHolidays(){
 
   }catch(err){
 
-    alert(err.message);
+    showToast(err.message, "error");
 
   }
 }
@@ -119,7 +121,7 @@ async function addHoliday(){
   const name = document.getElementById("holidayName").value.trim();
 
   if(!date || !name){
-    alert("Enter Holiday Date and Name");
+    showToast("Enter Holiday Date and Name", "warning");
     return;
   }
 
@@ -130,7 +132,7 @@ async function addHoliday(){
       name
     });
 
-    showToast("Holiday added");
+    showToast("Holiday Added");
 
     document.getElementById("holidayDate").value = "";
     document.getElementById("holidayName").value = "";
@@ -139,17 +141,16 @@ async function addHoliday(){
 
   }catch(err){
 
-    alert(err.message);
+    showToast(err.message, "error");
 
   }
 }
 
 // DELETE HOLIDAY
 async function deleteHoliday(date){
-
-  if(!confirm(`Delete holiday ${date}?`)){
-    return;
-  }
+  
+  const confirm = await showConfirm(`Delete Holiday ${date}?`);
+  if(!confirm) return;
 
   try{
 
@@ -161,7 +162,7 @@ async function deleteHoliday(date){
 
   }catch(err){
 
-    alert(err.message);
+    showToast(err.message, "error");
 
   }
 }

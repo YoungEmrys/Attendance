@@ -234,7 +234,7 @@ async function confirmReset() {
   saveSettings();
   applySettingsToUI();
 
-  showToast("Settings Reset");
+  showToast("Reset Successful");
   updateSummary();
 }
 
