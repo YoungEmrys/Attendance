@@ -15,11 +15,16 @@
       "username": "Rashida ",
       "password": "1234",
       "role": "user"
+    },
+    {
+      "username": "Rashida",
+      "password": "1234",
+      "role": "user"
     }
   ],
   "students": [
     {
-      "active": true,
+      "active": false,
       "name": "Esther Asare Appiah",
       "id": "001",
       "courses": [
@@ -121,7 +126,7 @@
       "image": "data:image/jpeg;base64,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"
     },
     {
-      "active": true,
+      "active": false,
       "name": "Josephine Cann",
       "id": "002",
       "courses": [
@@ -139,7 +144,7 @@
   ],
   "attendance": [
     {
-      "date": "2026-05-21",
+      "date": "2026-05-29",
       "records": [
         {
           "studentId": "001",
@@ -206,254 +211,120 @@
           "status": "absent",
           "time": null
         }
-      ]
+      ],
+      "updatedAt": "2026-05-29T20:50:20.602Z",
+      "updatedBy": "unknown",
+      "version": 1780087820602
     },
     {
-      "date": "2026-05-22",
-      "records": [
-        {
-          "studentId": "001",
-          "status": "absent",
-          "time": null
-        },
-        {
-          "studentId": "003",
-          "status": "absent",
-          "time": null
-        },
-        {
-          "studentId": "004",
-          "status": "absent",
-          "time": null
-        },
-        {
-          "studentId": "005",
-          "status": "absent",
-          "time": null
-        },
-        {
-          "studentId": "006",
-          "status": "absent",
-          "time": null
-        },
-        {
-          "studentId": "007",
-          "status": "absent",
-          "time": null
-        },
-        {
-          "studentId": "008",
-          "status": "absent",
-          "time": null
-        },
-        {
-          "studentId": "009",
-          "status": "absent",
-          "time": null
-        },
-        {
-          "studentId": "010",
-          "status": "absent",
-          "time": null
-        },
-        {
-          "studentId": "011",
-          "status": "absent",
-          "time": null
-        },
-        {
-          "studentId": "012",
-          "status": "absent",
-          "time": null
-        },
-        {
-          "studentId": "002",
-          "status": "absent",
-          "time": null
-        },
-        {
-          "studentId": "3254659",
-          "status": "absent",
-          "time": null
-        }
-      ]
-    },
-    {
-      "date": "2026-05-01",
+      "date": "2026-05-20",
       "records": [
         {
           "studentId": "001",
           "status": "ontime",
-          "time": "00:52"
+          "time": null
         },
         {
           "studentId": "003",
-          "status": "absent",
-          "time": "--:--"
-        },
-        {
-          "studentId": "004",
-          "status": "absent",
-          "time": "--:--"
-        },
-        {
-          "studentId": "005",
-          "status": "absent",
-          "time": "--:--"
-        },
-        {
-          "studentId": "006",
-          "status": "absent",
-          "time": "--:--"
-        },
-        {
-          "studentId": "007",
-          "status": "absent",
-          "time": "--:--"
-        },
-        {
-          "studentId": "008",
-          "status": "absent",
-          "time": "--:--"
-        },
-        {
-          "studentId": "009",
-          "status": "absent",
-          "time": "--:--"
-        },
-        {
-          "studentId": "010",
-          "status": "absent",
-          "time": "--:--"
-        },
-        {
-          "studentId": "011",
-          "status": "absent",
-          "time": "--:--"
-        },
-        {
-          "studentId": "012",
-          "status": "absent",
-          "time": "--:--"
-        },
-        {
-          "studentId": "002",
-          "status": "absent",
-          "time": "--:--"
-        },
-        {
-          "studentId": "3254659",
-          "status": "absent",
-          "time": "--:--"
-        }
-      ]
-    },
-    {
-      "date": "2026-05-02",
-      "records": [
-        {
-          "studentId": "001",
           "status": "late",
-          "time": "14:08"
-        },
-        {
-          "studentId": "003",
-          "status": "absent",
-          "time": "--:--"
+          "time": null
         },
         {
           "studentId": "004",
-          "status": "absent",
-          "time": "--:--"
+          "status": "ontime",
+          "time": null
         },
         {
           "studentId": "005",
-          "status": "absent",
-          "time": "--:--"
+          "status": "late",
+          "time": null
         },
         {
           "studentId": "006",
-          "status": "absent",
-          "time": "--:--"
+          "status": "ontime",
+          "time": null
         },
         {
           "studentId": "007",
-          "status": "absent",
-          "time": "--:--"
+          "status": "late",
+          "time": null
         },
         {
           "studentId": "008",
           "status": "absent",
-          "time": "--:--"
+          "time": null
         },
         {
           "studentId": "009",
           "status": "absent",
-          "time": "--:--"
+          "time": null
         },
         {
           "studentId": "010",
           "status": "absent",
-          "time": "--:--"
+          "time": null
         },
         {
           "studentId": "011",
           "status": "absent",
-          "time": "--:--"
+          "time": null
         },
         {
           "studentId": "012",
           "status": "absent",
-          "time": "--:--"
+          "time": null
         },
         {
           "studentId": "002",
           "status": "absent",
-          "time": "--:--"
+          "time": null
         },
         {
           "studentId": "3254659",
           "status": "absent",
-          "time": "--:--"
+          "time": null
         }
-      ]
+      ],
+      "updatedAt": "2026-05-29T21:38:59.904Z",
+      "updatedBy": "unknown",
+      "version": 1780090739904
     },
     {
-      "date": "2026-05-25",
+      "date": "2026-05-31",
       "records": [
         {
           "studentId": "001",
-          "status": "absent",
+          "status": "ontime",
           "time": null
         },
         {
           "studentId": "003",
-          "status": "absent",
+          "status": "ontime",
           "time": null
         },
         {
           "studentId": "004",
-          "status": "absent",
+          "status": "ontime",
           "time": null
         },
         {
           "studentId": "005",
-          "status": "absent",
+          "status": "late",
           "time": null
         },
         {
           "studentId": "006",
-          "status": "absent",
+          "status": "late",
           "time": null
         },
         {
           "studentId": "007",
-          "status": "absent",
+          "status": "ontime",
           "time": null
         },
         {
           "studentId": "008",
-          "status": "absent",
+          "status": "late",
           "time": null
         },
         {
@@ -478,42 +349,40 @@
         },
         {
           "studentId": "002",
-          "status": "absent",
+          "status": "ontime",
           "time": null
         },
         {
           "studentId": "3254659",
-          "status": "absent",
+          "status": "ontime",
           "time": null
         }
-      ]
+      ],
+      "updatedAt": "2026-05-31T21:41:49.243Z",
+      "updatedBy": "unknown",
+      "version": 1780263709243
     },
     {
-      "date": "2026-05-26",
+      "date": "2026-06-15",
       "records": [
         {
-          "studentId": "001",
-          "status": "absent",
-          "time": null
-        },
-        {
           "studentId": "003",
-          "status": "absent",
+          "status": "ontime",
           "time": null
         },
         {
           "studentId": "004",
-          "status": "absent",
+          "status": "late",
           "time": null
         },
         {
           "studentId": "005",
-          "status": "absent",
+          "status": "late",
           "time": null
         },
         {
           "studentId": "006",
-          "status": "absent",
+          "status": "ontime",
           "time": null
         },
         {
@@ -523,12 +392,12 @@
         },
         {
           "studentId": "008",
-          "status": "absent",
+          "status": "late",
           "time": null
         },
         {
           "studentId": "009",
-          "status": "absent",
+          "status": "late",
           "time": null
         },
         {
@@ -547,7 +416,65 @@
           "time": null
         },
         {
-          "studentId": "002",
+          "studentId": "3254659",
+          "status": "absent",
+          "time": null
+        }
+      ],
+      "updatedAt": "2026-06-03T04:59:04.199Z",
+      "updatedBy": "unknown",
+      "version": 1780462744199
+    },
+    {
+      "date": "2026-06-16",
+      "records": [
+        {
+          "studentId": "003",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "004",
+          "status": "late",
+          "time": null
+        },
+        {
+          "studentId": "005",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "006",
+          "status": "absent",
+          "time": null
+        },
+        {
+          "studentId": "007",
+          "status": "late",
+          "time": null
+        },
+        {
+          "studentId": "008",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "009",
+          "status": "late",
+          "time": null
+        },
+        {
+          "studentId": "010",
+          "status": "absent",
+          "time": null
+        },
+        {
+          "studentId": "011",
+          "status": "absent",
+          "time": null
+        },
+        {
+          "studentId": "012",
           "status": "absent",
           "time": null
         },
@@ -556,7 +483,325 @@
           "status": "absent",
           "time": null
         }
-      ]
+      ],
+      "updatedAt": "2026-06-03T04:59:29.306Z",
+      "updatedBy": "unknown",
+      "version": 1780462769306
+    },
+    {
+      "date": "2026-06-03",
+      "records": [
+        {
+          "studentId": "003",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "004",
+          "status": "late",
+          "time": null
+        },
+        {
+          "studentId": "005",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "006",
+          "status": "late",
+          "time": null
+        },
+        {
+          "studentId": "007",
+          "status": "absent",
+          "time": null
+        },
+        {
+          "studentId": "008",
+          "status": "absent",
+          "time": null
+        },
+        {
+          "studentId": "009",
+          "status": "late",
+          "time": null
+        },
+        {
+          "studentId": "010",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "011",
+          "status": "absent",
+          "time": null
+        },
+        {
+          "studentId": "012",
+          "status": "absent",
+          "time": null
+        },
+        {
+          "studentId": "3254659",
+          "status": "absent",
+          "time": null
+        }
+      ],
+      "updatedAt": "2026-06-03T05:52:19.110Z",
+      "updatedBy": "unknown",
+      "version": 1780465939110
+    },
+    {
+      "date": "2026-06-04",
+      "records": [
+        {
+          "studentId": "003",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "004",
+          "status": "late",
+          "time": null
+        },
+        {
+          "studentId": "005",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "006",
+          "status": "absent",
+          "time": null
+        },
+        {
+          "studentId": "007",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "008",
+          "status": "late",
+          "time": null
+        },
+        {
+          "studentId": "009",
+          "status": "absent",
+          "time": null
+        },
+        {
+          "studentId": "010",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "011",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "012",
+          "status": "absent",
+          "time": null
+        },
+        {
+          "studentId": "3254659",
+          "status": "absent",
+          "time": null
+        }
+      ],
+      "updatedAt": "2026-06-03T05:53:26.148Z",
+      "updatedBy": "unknown",
+      "version": 1780466006149
+    },
+    {
+      "date": "2026-06-05",
+      "records": [
+        {
+          "studentId": "003",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "004",
+          "status": "late",
+          "time": null
+        },
+        {
+          "studentId": "005",
+          "status": "absent",
+          "time": null
+        },
+        {
+          "studentId": "006",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "007",
+          "status": "late",
+          "time": null
+        },
+        {
+          "studentId": "008",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "009",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "010",
+          "status": "absent",
+          "time": null
+        },
+        {
+          "studentId": "011",
+          "status": "absent",
+          "time": null
+        },
+        {
+          "studentId": "012",
+          "status": "late",
+          "time": null
+        },
+        {
+          "studentId": "3254659",
+          "status": "absent",
+          "time": null
+        }
+      ],
+      "updatedAt": "2026-06-03T05:54:12.780Z",
+      "updatedBy": "unknown",
+      "version": 1780466052780
+    },
+    {
+      "date": "2026-06-08",
+      "records": [
+        {
+          "studentId": "003",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "004",
+          "status": "late",
+          "time": null
+        },
+        {
+          "studentId": "005",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "006",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "007",
+          "status": "absent",
+          "time": null
+        },
+        {
+          "studentId": "008",
+          "status": "late",
+          "time": null
+        },
+        {
+          "studentId": "009",
+          "status": "absent",
+          "time": null
+        },
+        {
+          "studentId": "010",
+          "status": "late",
+          "time": null
+        },
+        {
+          "studentId": "011",
+          "status": "absent",
+          "time": null
+        },
+        {
+          "studentId": "012",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "3254659",
+          "status": "absent",
+          "time": null
+        }
+      ],
+      "updatedAt": "2026-06-03T06:01:18.739Z",
+      "updatedBy": "unknown",
+      "version": 1780466478739
+    },
+    {
+      "date": "2026-06-09",
+      "records": [
+        {
+          "studentId": "003",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "004",
+          "status": "late",
+          "time": null
+        },
+        {
+          "studentId": "005",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "006",
+          "status": "late",
+          "time": null
+        },
+        {
+          "studentId": "007",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "008",
+          "status": "late",
+          "time": null
+        },
+        {
+          "studentId": "009",
+          "status": "absent",
+          "time": null
+        },
+        {
+          "studentId": "010",
+          "status": "late",
+          "time": null
+        },
+        {
+          "studentId": "011",
+          "status": "ontime",
+          "time": null
+        },
+        {
+          "studentId": "012",
+          "status": "absent",
+          "time": null
+        },
+        {
+          "studentId": "3254659",
+          "status": "absent",
+          "time": null
+        }
+      ],
+      "updatedAt": "2026-06-03T06:02:00.379Z",
+      "updatedBy": "unknown",
+      "version": 1780466520379
     }
   ],
   "settings": {},

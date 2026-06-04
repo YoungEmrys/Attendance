@@ -177,3 +177,37 @@ async function initUsersPage(){
 }
 initUsersPage();
 
+// REFRESH HOOK 
+window.AppState = {
+  listeners: [],
+
+  notify() {
+    this.listeners.forEach(fn => fn());
+  },
+
+  subscribe(fn) {
+    this.listeners.push(fn);
+  }
+};
+
+window.addEventListener(
+  "storage",
+  e => {
+
+    if (
+      e.key === "forceOffline"
+    ) {
+
+      console.log(
+        "Offline mode changed"
+      );
+
+      loadAttendanceForDate(
+        document.getElementById(
+          "datePicker"
+        ).value
+      );
+    }
+  }
+);
+

@@ -214,7 +214,7 @@ async function buildPreview(grouped) {
 let students = [];
 
 try {
-  students = await API.getStudents();
+  students = await DataLayer.getStudents();
   saveCachedStudents(students);
 
 } catch {
@@ -368,7 +368,7 @@ async function renderPreview(data) {
 async function confirmImport() {
   if (!window.previewData) return;
 
-let attendance = await API.getAttendance() || [];
+let attendance = await DataLayer.getAttendance() || [];
 
 window.previewData.forEach(day => {
   let existing = attendance.find(a => a.date === day.date);

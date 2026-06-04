@@ -5,10 +5,11 @@ console.log("db.js Loaded");
 ========================= */
 
 const DB_NAME = "attendance_app_db";
-const DB_VERSION = 2;
+const DB_VERSION = 4;
 
 const SYNC_STORE = "syncQueue";
 const ATTENDANCE_STORE = "attendance";
+const STUDENT_STORE = "students";
 
 /* =========================
    OPEN DATABASE
@@ -37,9 +38,7 @@ function openDB() {
         )
       ) {
 
-        const syncStore =
-          db.createObjectStore(
-            SYNC_STORE,
+        const syncStore = db.createObjectStore(SYNC_STORE,
             {
               keyPath: "id"
             }
@@ -55,27 +54,30 @@ function openDB() {
 
       }
       if (  
-        !db.objectStoreNames.contains(    
-            ATTENDANCE_STORE 
-        )
+        !db.objectStoreNames.contains(ATTENDANCE_STORE)
     ) {  
-        db.createObjectStore(    
-            ATTENDANCE_STORE,    
+        db.createObjectStore(ATTENDANCE_STORE,    
             {
       keyPath: "date"    
     }  
-);
+  );
 
-}
-    };
-    
-    request.onsuccess = () => {
-      resolve(request.result);
-    };
+    } 
+      if (  
+        !db.objectStoreNames.contains(STUDENT_STORE)
+    ) {    
+    db.createObjectStore(STUDENT_STORE,  
+      { 
+        keyPath: "id"
+  
+      }
+    );
+  }
 
-    request.onerror = () => {
-      reject(request.error);
-    };
+    }    
+    request.onsuccess = () => {resolve(request.result);};
+
+    request.onerror = () => {reject(request.error);};
 
   });
 
@@ -96,19 +98,43 @@ async function addToSyncQueue(item) {
       "readwrite"
     );
 
-    const store =
-      tx.objectStore(SYNC_STORE);
+    const store = tx.objectStore(SYNC_STORE);
 
-    const request =
-      store.add(item);
+    const request = store.add(item);
 
-    request.onsuccess = () => {
-      resolve(true);
-    };
+    request.onsuccess = () => {resolve(true);};
 
     request.onerror = () => {
       reject(request.error);
     };
+
+  });
+
+}
+
+/* =========================
+   LOAD ATTENDANCE LOCALLY
+========================= */
+async function getOfflineAttendance() {
+
+  const db = await openDB();
+
+  return new Promise((resolve, reject) => {
+
+    const tx = db.transaction(
+      ATTENDANCE_STORE,
+      "readonly"
+    );
+
+    const store = tx.objectStore(
+        ATTENDANCE_STORE
+      );
+
+    const request = store.getAll();
+
+    request.onsuccess = () => {resolve(request.result);};
+
+    request.onerror = () => {reject(request.error);};
 
   });
 
@@ -128,60 +154,71 @@ async function saveAttendanceOffline(day) {
       "readwrite"
     );
 
-    const store =
-      tx.objectStore(
-        ATTENDANCE_STORE
-      );
+    const store = tx.objectStore(ATTENDANCE_STORE);
 
-    const request =
-      store.put(day);
+    const request = store.put(day);
 
-    request.onsuccess = () => {
-      resolve(true);
+    request.onsuccess = () => {resolve(true);};
+
+    request.onerror = () => {reject(request.error);
     };
-
-    request.onerror = () => {
-      reject(request.error);
-    };
-
   });
 
 }
 
-
 /* =========================
-   LOAD ATTENDANCE LOCALLY
+   LOAD STUDENT LOCALLY
 ========================= */
-async function getOfflineAttendance() {
+async function getOfflineStudents() {
 
   const db = await openDB();
 
   return new Promise((resolve, reject) => {
 
     const tx = db.transaction(
-      ATTENDANCE_STORE,
-      "readonly"
-    );
-
-    const store =
-      tx.objectStore(
-        ATTENDANCE_STORE
+        "students",
+        "readonly"
       );
 
-    const request =
-      store.getAll();
+    const store = tx.objectStore("students");
 
-    request.onsuccess = () => {
-      resolve(request.result);
-    };
+    const request = store.getAll();
 
-    request.onerror = () => {
-      reject(request.error);
-    };
+    request.onsuccess = () => resolve(request.result);
 
+    request.onerror = () => reject(request.error);
   });
 
 }
+
+/* =========================
+   SAVE STUDENT LOCALLY
+========================= */
+async function saveOfflineStudents(students) {
+
+  const db = await openDB();
+
+  return new Promise((resolve, reject) => {
+
+    const tx = db.transaction(
+        STUDENT_STORE,
+        "readwrite"
+      );
+
+    const store = tx.objectStore(STUDENT_STORE);
+
+    store.clear();
+
+    students.forEach(student => {
+      store.put(student);
+    });
+
+    tx.oncomplete = () => resolve();
+
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
 
 /* =========================
    GET ALL PENDING SYNCS
@@ -300,9 +337,56 @@ function getCachedHolidays(){
       "cached_holidays"
     ) || "[]"
   );
+}
+
+async function saveAllOfflineAttendance(data) {
+
+  const db = await openDB();
+
+  return new Promise((resolve, reject) => {
+
+    const tx = db.transaction(
+      ATTENDANCE_STORE,
+      "readwrite"
+    );
+
+    const store = tx.objectStore(ATTENDANCE_STORE);
+
+    const request = store.clear();
+
+    request.onsuccess = () => {
+
+      data.forEach(item => store.put(item));
+      
+      resolve(true);
+    };
+
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function testSyncQueue() {
+
+  await addToSyncQueue({
+    id: crypto.randomUUID(),
+  type: "student_update",
+  payload: {
+    id: "001",
+    name: "Esther",
+    active: false
+  }
+  });
+
+  console.log(
+    await getPendingSyncs()
+  );
 
 }
 
+
+window.getOfflineStudents = getOfflineStudents;
+window.saveOfflineStudents = saveOfflineStudents;
+window.saveAllOfflineAttendance = saveAllOfflineAttendance;
 window.saveCachedHolidays = saveCachedHolidays;
 window.getCachedHolidays = getCachedHolidays;
 window.openDB = openDB;

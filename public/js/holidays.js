@@ -16,7 +16,7 @@ async function isHoliday(date){
 async function getHolidays(){
 
   try {
-    const holidays = await API.getHolidays();
+    const holidays = await DataLayer.getHolidays();
     saveCachedHolidays(holidays);
 
     return holidays;

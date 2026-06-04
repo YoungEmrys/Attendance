@@ -37,58 +37,57 @@ function setStorageMode(mode) {
 
 }
 
+
 /* =========================
    DATA LAYER
 ========================= */
 
 const DataLayer = {
 
-  // STUDENTS
-  async getStudents() {
+// STUDENTS
+async getStudents() {
 
-    const mode = getStorageMode();
+  const mode = getStorageMode();
 
-    // LOCAL FIRST    
-    if (mode === STORAGE_MODE.LOCAL_FIRST) {
+  // LOCAL FIRST
+  if (mode === STORAGE_MODE.LOCAL_FIRST) {
 
-      try {
-        const students = await API.getStudents();
-        saveCachedStudents(students);
+    let local = await getOfflineStudents();
 
-        return students;
+    if (local.length === 0) {
 
-      } catch {
-        console.warn(
-          "Using Cached Students"
-        );
+      const students = await API.getStudents();
 
-        return getCachedStudents();
+      await saveOfflineStudents(students);
 
-      }
+      return students;
 
     }
 
-    // SERVER FIRST
-    else {
+    return local;
 
-      try {
-        const students = await API.getStudents();
-        saveCachedStudents(students);
+  }
 
-        return students;
+  // SERVER FIRST
+  else {
 
-      } catch (err) {
-        console.warn(
-          "Server Failed, Using Cache"
-        );
+    try {
 
-        return getCachedStudents();
+      const students = await API.getStudents();
 
-      }
+      await saveOfflineStudents(students);
+
+      return students;
+
+    } catch {
+
+      return await getOfflineStudents();
 
     }
 
-  },
+  }
+
+},
 
   /* =========================
      HOLIDAYS
@@ -118,12 +117,52 @@ const DataLayer = {
         ) || "[]"
       );
     }
+  },
+
+/* ==============================
+   ATTENDANCE (LOCAL FIRST CORE)
+================================= */
+
+async getAttendance() {
+
+  const mode = getStorageMode();
+
+
+  try {
+
+    const attendance = await API.getAttendance();
+
+    await saveAllOfflineAttendance(attendance || []);
+
+    return attendance || [];
+
+  } catch {
+
+    return await getOfflineAttendance();
+
   }
+
+},
+
+// WRITE FLOW
+async saveAttendance(day) {
+
+  // 1. ALWAYS SAVE LOCALLY FIRST
+  await saveAttendanceOffline(day);
+
+  // 2. UPDATE LOCAL INDEX (overwrite same date)
+  const all = await getOfflineAttendance();
+
+  const updated = [
+    ...all.filter(a => a.date !== day.date),
+    day
+  ];
+
+  await saveAllOfflineAttendance(updated);
+
+}
 };
 
-/* =========================
-   EXPORTS
-========================= */
 
 window.DataLayer = DataLayer;
 window.STORAGE_MODE = STORAGE_MODE;

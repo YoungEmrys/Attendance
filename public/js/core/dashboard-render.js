@@ -21,14 +21,14 @@ async function renderDashboard() {
 let students = [];
 
 try {
-  students = await API.getStudents();
+  students = await DataLayer.getStudents();
   saveCachedStudents(students);
 
 } catch {
   students = getCachedStudents();
 }
 
-  const attendance = await API.getAttendance();
+  const attendance = await DataLayer.getAttendance();
 
     let summary = {};
     

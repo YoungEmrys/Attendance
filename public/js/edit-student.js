@@ -17,16 +17,14 @@ if (!studentId) {
 let students = [];
 
 try {
-  students = await API.getStudents();
-  saveCachedStudents(students);
+students = await DataLayer.getStudents();  
+saveCachedStudents(students);
 
 } catch {
   students = getCachedStudents();
 }
 
-const student = students.find(
-  s => String(s.id) === String(studentId)
-);
+const student = students.find(s => String(s.id) === String(studentId));
 
 if (!student) {
   showToast("Student Not Found", "info");
@@ -84,8 +82,8 @@ if (!studentId) {
 let students = [];
 
 try {
-  students = await API.getStudents();
-  saveCachedStudents(students);
+students = await DataLayer.getStudents();  
+saveCachedStudents(students);
 
 } catch {
   students = getCachedStudents();
@@ -131,20 +129,38 @@ if (!student) {
     });
   }
 
-  const active =
-  document.getElementById("editActive").checked;
+  const active = document.getElementById("editActive").checked;
 
-  await API.updateStudent(student.id, {
-    name,
-    id,
-    active,
-    courses: editCourses,
-    image
-  });
+  const localStudents = await getOfflineStudents();
+
+  const updatedStudent = {
+  name,
+  id,
+  courses: editCourses,
+  image,
+  active,
+  originalId: studentId
+};
+
+const originalId = studentId;
+
+const index = localStudents.findIndex(s => s.id === originalId);
+
+localStudents[index] = updatedStudent;
+
+await saveOfflineStudents(localStudents);
+
+await addToSyncQueue({
+  id: crypto.randomUUID(),
+  type: "student_update",
+  payload: updatedStudent
+});
   
   console.log("UPDATED STUDENT ACTIVE:", active);
 
   showToast("Student Updated");
+
+  window.location.href = "registered-Students.html"; 
 }
 
 // UPDATE COURSE
@@ -204,7 +220,7 @@ if (!studentId) {
 let students = [];
 
 try {
-  students = await API.getStudents();
+  students = await DataLayer.getStudents();
   saveCachedStudents(students);
 
 } catch {
@@ -252,6 +268,7 @@ if (coursesContainer) {
 
 }
 
+window.loadStudentDetails = loadStudentDetails;
 window.saveEdit = saveEdit;
 window.removeEditCourse = removeEditCourse;
 window.goBack = goBack;

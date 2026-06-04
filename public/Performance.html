@@ -13,6 +13,7 @@
 
 <link rel="icon" href="icons/icon-192.png">
 <link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="css/style.css">
 
   <script src="js/core/db.js"></script>
   <script src="js/api.js"></script>
@@ -20,24 +21,9 @@
   <script src="js/core/pwa.js"></script>
 	<script src="js/dashboard.js"></script>	
   <script src="js/performance.js"> </script>
+  <script src="/js/core/data-layer.js"></script>
 	
 <style>
-
-body{
-font-family: Arial;
-background: linear-gradient(135deg,#667eea,#764ba2);
-padding:20px;
-margin:0;
-}
-
-.container{
-background: rgba(255,255,255,0.9);
-max-width:1000px;
-margin:auto;
-padding:25px;
-border-radius:12px;
-box-shadow:0 10px 20px rgba(0,0,0,0.2);
-}
 
 table{
 width:100%;
@@ -55,153 +41,30 @@ th{
 background:#f0f0f0;
 }
 
-button{
-padding:6px 10px;
-margin-top:10px;
-background:#4CAF50;
-color:white;
-border:none;
-border-radius:6px;
-cursor:pointer;
-}
-	
-    input, button {
-      padding: 6px;
-      margin: 0.7% 0.5%;
-    }
-
-	  
-.navbar{
-  width:94%;
-  justify-content:center;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:14px;
-
-  padding:1.5% 3%;
-
-  background:rgba(255,255,255,0.25);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-
-  border-radius:20px;
-  border:1px solid rgba(255,255,255,0.4);
-
-  box-shadow:0 8px 20px rgba(0,0,0,0.15);
-}
-/* NAV BUTTONS */
-
-.navbar button{
-
-  padding:10px 20px;
-  border:none;
-  border-radius:25px;
-
-  background:rgba(255,255,255,0.6);
-  backdrop-filter:blur(5px);
-
-  color:#333;
-  font-weight:bold;
-  font-size:14px;
-
-  cursor:pointer;
-
-  transition:all 0.3s ease;
-
-  box-shadow:0 5px 12px rgba(0,0,0,0.15);
-}
-
-.navbar button:hover{
-  background:#667eea;
-  color:white;
-
-  transform:translateY(-3px);
-  box-shadow:0 10px 20px rgba(0,0,0,0.25);
-}
-
-/* ACTIVE PAGE */
-
-.navbar button.active{
-  background:#667eea;
-  color:white;
-}
-
-/* MOBILE */
-
-@media(max-width:700px){
-
-  .navbar{
-    flex-direction:column;
-    align-items:flex-start;   /* aligns menu to left */
-    display:none;
-    width:94%;  }
-
-  .navbar.show{
-    display:flex;
-  }
-
-  .navbar button{
-    width:100%;
-    text-align:left;       
-  }
-
-}
-
-    .tm button{
-  float: right;
-  background-color:rgb(255, 255, 255);
-  color: #5f7af0; 
-  padding:6px 12px;
-  margin: 10px 0 0 8px;
-  border:none;
-  border-radius:8px;
-  backdrop-filter:blur(5px);
-  font-weight:bold;
-  font-size:16px;
-  cursor:pointer;
-  transition:all 0.2s ease;
-}
-
-.tm button:hover{
-  transform: translateY(-3px);
-}
-
-.logt{
- 
-  color: #f0f0f0;
-    background:#667eea;
-
-}
-
-.settings {
-  float: right; 
-  background-color: transparent; 
-  font-size: 20px;
-}
-
-.settings:hover{
-  transform: translateY(-3);
-}
-
 
 
 </style>
 
 </head>
 
-<body onload="checkAuth()">
+<body onload="checkAuth(); displayUser()">
 
-<div class="container">
+  <div class="topbar">
 
-	<button class="settings" onclick="window.location.href = 'settings.html'">⚙️</button>
+  <div class="top-left">
 
-    <div class="tm">    
-      <button class="logt" onclick="logout()" class="logt">Logout</button>
-<button style="float: left;" onclick="toggleMenu()">☰</button>
-	<div id="userProfile" style="float: right; margin-top: 14px;font-weight: bold;" ></div>
-</div><br><br><br>
-  
- 		
+    <img style="height: 40px;" src="Upload/p2f logo.png" alt="Logo">
+
+    <div class="user-name">
+      <span id="currentUser"></span>
+    </div>
+  </div>
+
+  <button class="settings-btn" onclick="window.location.href='settings.html'">
+    ⚙️
+  </button>
+
+</div>
 
   		<div class="navbar" id="navbar">
 
@@ -229,11 +92,43 @@ onclick="window.location.href='registered-students.html'">
 
 </div>
 
-<h1>Student Performance</h1>
+<div class="container wide">
+
+<h2>Student Performance</h2>
 
 <div id="performanceTable"></div>
 
 </div>
+
+ <div class="bottom-nav">
+
+  <button class="nav-item"onclick="window.location.href='index.html'">
+    <span>🏠</span>
+    <small>Home</small>
+  </button>
+
+  <button class="nav-item" onclick="window.location.href='students.html'">
+    <span>📝</span>
+    <small>Students</small>
+  </button>
+
+  <button class="nav-item" onclick="window.location.href='registered-students.html'">
+    <span>👨‍🎓</span>
+    <small>Registered</small>
+  </button>
+
+  <button class="nav-item" onclick="window.location.href='attendance.html'">
+    <span>📋</span>
+    <small>Attendance</small>
+  </button>
+
+  <button class="nav-item active" onclick="window.location.href='performance.html'">
+    <span>⭐</span>
+    <small>Performance</small>
+  </button>
+
+</div>
+
 
 </body>
 </html>

@@ -16,8 +16,8 @@ async function loadAttendanceForDate(date) {
 let students = [];
 
 try {
-  students = await API.getStudents();
-  saveCachedStudents(students);
+students = await DataLayer.getStudents();
+saveCachedStudents(students);
 
 } catch {
   students = getCachedStudents();
@@ -31,7 +31,7 @@ attendanceData = {};
 let attendance = [];
 
 try {
-  attendance = await API.getAttendance();
+  attendance = await DataLayer.getAttendance();
 
 } catch {
   attendance = await getOfflineAttendance();
@@ -63,7 +63,7 @@ if (day) {
     });
   }
 
-  renderAttendanceTable(activeStudents);
+  renderAttendanceTable(activeStudents); 
 }
 
 

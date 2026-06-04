@@ -1,0 +1,334 @@
+
+h2 { margin-top: 30px; }
+
+
+
+
+.name-col {
+  text-align: left;
+  font-weight: 600;
+  width: 40%;
+}
+
+input[type="radio"] {
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
+    .record-box {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f7f7f7;
+      border-radius: 8px;
+    }
+
+    .locked {
+      color: red;
+      font-weight: bold;
+    } 
+	  
+
+
+    .save-btn {
+      display: grid;
+      gap: 10px;
+      justify-content: flex-start;
+      grid-template-columns: 1fr;/* 2 per row if space*/
+
+    }
+    
+    @media (min-width: 768px) {
+      .save-btn.two{
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+    .save-btn button{
+      background: #667eea;
+      width: 100%;
+  padding: 20px 15px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .save-btn button:hover {
+      transform: translateY(-3px);
+    
+    }
+
+    .clearAllBtn {
+      display: grid;
+      gap: 10px;
+      justify-content: flex-start;
+      grid-template-columns: 1fr;/* 2 per row if space*/
+
+    }
+    
+    @media (min-width: 768px) {
+      .clearAllBtn.two{
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.xpt-btn {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 15px; 
+  grid-template-columns: repeat( minmax(180px, 1fr)); /* 2 per row if space*/
+
+  
+}
+
+.xpt-btn button{  
+  background: #3cbc40;
+  width: 100%;
+  padding: 20px 15px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.xpt-btn button:hover {  
+    transform: translateY(-3px); 
+
+}
+
+.card {
+  
+  background: white;
+  padding: 15px;
+  border-radius: 14px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+.card h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+
+.status-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.status-buttons button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-ontime { background: #4CAF50; }
+.btn-late { background: #ff9800; }
+.btn-absent { background: #f44336; }
+
+.active-status {
+  outline: 3px solid #000;
+}
+
+.time-display {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 8px 0;
+}
+
+.time-display.ontime {
+  color: green;
+}
+
+.time-display.late {
+  color: orange;
+}
+
+.time-display.absent {
+  color: red;
+}
+
+<!--FILE UPLOAD--> 
+
+#file{
+  display: none;
+}
+
+.file-upload {
+  padding:10px 20px;
+  border:none;
+  border-radius:25px;
+  background:rgba(255,255,255,0.6);
+  backdrop-filter:blur(5px);
+  color:#333;
+  font-weight:bold;
+  font-size:14px;
+  cursor:pointer;
+  box-shadow:0 5px 12px rgba(0,0,0,0.15);
+  text-align: center;
+}
+
+.file-upload:hover {
+      transform: translateY(-2px);
+}
+
+.btn {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+/* Upload / Preview */
+.btn-primary {
+  background: #667eea;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #5563d6;
+}
+
+.btn-success {
+  background: #28a745;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #218838;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #c82333;
+}
+
+.btn-filter {
+  background: #17a2b8;
+  color: white;
+}
+
+.btn-filter:hover {
+  background: #138496;
+}
+
+#previewContainer {
+  background: #fff;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+#previewContainer h3 {
+  margin-top: 15px;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.preview-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+.preview-row.unmatched {
+  color: red;
+}
+
+.import-panel {
+  width:100%;
+  background:rgb(255, 255, 255);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,0.4);
+  box-shadow:0 8px 20px rgba(0,0,0,0.15);
+  padding: 15px;
+  border-radius: 14px;
+  margin: 0 0 20px 0;
+}
+
+.import-panel button{
+  padding:10px 20px;
+  border:none;
+  border-radius:25px;
+  background:rgba(255,255,255,0.6);
+  backdrop-filter:blur(5px);
+  color:#333;
+  font-weight:bold;
+  font-size:14px;
+  cursor:pointer;
+  box-shadow:0 5px 12px rgba(0,0,0,0.15);
+}
+
+.import-panel:hover {
+  transition: 0.3s ease-in-out;
+      transform: translateY(-3px);
+}
+
+
+.import-panel summary {
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+  .form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+@media (min-width: 768px) {
+  .form-grid.two{
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.date{
+  width: 100%;
+
+}
+.date input{
+  border: 1px #ddd solid;
+  border-radius: 6px;
+  width: 95%;
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+color:black;
+    cursor: pointer;
+    padding:12px 5px;
+    width: 100%;
+}
+
+.date-wrapper {
+  position: relative;
+}
+
+.date-label {
+  position: absolute;
+  left: 45px;
+  top: 19px;
+  background: white;
+  font-size: 16px;
+  color: #555;
+
+}
+

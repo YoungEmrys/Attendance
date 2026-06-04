@@ -4,11 +4,11 @@ console.log("attendance-actions.js Loaded")
 async function markUnmarkedAsAbsent() {
 
   showLoader();
-  await new Promise(r => setTimeout(r, 1000));
+  await new Promise(r => setTimeout(r, 500));
   hideLoader();
 
-  API.getStudents().then(students => {
-    students = getActiveStudents(students);
+const students = getActiveStudents(await API.getStudents());
+
     const settings = getSettings();
 
     if (settings.autoAbsent) {
@@ -17,7 +17,7 @@ async function markUnmarkedAsAbsent() {
         const id = normalizeId(s.id);
         
         if (!attendanceData[id]) {
-          attendanceData[s.id] = {
+          attendanceData[id] = {
             status: "absent",
             time: null
           };
@@ -25,8 +25,8 @@ async function markUnmarkedAsAbsent() {
       });
     }
 
-    renderAttendanceTable(students);
-  });
+  renderAttendanceTable(students);
+ 
 }
 
 // SUBMIT ATTENDANCE
@@ -34,7 +34,7 @@ async function submitAttendance() {
 
   const date = document.getElementById("datePicker").value;
   if (!date) return showToast("Select Date First", "warning");
-  
+
 const selectedDate = document.getElementById("datePicker").value;
 
 const holiday = await isHoliday(selectedDate);
@@ -51,7 +51,7 @@ if(holiday){
 let attendance = [];
 
 try{
-  attendance = await API.getAttendance();
+  attendance = await DataLayer.getAttendance();
 
 } catch {
 
@@ -63,7 +63,7 @@ const settings = getSettings();
 let students = [];
 
 try {
-  students = await API.getStudents();
+  students = await DataLayer.getStudents();
   saveCachedStudents(students);
 
 } catch {
@@ -94,10 +94,18 @@ const attendanceDay = {
 
     return {
       studentId: id,
+      
       status: attendanceData[id]?.status || "absent",
       time: attendanceData[id]?.time || null
     };
-  })
+  }),
+
+  updatedAt: new Date().toISOString(),
+
+  updatedBy: localStorage.getItem("username")
+    || "unknown",
+
+  version: Date.now()
 };
 
 // remove existing same date
@@ -141,23 +149,18 @@ console.log("FINAL PAYLOAD:", attendance);
       });
 
       await addToSyncQueue({
-
+        
         id:
           "attendance_" +
           Date.now(),
 
-        type:
-          "attendance_save",
+        type: "attendance_save",
 
-        payload:
-          attendanceDay,
+        payload: attendanceDay,
 
-        status:
-          "pending",
+        status: "pending",
 
-        createdAt:
-          new Date().toISOString()
-
+        createdAt: new Date().toISOString()
       });
 
     showToast(
@@ -187,7 +190,11 @@ console.log("FINAL PAYLOAD:", attendance);
 
 } finally {
   hideLoader();
-}}
+}
+
+renderAttendanceTable(activeStudents);
+AppState.notify();
+}
 
 // CLEAR MONTH
 
@@ -200,7 +207,7 @@ async function clearMonthAttendance() {
 
   const month = date.slice(0, 7);
 
-  let attendance = await API.getAttendance();
+  let attendance = await DataLayer.getAttendance();
  
   attendance = attendance.filter(day => !day.date.startsWith(month));
 
@@ -228,3 +235,4 @@ await API.saveAttendance([]);
   const date = document.getElementById("datePicker").value;
   await loadAttendanceForDate(date);
 };
+

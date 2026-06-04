@@ -515,7 +515,7 @@ app.delete("/api/students/:id", checkAuth, (req, res) => {
 });
 
 // =========================
-// ATTENDANCE API (FIXED)
+// ATTENDANCE API
 // =========================
 
 // GET

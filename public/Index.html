@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
   <title>Attendance Dashboard</title>
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
 	<meta http-equiv="Cache-Control" content="no-store">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -15,7 +15,8 @@
   <link rel="stylesheet" href="css/notifications.css">
   <link rel="stylesheet" href="css/modal.css">
   <link rel="stylesheet" href="css/loader.css">
-
+  <link rel="stylesheet" href="css/style.css">
+ 
   <script src="js/holidays.js"></script>
   <script src="js/core/db.js"></script> 
   <script src="js/api.js"></script>
@@ -35,36 +36,7 @@
 
 
    <style>
-    *{
-  box-sizing:border-box;
-}
-
-html,body{      
-  font-family: Arial, sans-serif;
-  width:100%;
-  overflow-x:hidden;
-}
-
-body{
-  margin:0;
-  padding:0;
-}
-
-.container {
-  max-width: 1130px;
-  margin: auto;
-      background: #e8e7e7;
-  padding: 25px;
-  border-radius: 18px;
-  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-}
-
-    h2 { margin-top: 20px; }
-
-    input, button {
-      padding: 6px;
-      margin: 5px 0;
-    }
+    h3 { margin-top: 20px; }
 
     table {
       width: 100%;
@@ -90,129 +62,15 @@ body{
       border-radius: 8px;
     }
 	  
-.navbar{
-  width:94%;
-  justify-content:center;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:5px;
-  padding:1.5% 3%;
-  background:rgba(255,255,255,0.25);
-  backdrop-filter:blur (12px);
-  -webkit-backdrop-filter:blur(12px);
-  border-radius:20px;
-  border:1px solid rgba(255,255,255,0.4);
-  box-shadow:0 8px 20px rgba(0,0,0,0.15);
-}
-
-.navbar button{
-
-  padding:10px 20px;
-  border:none;
-  border-radius:25px;
-  background:rgba(255,255,255,0.6);
-  backdrop-filter:blur(5px);
-  color:#333;
-  font-weight:bold;
-  font-size:14px;
-  cursor:pointer;
-  transition:all 0.3s ease;
-  box-shadow:0 5px 12px rgba(0,0,0,0.15);
-}
-
-.navbar button:hover{
-  background:#667eea;
-  color:white;
-
-  transform:translateY(-3px);
-  box-shadow:0 10px 20px rgba(0,0,0,0.25);
-}
-
-.navbar button.active{
-  background:#667eea;
-  color:white;
-}
-
-/* MOBILE */
-
-@media(max-width:700px){
-
-  .navbar{
-    flex-direction:column;
-    align-items:flex-start;   /* aligns menu to left */
-    display:none;
-    width:94%;  }
-
-  .navbar.show{
-    display:flex;
-  }
-
-  .navbar button{
-    width:100%;
-    text-align:left;         /* text aligns left */
-  }
-
-}
-
 .logo{
-	height: 50px;
-	width: 60px;
   float: left;
-	/*background: black;*/
-	z-index: 1;
-  align-items: center;
-  justify-content: center;
-  display: flex;
+  border: none;
+  padding: 0;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: 500;
   cursor: pointer;
 }
 
-
-.tm button{
-  float: right;
-  background-color:rgb(255, 255, 255);
-  color: #5f7af0; 
-  margin: 10px 5px 0 5px;
-  padding:6px 12px;
-  border:none;
-  border-radius:8px;
-  backdrop-filter:blur(5px);
-  font-weight:bold;
-  font-size:16px;
-  cursor:pointer;
-  transition:all 0.2s ease-in-out;
-}
-
-.tm button:hover{
-  transform: translateY(-2px);
-  box-shadow: 0 7px 25px -4px rgba(0,0,0,0.2);
-}
-
-.logt{ 
-  color: #f0f0f0;    
-  background:#667eea;
-}
-
-.settings {
-  float: right; 
-  background-color: transparent; 
-  font-size: 20px;
-  cursor: pointer;
-  transition: all 0.3s;
-  border: none;
-  border-radius: 50px;
-  text-align: center;
-  transition:all 0.3s ease-in-out;
-}
-
-.settings:hover{
-  transform: translateY(-2px);
-  box-shadow: 0 10px 10px -4px rgba(0,0,0,0.3);
-  background-color: #f0f0f0;
-}
-
-/* GRID WRAPPER */
 #settingsCards {
   display: grid;
   gap: 18px;
@@ -236,8 +94,6 @@ body{
   cursor: pointer;
   transition: all 0.3s ease-in-out;
   color: white;
-
-
 }
 
 .card button:hover{
@@ -245,45 +101,36 @@ body{
   box-shadow: 0 10px 10px -4px rgba(0,0,0,0.3);
 }
 
-.card h2 {
+.card h3 {
   margin-top: 0;
   margin-bottom: 15px;
   font-size: 18px;
   color: #333;
 }
 
-   </style> 
+</style> 
 	
 </head>
 
 <body onload="checkAuth(); displayUser();">
 
-<div class="container">
+<div class="topbar">
 
-  <div class="logo">
-    <a href="index.html"><img src="Upload/p2f logo.png" loading="lazy" height="50" alt="Company Logo"/></a>
+  <div class="top-left">
+
+    <img style="height: 40px;" src="Upload/p2f logo.png" alt="Logo">
+
+    <div class="user-name">
+      <span id="currentUser"></span>
+    </div>
   </div>
-  
-<div class="logo">
-    <div class="user-profile"><span id="currentUser"></span></div>
-</div>
-<button class="settings" onclick="window.location.href='holidays.html'">
-  📅
-</button>
-  
-<button class="settings" onclick="window.location.href = 'settings.html'">
-  ⚙️
-</button>
 
-<div class="tm">
-<button onclick="logout()"  class="logt">Logout</button>
-  <button onclick="toggleMenu()">☰</button>
-</div>
-<br><br><br><br>
+  <button class="settings-btn" onclick="window.location.href='settings.html'">
+    ⚙️
+  </button>
 
-<!-- Navigation-->
-  		<div class="navbar" id="navbar">
-			
+</div>
+  <div class="navbar" id="navbar">			
 			
   <button class="active" onclick="window.location.href='index.html'">
 📊 Dashboard 
@@ -307,19 +154,21 @@ onclick="window.location.href='registered-students.html'">
   ⭐ Student Performance
   </button>
 			
-    <button onclick="window.location.href='users.html'"> User Management
-  </button>
 
 </div>
 
+
+<div class="container wide">
+
+
 <!-- Attendance Report-->
 	
-  <h1>Attendance Dashboard</h1>
+  <h2>Attendance Dashboard</h2>
 
   <div id="settingsCards">
 
 <div class="card">  
-  <h2 >Select Month</h2>
+  <h3 >Select Month</h3>
   <input type="month" id="monthPicker" onchange="renderDashboard()">
 </div>
 
@@ -328,24 +177,50 @@ onclick="window.location.href='registered-students.html'">
   <div class="card" id="topStudent"></div>
 
 <div class="card">  	
-  <h2>Weekly Summary</h2>
+  <h3>Weekly Summary</h3>
 <div id="weeklySummary"></div>
 </div>
 
  <div class="card">
-  <h2>Monthly Summary</h2>
+  <h3>Monthly Summary</h3>
   <div id="summaryTable"></div>
 </div> 
 
    <div class="card">
-     <h2>Generate Report</h2>
+     <h3>Generate Report</h3>
     <button class="save" onclick="exportMonthlyReport()">Save Report</button>
 </div>
+</div>
 
+ <div class="bottom-nav">
 
+  <button class="nav-item active"onclick="window.location.href='index.html'">
+    <span>🏠</span>
+    <small>Home</small>
+  </button>
 
+  <button class="nav-item" onclick="window.location.href='students.html'">
+    <span>📝</span>
+    <small>Students</small>
+  </button>
+
+  <button class="nav-item" onclick="window.location.href='registered-students.html'">
+    <span>👨‍🎓</span>
+    <small>Registered</small>
+  </button>
+
+  <button class="nav-item" onclick="window.location.href='attendance.html'">
+    <span>📋</span>
+    <small>Attendance</small>
+  </button>
+
+  <button class="nav-item" onclick="window.location.href='performance.html'">
+    <span>⭐</span>
+    <small>Performance</small>
+  </button>
 
 </div>
+
 
 </body>
 </html>

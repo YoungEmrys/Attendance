@@ -16,11 +16,14 @@
   <link rel="stylesheet" href="css/notifications.css">
   <link rel="stylesheet" href="css/loader.css">
   <link rel="stylesheet" href="css/modal.css">
+  <link rel="stylesheet" href="css/style.css">  
+  <link rel="stylesheet" href="css/attendance.css">
 
   <script src="js/holidays.js"></script>
   <script src="js/core/settings.js"></script>
   <script src="js/core/utils.js"></script>
   <script src="js/core/db.js"></script>
+  <script src="/js/core/sync.js"></script>
   <script src="js/api.js"></script>
 	<script src="js/auth.js"></script>	
  	<script src="js/students.js"></script>
@@ -36,612 +39,28 @@
   <script src="js/core/dom-init.js"></script>
   <script src="js/report-export.js"></script>
 
-
-  <style>
-   body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      margin: 0;
-      padding: 20px;
-    }
-
-.container {
-  max-width: 1100px;
-  margin: auto;
-  background: rgba(255,255,255,0.9);
-  padding: 25px;
-  border-radius: 18px;
-  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-}
-
-    h2 { margin-top: 30px; }
-
-    input, select, button {
-      padding: 6px;
-      margin: 5px 0;
-    }
-
-    button {
-      cursor: pointer;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      color: white;
-    }
-
-    Table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      background: #fff;
-    }
-
-     th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: center;
-    }
-
-     th {
-  background: #667eea;
-  color: white;
-  font-weight: bold;
-}
-
-tr:nth-child(even) {
-  background: #f9f9f9;
-}
-
- tr:hover {
-  background: #e6e4e4;
-}
-
-.name-col {
-  text-align: left;
-  font-weight: 600;
-  width: 40%;
-}
-
-input[type="radio"] {
-  transform: scale(1.2);
-  cursor: pointer;
-}
-
-    .record-box {
-      margin-top: 10px;
-      padding: 10px;
-      background: #f7f7f7;
-      border-radius: 8px;
-    }
-
-    .locked {
-      color: red;
-      font-weight: bold;
-    } 
-	  
-	  .export-btn { background: #ff9800; }
-	  
-    input, button {
-      padding: 6px;
-      margin: 0.7% 0.5%;
-    }
-
-	  
-.navbar{
-  width:94%;
-  justify-content:center;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:14px;
-
-  padding:1.5% 3%;
-
-  background:rgba(255,255,255,0.25);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-
-  border-radius:20px;
-  border:1px solid rgba(255,255,255,0.4);
-
-  box-shadow:0 8px 20px rgba(0,0,0,0.15);
-}
-
-.navbar button{
-
-  padding:10px 20px;
-  border:none;
-  border-radius:25px;
-
-  background:rgba(255,255,255,0.6);
-  backdrop-filter:blur(5px);
-
-  color:#333;
-  font-weight:bold;
-  font-size:14px;
-
-  cursor:pointer;
-
-  transition:all 0.3s ease;
-
-  box-shadow:0 5px 12px rgba(0,0,0,0.15);
-}
-
-.navbar button:hover{
-  background:#667eea;
-  color:white;
-
-  transform:translateY(-3px);
-  box-shadow:0 10px 20px rgba(0,0,0,0.25);
-}
-
-/* ACTIVE PAGE */
-
-.navbar button.active{
-  background:#667eea;
-  color:white;
-}
-
-
-
-/* MOBILE */
-
-@media(max-width:700px){
-
-  .navbar{
-    flex-direction:column;
-    align-items:flex-start;   /* aligns menu to left */
-    display:none;
-    width:94%;  }
-
-  .navbar.show{
-    display:flex;
-  }
-
-  .navbar button{
-    width:100%;
-    text-align:left;        
-  }
-}
-
-
-    .add-btn { background: #4CAF50; }
-
-    .save-btn {
-      display: grid;
-      gap: 10px;
-      justify-content: flex-start;
-      grid-template-columns: 1fr;/* 2 per row if space*/
-
-    }
-    
-    @media (min-width: 768px) {
-      .save-btn.two{
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-    .save-btn button{
-      background: #667eea;
-      width: 100%;
-  padding: 10px 15px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 5px;
-  color: white;
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
-    }
-
-    .save-btn button:hover {
-      transform: translateY(-3px);
-    
-    }
-
-    .clearAllBtn {
-      display: grid;
-      gap: 10px;
-      justify-content: flex-start;
-      grid-template-columns: 1fr;/* 2 per row if space*/
-
-    }
-    
-    @media (min-width: 768px) {
-      .clearAllBtn.two{
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.clearAllBtn button {
-  background: #ed521f;
-  width: 100%;
-  padding: 10px 15px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 5px;
-  color: white;
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
-}
-
-.clearAllBtn button:hover {
-  transform: translateY(-3px);  
-}
-
-    .delete-btn { background: #f44336; }
-
-    .delete-btn:hover {
-      background-color: #c8372d;  
-      transform: translateY(-1px);  
-}
-
-.xpt-btn {
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-      margin-bottom: 15px; 
-      grid-template-columns: repeat( minmax(180px, 1fr)); /* 2 per row if space*/
-
-  
-}
-
-.xpt-btn button{  
-  background: #3cbc40;
-  width: 100%;
-  padding: 10px 15px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 5px;
-  color: white;
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
-}
-
-.xpt-btn button:hover {  
-    transform: translateY(-3px); 
-
-}
-	  
-	  .header{
-		  height: auto;
-		  display: flex;
-		  align-items: center;
-	  }
-
-    .logt{
-  padding:7px 12px;
-  margin: 0 5px;
-  border:none;
-  border-radius:12px;
-  background:#667eea;
-  backdrop-filter:blur(5px);
-  font-weight:bold;
-  font-size:14px;
-  cursor:pointer;
-    color:white;
-
-}
-
-.logt:hover{
-  background:#2f50e4;
-}
-
-/* =========================
-   GLOBAL CARD SYSTEM
-========================= */
-
-.container {
-  max-width: 1100px;
-  margin: auto;
-}
-
-/* GRID LAYOUT */
-.grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-
-/* DESKTOP GRID */
-@media (min-width: 768px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1100px) {
-  .grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-/* CARD */
-.card {
-  background: white;
-  padding: 15px;
-  border-radius: 14px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-}
-
-/* STUDENT NAME */
-.card h3 {
-  margin: 0 0 10px;
-  font-size: 16px;
-}
-
-/* BUTTON GROUP */
-.status-buttons {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-/* STATUS BUTTON */
-.status-buttons button {
-  flex: 1;
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-/* COLORS */
-.btn-ontime { background: #4CAF50; }
-.btn-late { background: #ff9800; }
-.btn-absent { background: #f44336; }
-
-/* ACTIVE STATE */
-.active-status {
-  outline: 3px solid #000;
-}
-
-
-/* Time format */
-.time-display {
-  font-size: 18px;
-  font-weight: bold;
-  margin: 8px 0;
-}
-
-.time-display.ontime {
-  color: green;
-}
-
-.time-display.late {
-  color: orange;
-}
-
-.time-display.absent {
-  color: red;
-}
-
-<!--FILE UPLOAD--> 
-
-#file{
-  display: none;
-}
-
-.file-upload {
-  padding:10px 20px;
-  border:none;
-  border-radius:25px;
-  background:rgba(255,255,255,0.6);
-  backdrop-filter:blur(5px);
-  color:#333;
-  font-weight:bold;
-  font-size:14px;
-  cursor:pointer;
-  box-shadow:0 5px 12px rgba(0,0,0,0.15);
-  text-align: center;
-}
-
-.file-upload:hover {
-      transform: translateY(-2px);
-}
-
-
-/* =========================
-   BUTTONS (GLOBAL)
-========================= */
-.btn {
-  padding: 10px 14px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: 0.2s ease;
-}
-
-/* Upload / Preview */
-.btn-primary {
-  background: #667eea;
-  color: white;
-}
-
-.btn-primary:hover {
-  background: #5563d6;
-}
-
-/* Confirm */
-.btn-success {
-  background: #28a745;
-  color: white;
-}
-
-.btn-success:hover {
-  background: #218838;
-}
-
-/* Cancel */
-.btn-danger {
-  background: #dc3545;
-  color: white;
-}
-
-.btn-danger:hover {
-  background: #c82333;
-}
-
-/* Filter */
-.btn-filter {
-  background: #17a2b8;
-  color: white;
-}
-
-.btn-filter:hover {
-  background: #138496;
-}
-
-
-/* PREVIEW CONTAINER*/
-#previewContainer {
-  background: #fff;
-  border-radius: 10px;
-  padding: 15px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-}
-
-#previewContainer h3 {
-  margin-top: 15px;
-  margin-bottom: 8px;
-  color: #333;
-}
-
-/* Row styling */
-.preview-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px;
-  border-bottom: 1px solid #eee;
-  font-size: 14px;
-}
-
-.preview-row.unmatched {
-  color: red;
-}
-
-.prv{
-  width:94%;
-  justify-content:center;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:14px;
-  padding:1.5% 3%;
-  background:rgba(255,255,255,0.25);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-  border-radius:20px;
-  border:1px solid rgba(255,255,255,0.4);
-  box-shadow:0 8px 20px rgba(0,0,0,0.15);
-}
-
-.prv button{
-  padding:10px 20px;
-  border:none;
-  border-radius:25px;
-  background:rgba(255,255,255,0.6);
-  backdrop-filter:blur(5px);
-  color:#333;
-  font-weight:bold;
-  font-size:14px;
-  cursor:pointer;
-  box-shadow:0 5px 12px rgba(0,0,0,0.15);
-}
-
-.prv button:hover {
-  transition: 0.3s ease-in-out;
-      transform: translateY(-3px);
-}
-
-
-  .form-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 15px;
-}
-
-@media (min-width: 768px) {
-  .form-grid.two{
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.date{
-  width: 100%;
-
-}
-.date input{
-  border: 1px #ddd solid;
-  border-radius: 6px;
-  width: 95%;
-  cursor: pointer;
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-color:black;
-    cursor: pointer;
-    padding:12px 5px;
-    width: 100%;
-}
-
-.date-wrapper {
-  position: relative;
-}
-
-.date-label {
-  position: absolute;
-  left: 45px;
-  top: 19px;
-  background: white;
-  font-size: 16px;
-  color: #555;
-
-}
-
-  .tm button{
-  float: right;
-  background-color:rgb(255, 255, 255);
-  color: #5f7af0; 
-  padding:6px 12px;
-  margin: 10px 0 0 8px;
-  border:none;
-  border-radius:8px;
-  backdrop-filter:blur(5px);
-  font-weight:bold;
-  font-size:16px;
-  cursor:pointer;
-  transition:all 0.2s ease;
-}
-
-.tm button:hover{
-  transform: translateY(-3px);
-  background-color:rgb(255, 255, 255);
-}
-
-.settings {
-  float: right; 
-  background-color: transparent; 
-  font-size: 20px;
-}
-
-
-</style>
-
 </head>
 
-<body onload="checkAuth()">
 
-<div class="container">
+<body onload="checkAuth(); displayUser()">
 
-	<button class="settings" onclick="window.location.href = 'settings.html'">⚙️</button>
+  <div class="topbar">
 
-    <div class="tm">
-    <button class="logt" onclick="logout()" class="logt">Logout</button>
-<button style="float: left;" onclick="toggleMenu()">☰</button>
-	<div id="userProfile" style="float: right; margin-top: 14px;font-weight: bold;" ></div>
-</div><br><br><br>
-    
+  <div class="top-left">
+
+    <img style="height: 40px;" src="Upload/p2f logo.png" alt="Logo">
+
+    <div class="user-name">
+      <span id="currentUser"></span>
+    </div>
+  </div>
+
+  <button class="settings-btn" onclick="window.location.href='settings.html'">
+    ⚙️
+  </button>
+
+</div>
+
 		<div class="navbar" id="navbar">
 
   <button onclick="window.location.href='index.html'">
@@ -667,11 +86,14 @@ onclick="window.location.href='registered-students.html'">
 
 </div>
 
-  <h1>Attendance & Punctuality Tracker</h1>
+<div class="container wide">
+    
+
+  <h2>Attendance & Punctuality Tracker</h2>
 	
 
   <!-- DATE PICKER -->
-  <h2>Attendance Entry</h2>
+  <h3>Attendance Entry</h3>
   <input type="date" id="datePicker" onchange="onDateChange()">
   <span id="lockStatus"></span><br><br>
 	
@@ -691,7 +113,8 @@ onclick="window.location.href='registered-students.html'">
 
 </div><br>
 
-<div class="prv">
+<details class="import-panel">
+  <summary> Import Fingerprint Attendance File</summary>
 <label> <h2>Select Dates </h2></label>
 
   <div class="form-grid two">
@@ -727,14 +150,17 @@ onclick="window.location.href='registered-students.html'">
 
 <button onclick="confirmImport()">Confirm</button>
 <button onclick="cancelImport()">Cancel</button><br><br>
-</div><br>
+
+</details>
 
   <label>
   <input type="checkbox" id="holidayToggle">
   Mark this day as Holiday / No School
 </label><br><br>
 
-<div id="attendanceTable" class="grid"></div><br><br>
+<div class="card">
+<div id="attendanceTable" class="student-grid"></div><br><br>
+</div>
 
   <div class="save-btn two">  
 <button onclick="markUnmarkedAsAbsent()">Mark Remaining Students Absent</button>
@@ -749,8 +175,33 @@ onclick="window.location.href='registered-students.html'">
 
 </div>
 
-<div id="globalLoader" class="global-loader">
-  <div class="loader-spinner"></div>
+ <div class="bottom-nav">
+
+  <button class="nav-item"onclick="window.location.href='index.html'">
+    <span>🏠</span>
+    <small>Home</small>
+  </button>
+
+  <button class="nav-item" onclick="window.location.href='students.html'">
+    <span>📝</span>
+    <small>Students</small>
+  </button>
+
+  <button class="nav-item" onclick="window.location.href='registered-students.html'">
+    <span>👨‍🎓</span>
+    <small>Registered</small>
+  </button>
+
+  <button class="nav-item active" onclick="window.location.href='attendance.html'">
+    <span>📋</span>
+    <small>Attendance</small>
+  </button>
+
+  <button class="nav-item" onclick="window.location.href='performance.html'">
+    <span>⭐</span>
+    <small>Performance</small>
+  </button>
+
 </div>
 
   

@@ -5,6 +5,11 @@ const API = {
 
   async request(url, options = {}) {
 
+    if (localStorage.getItem("forceOffline") === "true"
+) {
+  throw new Error("Offline");
+}
+
     const res = await fetch(url, {
       credentials: "include",
       headers: {

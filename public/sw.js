@@ -1,4 +1,4 @@
-const CACHE_NAME = "attendance-v2";
+const CACHE_NAME = "attendance-v4";
 
 const STATIC_ASSETS = [
 
@@ -62,6 +62,8 @@ self.addEventListener("install", event => {
 
   console.log("Service Worker Installed");
 
+  self.skipWaiting();
+
   event.waitUntil(
 
     caches.open(CACHE_NAME)
@@ -80,6 +82,8 @@ self.addEventListener("install", event => {
 self.addEventListener("activate", event => {
 
   console.log("Service Worker Activated");
+
+  self.clients.claim();
 
   event.waitUntil(
 

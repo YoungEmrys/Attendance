@@ -7,7 +7,7 @@ window.openStudentDetails = async function(id) {
 let students = [];
 
 try {
-  students = await API.getStudents();
+  students = await DataLayer.getStudents();
   saveCachedStudents(students);
 
 } catch {
@@ -29,7 +29,7 @@ window.editStudent = async function(id) {
 let students = [];
 
 try {
-  students = await API.getStudents();
+  students = await DataLayer.getStudents();
   saveCachedStudents(students);
 
 } catch {
@@ -53,9 +53,24 @@ window.deleteStudent = async function(id) {
 
 if (!confirmed) return;
 
-  try {
-    await API.deleteStudent(id);
+  try {   
+    let students =  
+    await getOfflineStudents();
+
+    students = students.filter(
+      s => String(s.id) !== String(id)
+    );
+
+    await saveOfflineStudents(students);
+    
+    await addToSyncQueue({  
+      id: crypto.randomUUID(),  
+      type: "student_delete",  
+      payload: { id }
+    });
+    
     showToast("Student Deleted Successfully", "success");
+
     loadStudents();
 
   } catch (err) {
@@ -64,13 +79,14 @@ if (!confirmed) return;
   }
 };
 
+
 window.toggleStudentStatus = async function(id, currentState) {
   try {
 
 let students = [];
 
 try {
-  students = await API.getStudents();
+  students = await DataLayer.getStudents();
   saveCachedStudents(students);
 
 } catch {
@@ -79,17 +95,33 @@ try {
     const student = students.find(s => String(s.id) === String(id));
 
     if (!student) return showToast("Student Not Found", "info");
+ 
+  const updatedStudent = { 
+    ...student, 
+    active: !currentState
+  };
 
-    await API.updateStudent(id, {
-      ...student,
-      active: !currentState
-    });
+  const localStudents = await getOfflineStudents();
 
-    loadStudents();
+  const index = localStudents.findIndex(s => String(s.id) === String(id));
+
+  localStudents[index] =
+
+  updatedStudent;
+
+  await saveOfflineStudents(localStudents);
+
+  await addToSyncQueue({
+    id: crypto.randomUUID(),
+    type: "student_update",
+    payload: updatedStudent
+  });
+
+  loadStudents();
 
   } catch (err) {
     console.error(err);
-    showToast("Failed to update status", "error");
+    showToast("Failed To Update Status", "error");
   }
 };
 
@@ -111,7 +143,7 @@ async function loadStudents(search = "") {
 let students = [];
 
 try {
-  students = await API.getStudents();
+  students = await DataLayer.getStudents();
   saveCachedStudents(students);
 
 } catch {
@@ -176,7 +208,7 @@ try {
   }
 }
 
-// AD STUDENT
+// ADD STUDENT
 async function addStudent() {
   try {
     const name = document.getElementById("studentName").value.trim();
@@ -192,15 +224,7 @@ async function addStudent() {
   return;
 }
 
-let students = [];
-
-try {
-  students = await API.getStudents();
-  saveCachedStudents(students);
-
-} catch {
-  students = getCachedStudents();
-}
+let students = await DataLayer.getStudents();
 
 if (students.some(s => normalizeId(s.id) === normalizeId(id))) {
   showToast("Student ID Already Exists", "warning");
@@ -233,10 +257,30 @@ if (students.some(s => normalizeId(s.id) === normalizeId(id))) {
         reader.readAsDataURL(file);
       });
     }
+ 
+    const newStudent = {  
+      name,  
+      id,  
+      courses,  
+      image,  
+      active: true
+    };
 
-    await API.addStudent({ name, id, courses, image, active: true });
+    students.push(newStudent);
+    
+    await saveOfflineStudents(students);
+
+    await addToSyncQueue({ 
+      id: crypto.randomUUID(),
+      type: "student_create", 
+      payload: newStudent
+    });
+
+    AppState.notify();    
 
     showToast("Student Added Successfully", "success");
+    
+    loadStudents();
 
     // clear form
     document.getElementById("studentName").value = "";
@@ -244,7 +288,7 @@ if (students.some(s => normalizeId(s.id) === normalizeId(id))) {
     document.getElementById("courseTags").innerHTML = "";
     document.getElementById("studentImage").value = "";
     document.getElementById("imagePreview").src = "";
-loadStudents();
+
 
   } catch (err) {
     console.error(err);

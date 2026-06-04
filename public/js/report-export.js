@@ -16,11 +16,11 @@ async function exportMonthlyReport(){
 
   const month = selectedDate.slice(0,7);
 
-  const attendance = await API.getAttendance();
+  const attendance = await DataLayer.getAttendance();
 let students = [];
 
 try {
-  students = await API.getStudents();
+  students = await DataLayer.getStudents();
   saveCachedStudents(students);
 
 } catch {

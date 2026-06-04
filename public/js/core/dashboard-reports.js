@@ -5,12 +5,12 @@ async function generateMonthlyReport() {
   const date = document.getElementById("datePicker").value;
   const month = getMonth(date);
 
-const attendance = await API.getAttendance();
+const attendance = await DataLayer.getAttendance();
 
 let students = [];
 
 try {
-  students = await API.getStudents();
+  students = await DataLayer.getStudents();
   saveCachedStudents(students);
 
 } catch {
@@ -42,12 +42,12 @@ try {
 async function generateWeeklyReport(date) {
   const { start, end } = getWeekRange(date);
 
-const attendance = await API.getAttendance();
+const attendance = await DataLayer.getAttendance();
 
 let students = [];
 
 try {
-  students = await API.getStudents();
+  students = await DataLayer.getStudents();
   saveCachedStudents(students);
 
 } catch {

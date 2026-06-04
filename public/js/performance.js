@@ -7,14 +7,14 @@ async function renderPerformance(){
 let students = [];
 
 try {
-  students = await API.getStudents();
+  students = await DataLayer.getStudents();
   saveCachedStudents(students);
 
 } catch {
   students = getCachedStudents();
 }
 
-const attendance = await API.getAttendance();
+const attendance = await DataLayer.getAttendance();
 	
 	if(!Array.isArray(students) || !Array.isArray(attendance)){
 console.error("Invalid data", students, attendance);
@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", renderPerformance);
 
 	async function checkAlerts(){
 
-const attendance= await API.getAttendance();
+const attendance = await DataLayer.getAttendance();
 		
 		if(!Array.isArray(attendance)){
 console.error("Invalid attendance data:", attendance);
