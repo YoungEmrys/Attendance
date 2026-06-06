@@ -120,7 +120,7 @@ const highest = ranking[0].ontime;
 const topStudents = ranking.filter(r => r.ontime === highest);
 
     // 🏆 Top Student
- const formattedMonth = new Date(month + "-01").toLocaleDateString("en-US", {
+ const formattedMonth = new Date(month + "-02").toLocaleDateString("en-US", {
   month: "long",
   year: "numeric"
 });
